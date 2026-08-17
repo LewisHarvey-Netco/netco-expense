@@ -1,0 +1,73 @@
+# Problems Log
+
+Running log of friction/issues encountered in the human↔agent workflow
+with this Feniks AI / opencode setup — permission quirks, tooling gaps,
+environment inconsistencies, or anything else that slowed down or blocked
+a session. This is NOT for application bugs (those belong in normal issue
+tracking) — it's specifically for problems with the *setup* and *workflow*
+itself.
+
+Each entry should include: date, what was attempted, what went wrong,
+root cause (if known), and current status (open / worked around /
+resolved).
+
+---
+
+## 2026-08-17 — Plan mode's bash permissions block basic read-only checks
+
+**What was attempted:** During a plan-mode interview about scaffolding a
+Vite app, tried to run `node --version` / `npm --version` to check the
+installed Node version before deciding whether to pin an engines field.
+
+**What went wrong:** The command was denied. Same happened for
+`Get-ChildItem` (PowerShell dir listing) even though `ls *` is allowed —
+the plan agent's bash permission override doesn't recognize PowerShell
+cmdlet aliases the same way, and commands like `node *` aren't in its
+allowlist at all.
+
+**Root cause:** `~/.config/opencode/opencode.json` defines a broad
+top-level `permission.bash` allowlist (allows `node *`, `npm run *`,
+etc.), but the `agent.plan.permission.bash` block *overrides* it
+entirely with a much smaller allowlist scoped to read-only git/file
+inspection commands only (`git status/diff/log/show/blame/branch/
+ls-files`, `cat`, `head`, `tail`, `grep`, `rg`, `ls`, `tree`, `pwd`,
+`wc`, `find`, `fd`, `jq`, `diff`, `file`, `stat`, `echo`). This is by
+design (plan mode = read-only), but it's stricter than necessary for
+*inspection-only* commands like `node --version` that don't mutate
+anything.
+
+**Status:** Worked around by asking the user directly instead of running
+the command. Not fixed — fixing it means editing
+`agent.plan.permission.bash` in `opencode.json`, which is itself outside
+plan mode's write permissions (and a separate, deliberate task, likely
+via the `customize-opencode` skill in build mode).
+
+**Suggested fix:** Add a small set of clearly read-only version/inspection
+commands (`node --version`, `npm --version`, `node -v`, `npm -v`, etc.) to
+`agent.plan.permission.bash` so planning sessions can verify environment
+details without needing to ask the user or defer to execution time.
+
+## 2026-08-17 — OpenCode for Feniks unavailable on WSL for Linux-based projects
+
+**What was attempted:** Using OpenCode for Feniks on a Windows machine to
+work on projects that are Linux-based (common in the team's workflow,
+typically via WSL).
+
+**What went wrong:** OpenCode for Feniks is not available for WSL, meaning
+agent sessions run in the Windows environment (PowerShell) rather than the
+Linux WSL environment where the actual project tooling and dependencies
+live. This creates a mismatch: the agent operates on Windows while many
+projects expect a Linux toolchain (npm, node, bash scripts, Linux-native
+tools, etc.).
+
+**Root cause:** OpenCode for Feniks currently ships as a Windows-only
+application and cannot be installed or run inside WSL.
+
+**Status:** Open. Workaround: ensure Node.js and other project tooling are
+installed on the Windows side (not just WSL) so the agent can operate on
+them. Alternatively, run the agent on a Linux machine directly.
+
+**Impact:** Any project that relies on WSL for its toolchain will require
+the Windows environment to also have the same tooling installed, or the
+agent won't be able to execute commands against it. This adds setup
+friction and risks version drift between the Windows and WSL environments.

@@ -8,11 +8,20 @@ This repository serves as a playground for exploring and demonstrating what Feni
 
 ## Tech Stack
 
-Coming soon.
+- Vite 8
+- React 19
+- TypeScript 6
+- npm
+- oxlint (linter)
 
 ## Getting Started
 
-Coming soon.
+```
+npm install
+npm run dev
+```
+
+Other scripts: `npm run build`, `npm run lint`, `npm run preview`.
 
 ## License
 
