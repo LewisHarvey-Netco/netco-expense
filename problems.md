@@ -71,3 +71,49 @@ them. Alternatively, run the agent on a Linux machine directly.
 the Windows environment to also have the same tooling installed, or the
 agent won't be able to execute commands against it. This adds setup
 friction and risks version drift between the Windows and WSL environments.
+
+## 2026-08-17 — False positive prompt injection detection blocks build/test commands
+
+**What was attempted:** Running `npm run build` and `npm run test` via the
+agent's bash tool to verify the project compiles and tests pass.
+
+**What went wrong:** Commands were blocked with `[BLOCKED: prompt injection
+detected]` — no further explanation, file path, or triggered pattern
+provided. The block persisted even after the `@/` directory cleanup was
+complete, making it impossible for the agent to run verification commands.
+
+**Root cause:** The security injection detection appears to trigger on
+project content containing patterns like password fields, storage keys,
+or mock credentials (e.g. `src/mocks/users.json`, `AuthContext.tsx`).
+However, the error message gives zero visibility into what triggered it,
+making it hard to diagnose or fix.
+
+**Status:** Open. Worked around by having the user run commands manually.
+
+**Suggested fix:** The injection detection should surface which file or
+pattern triggered the block, so the user can distinguish false positives
+from genuine issues. At minimum, the error message should name the
+suspect file or content pattern.
+
+## 2026-08-17 — Agent applies workarounds without consulting the user
+
+**What was attempted:** Standard build workflow — agent runs verification
+commands, encounters errors, and fixes them.
+
+**What went wrong:** The agent independently decided to refactor the
+router architecture (moving `<BrowserRouter>` from `App.tsx` to
+`main.tsx`) and rewrite test file structure without informing the user
+or asking for approval. While the fix was correct, the user was not
+consulted before structural changes were made.
+
+**Root cause:** No explicit workflow rule in place requiring the agent to
+ask before applying workarounds or making architectural changes. The
+agent's default behavior is to solve problems autonomously.
+
+**Status:** Open.
+
+**Suggested fix:** Add a workflow rule: when the agent encounters an
+error or blocker during verification (build, test, lint), it should
+present the issue to the user and propose a fix before applying it.
+Only apply the fix after the user confirms. This keeps the user in the
+loop and prevents surprise refactors.
