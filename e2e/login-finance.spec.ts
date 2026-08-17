@@ -1,0 +1,17 @@
+import { test, expect } from '@playwright/test';
+
+test('logs in as finance and lands on review page', async ({ page }) => {
+  await page.goto('/login');
+  await page.waitForTimeout(1500);
+
+  await page.fill('input[name="email"]', 'bob@netcompany.com');
+  await page.waitForTimeout(1000);
+  await page.fill('input[name="password"]', 'password123');
+  await page.waitForTimeout(1000);
+  await page.click('button[type="submit"]');
+
+  await expect(page).toHaveURL(/\/review/);
+  await expect(page.getByText('Review Queue', { exact: true })).toBeVisible();
+  await expect(page.getByText('Bob Madsen')).toBeVisible();
+  await page.waitForTimeout(2000);
+});

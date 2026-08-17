@@ -15,10 +15,10 @@ export default function Header() {
   if (!user) return null
 
   return (
-    <header className="flex items-center justify-between border-b border-border px-6 py-3">
-      <h1 className="text-lg font-semibold text-foreground">Netco Expense</h1>
+    <header className="flex items-center justify-between bg-primary text-primary-foreground px-6 py-3">
+      <h1 className="text-lg font-semibold">Netco Expense</h1>
       <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground">{user.name}</span>
+        <span className="text-sm">{user.name}</span>
         <Badge variant="secondary">{user.role}</Badge>
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           Logout

@@ -17,7 +17,9 @@ This repository serves as a playground for exploring and demonstrating what Feni
 - Tailwind v4 + shadcn/ui (New York style, lucide-react icons) — shadcn is a copy-paste CLI, not a traditional library. Components live in `src/components/ui/` so you own the source and can modify it freely.
 - clsx + tailwind-merge — `cn()` utility in `src/lib/utils.ts` for safely merging Tailwind classes, used by all shadcn components
 - react-hook-form + zod (form handling & validation)
-- Vitest + React Testing Library (testing)
+- Vitest + React Testing Library (unit/component testing)
+- @vitest/ui — browser dashboard for test results and DOM snapshots, run with `npm run test:ui`
+- Playwright (E2E browser testing)
 
 ## Getting Started
 
@@ -26,7 +28,7 @@ npm install
 npm run dev
 ```
 
-Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run preview`.
+Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run test:ui`, `npm run test:e2e`, `npm run test:e2e:headed`, `npm run preview`.
 
 ## Project Structure
 
@@ -38,6 +40,7 @@ src/
   lib/              # Utility functions (cn helper, etc.)
   mocks/            # Mock data (hardcoded users, etc.)
   pages/            # Page components (routes)
+e2e/                # Playwright E2E tests
 ```
 
 ## Configuration Files
@@ -51,6 +54,7 @@ src/
 | `tsconfig.node.json` | TypeScript for config files: Node module resolution | [TS Compiler Options](https://www.typescriptlang.org/tsconfig/) |
 | `.oxlintrc.json` | oxlint rules: react hooks, component export warnings | [oxlint Docs](https://oxc.rs/docs/guide/usage/lint/rules.html) |
 | `components.json` | shadcn/ui CLI: style, path aliases, icon library | [shadcn Docs](https://ui.shadcn.com/docs/cli) |
+| `playwright.config.ts` | Playwright E2E test runner: Chromium, screenshots on failure, auto-starts dev server | [Playwright Config](https://playwright.dev/docs/test-configuration) |
 
 ## License
 

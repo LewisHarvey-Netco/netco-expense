@@ -13,6 +13,8 @@
 
 ## Nice-to-Have
 *(Low priority, polish)*
+
+- [ ] Find a cleaner way to slow down E2E tests for visual inspection instead of `waitForTimeout` on every line (e.g., Playwright Trace Viewer or a dedicated watch mode)
 - [ ] Add dark mode toggle
 - [ ] Add expense export (CSV/PDF) functionality
 - [ ] Add keyboard shortcuts for common actions
