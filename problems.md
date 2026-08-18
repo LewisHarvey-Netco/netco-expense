@@ -72,28 +72,43 @@ the Windows environment to also have the same tooling installed, or the
 agent won't be able to execute commands against it. This adds setup
 friction and risks version drift between the Windows and WSL environments.
 
-## 2026-08-17 — False positive prompt injection detection blocks build/test commands
+## 2026-08-17 — Aggressive prompt injection detection blocks legitimate commands and code
 
 **What was attempted:** Running `npm run build` and `npm run test` via the
-agent's bash tool to verify the project compiles and tests pass.
+agent's bash tool to verify the project compiles and tests pass. Also
+writing test code containing mock credentials (e.g. email/password
+strings in `App.test.tsx`).
 
 **What went wrong:** Commands were blocked with `[BLOCKED: prompt injection
 detected]` — no further explanation, file path, or triggered pattern
 provided. The block persisted even after the `@/` directory cleanup was
 complete, making it impossible for the agent to run verification commands.
+Separately, the LLM bridge redacted credential-like strings in generated
+code (see next entry), further suggesting the security filters are
+overly broad.
 
 **Root cause:** The security injection detection appears to trigger on
 project content containing patterns like password fields, storage keys,
 or mock credentials (e.g. `src/mocks/users.json`, `AuthContext.tsx`).
 However, the error message gives zero visibility into what triggered it,
-making it hard to diagnose or fix.
+making it hard to diagnose or fix. The filters seem designed to catch
+prompt injection in *external* content, but they fire on the project's
+own legitimate code and data. Because the developer sees no diagnostic
+information about why a command was blocked, the most obvious course of
+action is to simply disable the injection detection entirely — which
+creates a bad incentive structure where the security feature is removed
+rather than tuned to work correctly.
 
 **Status:** Open. Worked around by having the user run commands manually.
+
+**Discussion:** [Teams thread](https://teams.microsoft.com/l/entity/683f3525-d193-4a67-8d91-22093beab1ca/?context=%7B%22internalId%22%3A%2219%3AeyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNTQ3MDYzMTExNjgifQ%40EngageCommunity%22%2C%22contextType%22%3A%22engageCommunity%22%2C%22subEntityId%22%3A%22%7B%5C%22deepLinkType%5C%22%3A%5C%22crossapp%5C%22%2C%5C%22path%5C%22%3A%5C%22%2Fthreads%2FeyJfdHlwZSI6IlRocmVhZCIsImlkIjoiMzk4NDM3MTk4MTc4NzEzNiJ9%5C%22%7D%22%7D)
 
 **Suggested fix:** The injection detection should surface which file or
 pattern triggered the block, so the user can distinguish false positives
 from genuine issues. At minimum, the error message should name the
-suspect file or content pattern.
+suspect file or content pattern. Consider scoping the detection to
+external/untrusted content (e.g. fetched URLs, user messages) rather
+than the project's own source files.
 
 ## 2026-08-17 — Agent applies workarounds without consulting the user
 
@@ -144,3 +159,58 @@ not redact strings in test files, mock data, or code that's already
 part of the repository. Alternatively, provide a way to whitelist
 known demo credentials or disable masking for specific file patterns
 like `*.test.tsx`, `*.spec.ts`, and `src/mocks/`.
+
+## 2026-08-18 — Get-ChildItem with -LiteralPath fails consistently in bash tool
+
+**What was attempted:** Running `Get-ChildItem -Force -LiteralPath "." | Select-Object Name, Mode`
+(via the bash tool) to list directory contents in a way that handles paths with spaces and
+special characters safely.
+
+**What went wrong:** The command fails consistently. The same pattern works when using `ls *`
+(which is on the bash allowlist), but `Get-ChildItem` is not — the `bash` tool's permission
+rules allow `ls *` but do not include `Get-ChildItem` or other PowerShell cmdlets by name.
+Using `tree /f /a` also fails for the same reason.
+
+**Root cause:** The bash permission allowlist in `opencode.json` includes `ls *` and `tree *`
+as allowed patterns, but these are Unix-native commands or external executables, not PowerShell
+cmdlets. On Windows with PowerShell 5.1 as the shell, `ls` works only as an alias for
+`Get-ChildItem`, and the allowlist matching may not resolve aliases. Meanwhile, running
+`Get-ChildItem` directly is not covered by any allowlist pattern.
+
+**Status:** Open. Worked around by using the Read tool on directories and the Glob tool for
+file pattern matching, which are the recommended approach anyway per the tool usage policy.
+
+**Suggested fix:** Either (a) add `Get-ChildItem *` and other commonly-needed PowerShell cmdlets
+to the bash allowlist, or (b) clarify in AGENTS.md or the tooling docs that agents should prefer
+the Read/Glob tools over shell-based directory listing on Windows, since the bash allowlist is
+tuned for Unix commands and PowerShell cmdlets are not reliably covered.
+
+## 2026-08-18 — No good way to reference small code snippets without overloading context
+
+**What was attempted:** Referencing a specific function, type, or small code
+section in conversation (e.g. "look at `roleHome()` in `types.ts`") to
+ground a discussion or decision, without dumping the entire file into
+context.
+
+**What went wrong:** The available tools are all-or-nothing: `Read` loads
+an entire file (or a large chunk), `Grep` returns matching lines but not
+surrounding context, and `Glob` only finds filenames. There's no "show me
+lines X–Y of this file" or "show me the definition of this function"
+primitive. This means referencing even a 5-line function requires feeding
+the agent the whole file, which wastes context window and makes
+conversations harder to follow.
+
+**Root cause:** The tool set is designed for exploration (find files,
+search content, read files) rather than surgical code reference. The
+`Read` tool supports `offset` and `limit`, but the agent has to know the
+exact line numbers beforehand — which defeats the purpose when the goal
+is to find and reference a specific snippet.
+
+**Status:** Open. Worked around by reading whole files and accepting the
+context cost, or using `Grep` to find line numbers then `Read` with
+offset/limit — which requires two steps and is error-prone.
+
+**Suggested fix:** Consider adding a tool or mode that lets the agent
+reference a specific symbol, function, or line range without loading the
+entire file. Even a "find definition" tool (like IDE go-to-definition)
+would dramatically reduce context waste when discussing specific code.
