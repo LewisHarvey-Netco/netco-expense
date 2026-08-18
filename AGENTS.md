@@ -4,6 +4,12 @@
 
 Demo expense app built to experiment with Feniks AI capabilities. Start from scratch — no existing codebase conventions to follow.
 
+## Architecture
+
+`docs/architecture.md` is the source of truth for the architectural patterns this codebase must follow (routing, auth/context, state management, forms, testing boundaries, and where new architectural boundaries like a service/API layer should go). Consult it — and follow the patterns it documents — before making any change that touches these areas; don't invent a conflicting pattern. Significant architectural decisions and their rationale are recorded in `docs/decisions/` — check there before revisiting a decision, and add a new ADR when making another one.
+
+Keep this documentation up to date: when a change introduces, removes, or alters an architectural pattern or boundary described in `docs/architecture.md`, update that document in the same change, and add a new ADR to `docs/decisions/` if a significant new decision was made. Stale architecture docs are worse than none — don't leave them describing a pattern the code no longer follows.
+
 ## Guidance for Future Sessions
 
 - **Stack:** Vite 8 + React 19 + TypeScript 6, npm as package manager.

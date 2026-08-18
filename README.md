@@ -21,6 +21,10 @@ This repository serves as a playground for exploring and demonstrating what Feni
 - @vitest/ui — browser dashboard for test results and DOM snapshots, run with `npm run test:ui`
 - Playwright (E2E browser testing)
 
+## Architecture
+
+See [`docs/architecture.md`](docs/architecture.md) for how the app is structured (routing, auth/context, forms, testing) and [`docs/decisions/`](docs/decisions/) for the reasoning behind key architectural choices.
+
 ## Getting Started
 
 ```
