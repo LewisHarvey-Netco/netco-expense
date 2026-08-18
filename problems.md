@@ -117,3 +117,30 @@ error or blocker during verification (build, test, lint), it should
 present the issue to the user and propose a fix before applying it.
 Only apply the fix after the user confirms. This keeps the user in the
 loop and prevents surprise refactors.
+
+## 2026-08-18 — LLM bridge masks passwords and credentials in code output
+
+**What was attempted:** Writing test code containing email/password
+strings (e.g., `'alice@netcompany.com'`, `'password123'`) in
+`src/App.test.tsx`.
+
+**What went wrong:** The LLM bridge is redacting credential-like strings
+in the agent's output, replacing them with asterisks. For example,
+`'alice@netcompany.com'` became `'alic************.com'` and
+`{ name: /sign in/i }` became `{ name************ }`. This corrupted
+the generated code, causing parse errors and test failures.
+
+**Root cause:** The LLM bridge has a security filter that detects
+password/credential patterns and masks them before they reach the
+agent. This is intended to prevent credential leakage, but it
+incorrectly triggers on test fixtures, mock data, and demo credentials
+that are part of the codebase.
+
+**Status:** Open. Worked around by manually fixing the corrupted strings
+after the agent generates them.
+
+**Suggested fix:** The masking should be aware of context — it should
+not redact strings in test files, mock data, or code that's already
+part of the repository. Alternatively, provide a way to whitelist
+known demo credentials or disable masking for specific file patterns
+like `*.test.tsx`, `*.spec.ts`, and `src/mocks/`.

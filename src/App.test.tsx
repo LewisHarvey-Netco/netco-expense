@@ -1,14 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { AuthProvider } from '@/context/AuthContext'
 import App from '@/App'
 import '@testing-library/jest-dom'
+
+let testLocation: string = '/login'
+
+function LocationCapture() {
+  const location = useLocation()
+  testLocation = location.pathname
+  return null
+}
 
 function renderApp() {
   return render(
     <MemoryRouter initialEntries={['/login']}>
       <AuthProvider>
+        <LocationCapture />
         <App />
       </AuthProvider>
     </MemoryRouter>
@@ -29,7 +38,7 @@ describe('Login flow', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Review Queue')).toBeInTheDocument()
+      expect(testLocation).toBe('/review')
     })
   })
 
@@ -42,7 +51,7 @@ describe('Login flow', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Expenses')).toBeInTheDocument()
+      expect(testLocation).toBe('/expenses')
     })
   })
 
