@@ -207,6 +207,25 @@ restrictions (e.g., Docker Compose V2 standalone, podman-desktop, or
 colima), or (c) update the setup docs to clarify the licensing requirement
 so users are aware before installing.
 
+## 2026-08-20 — Feniks startup fails with Docker container not found, requires full termination
+
+**What was attempted:** Starting Feniks normally to begin a session.
+
+**What went wrong:** Feniks occasionally complains about not finding Docker
+containers on startup. The error persists through normal restart attempts
+and the only reliable fix is to fully terminate Feniks from the taskbar
+(close the process completely) before relaunching.
+
+**Root cause:** Unknown. Likely a stale Docker context or orphaned process
+state that Feniks doesn't clean up on normal exit.
+
+**Status:** Open. Worked around by force-closing Feniks from the taskbar
+when the error appears, then relaunching.
+
+**Suggested fix:** Feniks should detect and clean up stale Docker state on
+startup, or gracefully handle the missing container case without requiring
+a full process kill.
+
 ## 2026-08-18 — No good way to reference small code snippets without overloading context
 
 **What was attempted:** Referencing a specific function, type, or small code
