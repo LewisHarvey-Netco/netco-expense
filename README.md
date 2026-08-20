@@ -25,7 +25,33 @@ This repository serves as a playground for exploring and demonstrating what Feni
 
 See [`docs/architecture.md`](docs/architecture.md) for how the app is structured (routing, auth/context, forms, testing) and [`docs/decisions/`](docs/decisions/) for the reasoning behind key architectural choices.
 
-## Getting Started
+## Prototype
+
+A static HTML/CSS prototype has been built to explore user flows, interaction patterns, and UI design before writing React code.
+
+**Location:** `prototype/` directory
+
+**What's inside:**
+- Consultant views (submit expenses, batch upload, manage templates, track flagged receipts)
+- Finance views (review queue, approve/reject, statistics dashboard)
+- Daily food cap tracking and warnings
+- Communication threads between consultants and finance
+- Multi-receipt batch upload with editable fields
+- Expense type templates
+
+**How to run:**
+```
+npx serve prototype
+```
+Then open `http://localhost:3000` or navigate directly to `prototype/index.html` in your browser.
+
+**Quick start:**
+- Visit `prototype/index.html` for a guided tour of all features
+- Login as consultant: use `john@netcompany.com`
+- Login as finance: use `finance@netcompany.com`
+- All forms and inputs are live — no data is persisted across page refreshes
+
+## Getting Started (React App)
 
 ```
 npm install
