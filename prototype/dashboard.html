@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="dashboard.html" class="nav-link active">Dashboard</a>
+    <a href="expenses.html" class="nav-link">All Expenses</a>
+    <a href="create-expense.html" class="nav-link">New Expense</a>
+    <a href="multi-receipt.html" class="nav-link">Multi-Receipt</a>
+    <a href="expense-types.html" class="nav-link">Expense Types</a>
+    <div class="nav-user">john@netcompany.com</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Overview of your expenses and activity</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Submitted This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">£487.50</div>
+        <div class="stat-label">Total This Month</div>
+      </div>
+      <div class="stat-card alert">
+        <div class="stat-value">2</div>
+        <div class="stat-label">Flagged Receipts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">8</div>
+        <div class="stat-label">Approved This Month</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Flagged Receipts</h2>
+        <a href="finance-flagged.html" class="btn btn-secondary btn-sm">View All</a>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Flag Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>15 Aug 2025</td>
+              <td>Client Dinner — The Ivy</td>
+              <td>Dinner</td>
+              <td>£62.00</td>
+              <td><span class="badge badge-flagged">Over daily cap (£40)</span></td>
+            </tr>
+            <tr>
+              <td>12 Aug 2025</td>
+              <td>Train to Manchester</td>
+              <td>Transport</td>
+              <td>£45.00</td>
+              <td><span class="badge badge-flagged">Missing receipt image</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Recent Activity</h2>
+        <a href="expenses.html" class="btn btn-secondary btn-sm">View All</a>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>18 Aug 2025</td>
+              <td>Working Lunch — Pret</td>
+              <td>Lunch</td>
+              <td>£12.50</td>
+              <td><span class="badge badge-submitted">Submitted</span></td>
+            </tr>
+            <tr>
+              <td>17 Aug 2025</td>
+              <td>Client Coffee Meeting</td>
+              <td>Meals</td>
+              <td>£8.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+            <tr>
+              <td>16 Aug 2025</td>
+              <td>Uber to Airport</td>
+              <td>Transport</td>
+              <td>£32.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+            <tr>
+              <td>15 Aug 2025</td>
+              <td>Client Dinner — The Ivy</td>
+              <td>Dinner</td>
+              <td>£62.00</td>
+              <td><span class="badge badge-flagged">Flagged</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="expenses.html">All Expenses</a>
+    <a href="expense-detail.html">Expense Detail</a>
+    <a href="create-expense.html">Create Expense</a>
+    <a href="expense-types.html">Expense Types</a>
+    <a href="multi-receipt.html">Multi-Receipt</a>
+    <a href="finance-flagged.html">Finance — Flagged</a>
+    <a href="finance-detail.html">Finance — Review</a>
+  </div>
+</body>
+</html>

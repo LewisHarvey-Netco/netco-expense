@@ -1,0 +1,652 @@
+/* Netcompany Expense Prototype Styles */
+
+:root {
+  --dark-green: #141E1E;
+  --green: #123836;
+  --green-90: #2A4C4A;
+  --green-80: #41605E;
+  --green-60: #718886;
+  --green-40: #A0AFAF;
+  --green-30: #B8C3C3;
+  --green-20: #D0D7D7;
+  --green-10: #E7EBEB;
+  --white: #FFFFFF;
+  --coral: #FF6359;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Studio 6', Arial, sans-serif;
+  color: var(--dark-green);
+  background: var(--white);
+  line-height: 1.5;
+}
+
+/* Navigation */
+.nav {
+  background: var(--green);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand {
+  color: var(--white);
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: none;
+  margin-right: 48px;
+}
+
+.nav-link {
+  color: var(--green-30);
+  text-decoration: none;
+  font-size: 14px;
+  margin-right: 24px;
+  transition: color 0.15s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--white);
+}
+
+.nav-user {
+  margin-left: auto;
+  color: var(--green-30);
+  font-size: 14px;
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--green-60);
+}
+
+/* Cards */
+.card {
+  background: var(--white);
+  border: 1px solid var(--green-20);
+  border-radius: 4px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--green-30);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--dark-green);
+  background: var(--white);
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background: var(--green-90);
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--dark-green);
+  border-color: var(--green-30);
+}
+
+.btn-secondary:hover {
+  background: var(--green-10);
+}
+
+.btn-coral {
+  background: var(--coral);
+  color: var(--white);
+}
+
+.btn-coral:hover {
+  opacity: 0.9;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-60);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--green-20);
+}
+
+td {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--green-10);
+}
+
+tr:hover {
+  background: var(--green-10);
+  cursor: pointer;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-submitted {
+  background: var(--green-10);
+  color: var(--green-80);
+}
+
+.badge-approved {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.badge-flagged {
+  background: #FFEBEE;
+  color: var(--coral);
+}
+
+/* Filters bar */
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--green-10);
+  border-radius: 4px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green-60);
+  text-transform: uppercase;
+}
+
+.filter-input {
+  padding: 8px 10px;
+  border: 1px solid var(--green-30);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  min-width: 140px;
+}
+
+/* Daily cap indicator */
+.cap-indicator {
+  background: var(--green-10);
+  border: 1px solid var(--green-20);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.cap-indicator.warning {
+  background: #FFF8E1;
+  border-color: #FFB300;
+}
+
+.cap-indicator.over {
+  background: #FFEBEE;
+  border-color: var(--coral);
+}
+
+.cap-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.cap-row:not(:last-child) {
+  border-bottom: 1px solid var(--green-20);
+}
+
+.cap-label {
+  color: var(--green-60);
+}
+
+.cap-value {
+  font-weight: 600;
+}
+
+.cap-remaining {
+  color: var(--green-80);
+}
+
+.cap-remaining.over {
+  color: var(--coral);
+}
+
+/* Conversation thread */
+.conversation {
+  margin-top: 20px;
+}
+
+.message {
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  max-width: 80%;
+}
+
+.message-sender {
+  background: var(--green-10);
+}
+
+.message-finance {
+  background: var(--green-10);
+  margin-left: auto;
+}
+
+.message-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-60);
+  margin-bottom: 4px;
+}
+
+.message-text {
+  font-size: 14px;
+  color: var(--dark-green);
+}
+
+.message-time {
+  font-size: 11px;
+  color: var(--green-40);
+  margin-top: 4px;
+}
+
+.message-input {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.message-input input {
+  flex: 1;
+}
+
+/* Expense type card */
+.type-card {
+  border: 1px solid var(--green-20);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.15s;
+}
+
+.type-card:hover {
+  border-color: var(--green);
+  background: var(--green-10);
+}
+
+.type-card.selected {
+  border-color: var(--green);
+  background: var(--green-10);
+}
+
+.type-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.type-details {
+  font-size: 13px;
+  color: var(--green-60);
+  margin-top: 4px;
+}
+
+/* Multi-receipt upload */
+.upload-zone {
+  border: 2px dashed var(--green-30);
+  border-radius: 4px;
+  padding: 40px;
+  text-align: center;
+  background: var(--green-10);
+  margin-bottom: 24px;
+}
+
+.upload-zone.dragover {
+  border-color: var(--green);
+  background: var(--green-20);
+}
+
+.upload-text {
+  font-size: 14px;
+  color: var(--green-60);
+}
+
+.receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.receipt-box {
+  border: 1px solid var(--green-20);
+  border-radius: 4px;
+  padding: 16px;
+  min-height: 200px;
+}
+
+.receipt-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.receipt-images {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.receipt-image {
+  width: 60px;
+  height: 60px;
+  background: var(--green-10);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--green-60);
+}
+
+/* Login/Register */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-10);
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: 4px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--green-60);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--green-60);
+}
+
+.auth-link a {
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Role selector */
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.role-card {
+  border: 2px solid var(--green-20);
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.role-card:hover {
+  border-color: var(--green-40);
+}
+
+.role-card.selected {
+  border-color: var(--green);
+  background: var(--green-10);
+}
+
+.role-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.role-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Dashboard stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--green-20);
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--dark-green);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--green-60);
+  margin-top: 4px;
+}
+
+.stat-card.alert {
+  border-color: var(--coral);
+}
+
+.stat-card.alert .stat-value {
+  color: var(--coral);
+}
+
+/* Footer nav for prototype */
+.proto-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--dark-green);
+  padding: 8px 32px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--green-40);
+  z-index: 100;
+}
+
+.proto-footer span {
+  margin-right: 16px;
+  font-weight: 600;
+}
+
+.proto-footer a {
+  color: var(--green-30);
+  text-decoration: none;
+  margin-right: 24px;
+}
+
+.proto-footer a:hover {
+  color: var(--white);
+}
+
+/* Utility */
+.text-coral {
+  color: var(--coral);
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body {
+  padding-bottom: 40px;
+}

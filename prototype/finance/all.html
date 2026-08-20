@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Finance: All Expenses</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="flagged.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="flagged.html" class="nav-link">Flagged Queue</a>
+    <a href="all.html" class="nav-link active">All Expenses</a>
+    <a href="stats.html" class="nav-link">Statistics</a>
+    <div class="nav-user">finance@netcompany.com (Finance)</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">All Expenses</h1>
+      <p class="page-subtitle">Finance view of all submitted expenses</p>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select class="filter-input">
+          <option>All</option>
+          <option>Submitted</option>
+          <option>Approved</option>
+          <option>Flagged</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Submitter</label>
+        <input type="text" class="filter-input" placeholder="Name or email">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Type</label>
+        <select class="filter-input">
+          <option>All</option>
+          <option>Breakfast</option>
+          <option>Lunch</option>
+          <option>Dinner</option>
+          <option>Transport</option>
+          <option>Accommodation</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Date Range</label>
+        <input type="date" class="filter-input" value="2025-08-01">
+      </div>
+      <button class="btn btn-primary" style="height: 36px;">Apply Filters</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">All Submissions (247 total)</h2>
+        <div>
+          <button class="btn btn-secondary btn-sm">Export</button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Submitter</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>18 Aug 2025</td>
+              <td>John Smith</td>
+              <td>Working Lunch — Pret</td>
+              <td>Lunch</td>
+              <td>£12.50</td>
+              <td><span class="badge badge-submitted">Submitted</span></td>
+              <td><a href="review.html?id=10" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr>
+              <td>17 Aug 2025</td>
+              <td>Sarah Johnson</td>
+              <td>Client Coffee Meeting</td>
+              <td>Meals</td>
+              <td>£8.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+              <td><a href="review.html?id=11" class="btn btn-secondary btn-sm">View</a></td>
+            </tr>
+            <tr>
+              <td>16 Aug 2025</td>
+              <td>Mike Chen</td>
+              <td>Uber to Airport</td>
+              <td>Transport</td>
+              <td>£32.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+              <td><a href="review.html?id=12" class="btn btn-secondary btn-sm">View</a></td>
+            </tr>
+            <tr>
+              <td>15 Aug 2025</td>
+              <td>John Smith</td>
+              <td>Client Dinner — The Ivy</td>
+              <td>Dinner</td>
+              <td>£62.00</td>
+              <td><span class="badge badge-flagged">Flagged</span></td>
+              <td><a href="review.html?id=1" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr>
+              <td>15 Aug 2025</td>
+              <td>John Smith</td>
+              <td>Train to Manchester</td>
+              <td>Transport</td>
+              <td>£45.00</td>
+              <td><span class="badge badge-flagged">Flagged</span></td>
+              <td><a href="review.html?id=2" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr>
+              <td>14 Aug 2025</td>
+              <td>Emily Davis</td>
+              <td>Breakfast at Hotel</td>
+              <td>Breakfast</td>
+              <td>£9.50</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+              <td><a href="review.html?id=13" class="btn btn-secondary btn-sm">View</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="../index.html">Info</a>
+    <a href="../login.html">Login</a>
+    <a href="flagged.html">Home</a>
+    <a href="all.html">All</a>
+    <a href="stats.html">Stats</a>
+    <a href="../consultant/dashboard.html">Consultant</a>
+  </div>
+</body>
+</html>

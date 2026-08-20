@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Finance: Statistics</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="flagged.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="flagged.html" class="nav-link">Flagged Queue</a>
+    <a href="all.html" class="nav-link">All Expenses</a>
+    <a href="stats.html" class="nav-link active">Statistics</a>
+    <div class="nav-user">finance@netcompany.com (Finance)</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Finance Dashboard</h1>
+      <p class="page-subtitle">Expense statistics and monitoring</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">247</div>
+        <div class="stat-label">Total This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">£8,942.50</div>
+        <div class="stat-label">Total Amount</div>
+      </div>
+      <div class="stat-card alert">
+        <div class="stat-value">8</div>
+        <div class="stat-label">Flagged (Need Review)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">231</div>
+        <div class="stat-label">Approved</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Expense Breakdown by Type</h2>
+        </div>
+        <div style="padding: 16px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Transport</span>
+            <strong>£3,245.00</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Accommodation</span>
+            <strong>£2,850.00</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Meals (Food)</span>
+            <strong>£1,547.50</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Other</span>
+            <strong>£1,300.00</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Top Submitters</h2>
+        </div>
+        <div style="padding: 16px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>John Smith</span>
+            <strong>£1,242.50</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Sarah Johnson</span>
+            <strong>£1,105.00</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Mike Chen</span>
+            <strong>£987.50</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Emily Davis</span>
+            <strong>£845.00</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Common Flag Reasons</h2>
+        </div>
+        <div style="padding: 16px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Over Daily Cap</span>
+            <span style="background: var(--green-10); padding: 2px 8px; border-radius: 12px; font-size: 12px;">2</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Missing Receipt</span>
+            <span style="background: var(--green-10); padding: 2px 8px; border-radius: 12px; font-size: 12px;">3</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Duplicate Submission</span>
+            <span style="background: var(--green-10); padding: 2px 8px; border-radius: 12px; font-size: 12px;">2</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+            <span>Missing Project Info</span>
+            <span style="background: var(--green-10); padding: 2px 8px; border-radius: 12px; font-size: 12px;">1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Review Queue Health</h2>
+        </div>
+        <div style="padding: 16px 0;">
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+              <span style="color: var(--green-60);">Pending (0-2 days)</span>
+              <span style="font-weight: 600;">3</span>
+            </div>
+            <div style="background: var(--green-10); border-radius: 4px; height: 8px; overflow: hidden;">
+              <div style="background: var(--green); height: 100%; width: 37.5%;"></div>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+              <span style="color: var(--green-60);">Aging (2-5 days)</span>
+              <span style="font-weight: 600;">3</span>
+            </div>
+            <div style="background: var(--green-10); border-radius: 4px; height: 8px; overflow: hidden;">
+              <div style="background: #FFB300; height: 100%; width: 37.5%;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+              <span style="color: var(--green-60);">Overdue (5+ days)</span>
+              <span style="font-weight: 600;">2</span>
+            </div>
+            <div style="background: var(--green-10); border-radius: 4px; height: 8px; overflow: hidden;">
+              <div style="background: var(--coral); height: 100%; width: 25%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Recent Actions</h2>
+      </div>
+      <div style="font-size: 14px;">
+        <div style="padding: 12px 0; border-bottom: 1px solid var(--green-10);">
+          <div style="font-weight: 600; margin-bottom: 4px;">Sarah Johnson — Team Lunch (£25.00)</div>
+          <div style="color: var(--green-60); font-size: 12px;">Approved • 2 hours ago</div>
+        </div>
+        <div style="padding: 12px 0; border-bottom: 1px solid var(--green-10);">
+          <div style="font-weight: 600; margin-bottom: 4px;">Mike Chen — Hotel Stay (£180.00)</div>
+          <div style="color: var(--green-60); font-size: 12px;">Flagged for missing project info • 4 hours ago</div>
+        </div>
+        <div style="padding: 12px 0;">
+          <div style="font-weight: 600; margin-bottom: 4px;">Emily Davis — Conference (£350.00)</div>
+          <div style="color: var(--green-60); font-size: 12px;">Awaiting response from submitter • 1 day ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="../index.html">Info</a>
+    <a href="../login.html">Login</a>
+    <a href="flagged.html">Home</a>
+    <a href="all.html">All</a>
+    <a href="stats.html">Stats</a>
+    <a href="../consultant/dashboard.html">Consultant</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-title">Netcompany Expenses</div>
+      <div class="auth-subtitle">Sign in to manage your expenses</div>
+      <form>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="email" placeholder="you@netcompany.com" value="john@netcompany.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Enter your password" value="password">
+        </div>
+        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">Sign In</button>
+      </form>
+      <div class="auth-link">
+        Don't have an account? <a href="register.html">Register</a>
+      </div>
+      <script>
+        function handleLogin() {
+          const email = document.getElementById('email').value;
+          if (email.includes('finance')) {
+            window.location.href = 'finance/flagged.html';
+          } else {
+            window.location.href = 'consultant/dashboard.html';
+          }
+        }
+      </script>
+    </div>
+  </div>
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="index.html">Info</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="consultant/dashboard.html">Consultant</a>
+    <a href="finance/flagged.html">Finance</a>
+  </div>
+</body>
+</html>

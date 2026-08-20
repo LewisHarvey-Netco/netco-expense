@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Finance: Review Expense</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="flagged.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="flagged.html" class="nav-link">Flagged Queue</a>
+    <a href="all.html" class="nav-link">All Expenses</a>
+    <a href="stats.html" class="nav-link">Statistics</a>
+    <div class="nav-user">finance@netcompany.com (Finance)</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 class="page-title">Client Dinner — The Ivy</h1>
+          <p class="page-subtitle">Submitted by John Smith • 15 Aug 2025 • Receipt ID: #REC-2025-08-15-001</p>
+        </div>
+        <span class="badge badge-flagged">Flagged</span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Expense Details</h2>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <p style="padding: 10px 0; font-size: 14px;">Client Dinner — The Ivy</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <p style="padding: 10px 0; font-size: 14px;">Dinner</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount</label>
+            <p style="padding: 10px 0; font-size: 14px;"><strong>£62.00</strong></p>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Currency</label>
+              <p style="padding: 10px 0; font-size: 14px;">GBP</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Receipt Date</label>
+              <p style="padding: 10px 0; font-size: 14px;">15 Aug 2025</p>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Region</label>
+              <p style="padding: 10px 0; font-size: 14px;">UK — London</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project</label>
+              <p style="padding: 10px 0; font-size: 14px;">Acme Corp — Platform</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Receipt Image</h2>
+          </div>
+          <div style="background: var(--green-10); border-radius: 4px; height: 300px; display: flex; align-items: center; justify-content: center; color: var(--green-60); font-size: 14px;">
+            [Receipt Image Preview]
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Daily Food Cap Summary (15 Aug)</h2>
+          </div>
+          <div class="cap-indicator over">
+            <div class="cap-row">
+              <span class="cap-label">Breakfast:</span>
+              <span class="cap-value">£5.00 / £10</span>
+            </div>
+            <div class="cap-row">
+              <span class="cap-label">Lunch:</span>
+              <span class="cap-value">£10.00 / £15</span>
+            </div>
+            <div class="cap-row">
+              <span class="cap-label">Dinner (flagged):</span>
+              <span class="cap-value">£62.00 / £25</span>
+            </div>
+            <div class="cap-row" style="border-top: 2px solid var(--coral); padding-top: 10px; margin-top: 10px;">
+              <span class="cap-label">Daily Total:</span>
+              <span class="cap-value cap-remaining over">£77.00 / £40 — Over by £37</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Flag Details</h2>
+          </div>
+          <div style="padding: 12px; background: #FFEBEE; border-radius: 4px; border-left: 3px solid var(--coral);">
+            <p style="font-size: 13px; font-weight: 600; color: var(--coral); margin-bottom: 8px;">Dinner amount exceeds daily cap</p>
+            <p style="font-size: 13px; color: var(--dark-green);">This receipt is £62.00, but the dinner cap is £25.00. Additionally, combined with other meals on 15 Aug, the daily food expense cap of £40 is exceeded by £37.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Review Decision</h2>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Action *</label>
+            <select class="form-select">
+              <option value="">-- Select Decision --</option>
+              <option value="approve">✓ Approve — Accept as-is (override cap)</option>
+              <option value="reject">✗ Reject — Return to submitter</option>
+              <option value="partial">⚡ Partial Approval — Approve £25, flag excess</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Internal Notes (Finance only)</label>
+            <textarea class="form-textarea" placeholder="Document reason for decision..."></textarea>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-primary">Submit Decision</button>
+            <a href="flagged.html" class="btn btn-secondary">Back to Queue</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Communication with Submitter</h2>
+          </div>
+          <div class="conversation">
+            <div class="message message-sender">
+              <div class="message-author">John Smith — 15 Aug, 3:45 PM</div>
+              <div class="message-text">Submitted client dinner receipt. This was a team dinner with our key client Acme Corp.</div>
+              <div class="message-time">3:45 PM</div>
+            </div>
+            <div class="message message-finance">
+              <div class="message-author">Finance Review — 16 Aug, 9:15 AM</div>
+              <div class="message-text">Hi John, this receipt exceeds the dinner cap of £25 by itself, and combined with your other meals on 15 Aug takes you over the daily cap of £40. Can you provide more details or adjust the expense?</div>
+              <div class="message-time">9:15 AM</div>
+            </div>
+            <div class="message message-sender">
+              <div class="message-author">John Smith — 16 Aug, 10:30 AM</div>
+              <div class="message-text">This was an important client dinner. Can we discuss a special approval? I can split the cost with another team member if needed.</div>
+              <div class="message-time">10:30 AM</div>
+            </div>
+          </div>
+          <div class="message-input">
+            <input type="text" placeholder="Type your message to John..." class="form-input">
+            <button class="btn btn-primary btn-sm">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="../index.html">Info</a>
+    <a href="../login.html">Login</a>
+    <a href="flagged.html">Home</a>
+    <a href="all.html">All</a>
+    <a href="stats.html">Stats</a>
+    <a href="../consultant/dashboard.html">Consultant</a>
+  </div>
+</body>
+</html>

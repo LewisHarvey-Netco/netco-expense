@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Create Expense</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="expenses.html" class="nav-link">All Expenses</a>
+    <a href="create-expense.html" class="nav-link active">New Expense</a>
+    <a href="multi-receipt.html" class="nav-link">Multi-Receipt</a>
+    <a href="expense-types.html" class="nav-link">Expense Types</a>
+    <div class="nav-user">john@netcompany.com</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Create New Expense</h1>
+      <p class="page-subtitle">Submit a single receipt or use multi-receipt for batch submissions</p>
+    </div>
+
+    <div style="max-width: 800px;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Expense Details</h2>
+        </div>
+
+        <form>
+          <div class="form-group">
+            <label class="form-label">Use Expense Type (Optional)</label>
+            <select class="form-select">
+              <option value="">-- Select a saved type --</option>
+              <option value="acme">Acme Corp — Platform (GBP, UK)</option>
+              <option value="internal">Internal Meeting (GBP, UK)</option>
+            </select>
+            <p style="font-size: 12px; color: var(--green-60); margin-top: 6px;">Expense types auto-fill currency, region, and project</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description *</label>
+            <input type="text" class="form-input" placeholder="e.g., Client Lunch at Pret, Train to Manchester">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Type *</label>
+              <select class="form-select">
+                <option value="">-- Select --</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="transport">Transport</option>
+                <option value="accommodation">Accommodation</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount *</label>
+              <input type="number" class="form-input" placeholder="0.00" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Currency *</label>
+              <select class="form-select">
+                <option value="GBP">GBP (£)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="USD">USD ($)</option>
+                <option value="SEK">SEK (kr)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Region *</label>
+              <select class="form-select">
+                <option value="">-- Select --</option>
+                <option value="uk">UK — London</option>
+                <option value="se">Sweden — Stockholm</option>
+                <option value="de">Germany — Berlin</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Receipt Date *</label>
+              <input type="date" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project/Delivery *</label>
+              <select class="form-select">
+                <option value="">-- Select --</option>
+                <option value="acme">Acme Corp — Platform</option>
+                <option value="netco">Netcompany Internal</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Receipt Image *</label>
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-text">📷 Drag and drop your receipt image here or click to browse</div>
+            </div>
+            <div id="uploadedImage" style="margin-top: 12px; display: none;">
+              <div style="background: var(--green-10); border-radius: 4px; padding: 12px; font-size: 13px; color: var(--dark-green);">
+                ✓ Receipt image uploaded
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notes (Optional)</label>
+            <textarea class="form-textarea" placeholder="Add any additional details about this expense..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 32px;">
+            <button type="button" class="btn btn-primary" onclick="showFoodCapWarning()">Submit Expense</button>
+            <a href="expenses.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+      <div id="capWarning" class="card" style="display: none; margin-top: 24px; border-left: 3px solid #FFB300;">
+        <div class="card-header">
+          <h2 class="card-title">⚠ Daily Food Cap Warning</h2>
+        </div>
+        <div class="cap-indicator warning">
+          <div class="cap-row">
+            <span class="cap-label">Breakfast (15 Aug):</span>
+            <span class="cap-value">£5.00 / £10</span>
+          </div>
+          <div class="cap-row">
+            <span class="cap-label">Lunch (15 Aug):</span>
+            <span class="cap-value">£10.00 / £15</span>
+          </div>
+          <div class="cap-row">
+            <span class="cap-label">Your new dinner:</span>
+            <span class="cap-value">£25.00 / £25</span>
+          </div>
+          <div class="cap-row" style="border-top: 1px solid #FFB300; padding-top: 10px; margin-top: 10px;">
+            <span class="cap-label">Total for 15 Aug:</span>
+            <span class="cap-value">£40.00 / £40 ✓</span>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--green-60); margin-top: 12px;">This expense will fit within your daily food cap, but there is no remaining allowance for additional meals today.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadedImage = document.getElementById('uploadedImage');
+
+    uploadZone.addEventListener('click', () => alert('File picker would open here'));
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      uploadZone.style.display = 'none';
+      uploadedImage.style.display = 'block';
+    });
+
+    function showFoodCapWarning() {
+      document.getElementById('capWarning').style.display = 'block';
+      window.scrollTo(0, document.getElementById('capWarning').offsetTop - 100);
+    }
+  </script>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="expenses.html">All Expenses</a>
+    <a href="expense-detail.html">Expense Detail</a>
+    <a href="create-expense.html">Create Expense</a>
+    <a href="expense-types.html">Expense Types</a>
+    <a href="multi-receipt.html">Multi-Receipt</a>
+    <a href="finance-flagged.html">Finance — Flagged</a>
+    <a href="finance-detail.html">Finance — Review</a>
+  </div>
+</body>
+</html>

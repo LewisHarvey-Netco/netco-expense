@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Expense Types</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="expenses.html" class="nav-link">All Expenses</a>
+    <a href="create-expense.html" class="nav-link">New Expense</a>
+    <a href="multi-receipt.html" class="nav-link">Multi-Receipt</a>
+    <a href="expense-types.html" class="nav-link active">Expense Types</a>
+    <div class="nav-user">john@netcompany.com</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 class="page-title">Expense Types</h1>
+          <p class="page-subtitle">Create and manage templates to speed up expense submission</p>
+        </div>
+        <button class="btn btn-primary" onclick="toggleNewTypeForm()">+ Create New Type</button>
+      </div>
+    </div>
+
+    <div id="newTypeForm" class="card" style="display: none; margin-bottom: 32px;">
+      <div class="card-header">
+        <h2 class="card-title">Create New Expense Type</h2>
+      </div>
+      <form>
+        <div class="form-group">
+          <label class="form-label">Type Name *</label>
+          <input type="text" class="form-input" placeholder="e.g., Acme Corp Meetings, Travel to SE">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Currency *</label>
+            <select class="form-select">
+              <option value="GBP">GBP (£)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+              <option value="SEK">SEK (kr)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Region *</label>
+            <select class="form-select">
+              <option value="">-- Select --</option>
+              <option value="uk">UK — London</option>
+              <option value="se">Sweden — Stockholm</option>
+              <option value="de">Germany — Berlin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Project/Delivery *</label>
+          <select class="form-select">
+            <option value="">-- Select --</option>
+            <option value="acme">Acme Corp — Platform</option>
+            <option value="netco">Netcompany Internal</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+          <button type="button" class="btn btn-primary">Create Type</button>
+          <button type="button" class="btn btn-secondary" onclick="toggleNewTypeForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Your Expense Types (3)</h2>
+      </div>
+
+      <div class="type-card">
+        <div>
+          <div class="type-name">Acme Corp — Platform</div>
+          <div class="type-details">💷 GBP | 📍 UK — London | 🏢 Acme Corp — Platform</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm">Edit</button>
+          <button class="btn btn-secondary btn-sm" style="color: var(--coral);">Delete</button>
+        </div>
+      </div>
+
+      <div class="type-card">
+        <div>
+          <div class="type-name">Internal Meeting — Sweden</div>
+          <div class="type-details">💷 SEK | 📍 Sweden — Stockholm | 🏢 Netcompany Internal</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm">Edit</button>
+          <button class="btn btn-secondary btn-sm" style="color: var(--coral);">Delete</button>
+        </div>
+      </div>
+
+      <div class="type-card">
+        <div>
+          <div class="type-name">Client Travel — Germany</div>
+          <div class="type-details">💷 EUR | 📍 Germany — Berlin | 🏢 Other</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm">Edit</button>
+          <button class="btn btn-secondary btn-sm" style="color: var(--coral);">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Using Expense Types</h2>
+      </div>
+      <p style="font-size: 14px; line-height: 1.6; color: var(--dark-green);">
+        Expense types let you save your most common settings — currency, region, and project — so you don't have to re-enter them every time. When creating a new expense, select a type from the dropdown to auto-fill these fields. You can still override any value on a per-expense basis.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function toggleNewTypeForm() {
+      const form = document.getElementById('newTypeForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="expenses.html">All Expenses</a>
+    <a href="expense-detail.html">Expense Detail</a>
+    <a href="create-expense.html">Create Expense</a>
+    <a href="expense-types.html">Expense Types</a>
+    <a href="multi-receipt.html">Multi-Receipt</a>
+    <a href="finance-flagged.html">Finance — Flagged</a>
+    <a href="finance-detail.html">Finance — Review</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Multi-Receipt</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .expense-item {
+      background: var(--white);
+      border: 1px solid var(--green-20);
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .expense-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .expense-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .drag-handle {
+      cursor: grab;
+      color: var(--green-60);
+      margin-right: 12px;
+    }
+    .drop-zone {
+      border: 2px dashed var(--green-30);
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+      background: var(--green-10);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--green-60);
+    }
+    .drop-zone.dragover {
+      border-color: var(--green);
+      background: var(--green-20);
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="expenses.html" class="nav-link">All Expenses</a>
+    <a href="create-expense.html" class="nav-link">New Expense</a>
+    <a href="multi-receipt.html" class="nav-link active">Multi-Receipt</a>
+    <a href="expense-types.html" class="nav-link">Expense Types</a>
+    <div class="nav-user">john@netcompany.com</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Multi-Receipt Batch Upload</h1>
+      <p class="page-subtitle">Fast-track submission of multiple receipts at once</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Batch Upload Area</h2>
+      </div>
+      <div id="batchDropZone" class="upload-zone">
+        <div class="upload-text">📸 Drag and drop multiple receipt images here or click to browse</div>
+      </div>
+      <p style="font-size: 12px; color: var(--green-60); margin-top: 8px;">✓ Supports JPG, PNG, PDF (up to 5MB each)</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Expenses to Submit (3)</h2>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="addNewExpense()">+ Add Expense</button>
+          <button class="btn btn-secondary btn-sm" onclick="removeAllExpenses()">Clear All</button>
+        </div>
+      </div>
+
+      <div id="expenseList">
+        <div class="expense-item">
+          <div class="expense-header">
+            <div style="display: flex; align-items: center;">
+              <span class="drag-handle">⋮⋮</span>
+              <div class="expense-title">Working Lunch — Pret</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="editExpense()">Edit</button>
+          </div>
+          <div class="receipt-images">
+            <div class="receipt-image">receipt1.jpg</div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px;">
+            <div><span style="color: var(--green-60);">Type:</span> Lunch</div>
+            <div><span style="color: var(--green-60);">Amount:</span> £12.50</div>
+            <div><span style="color: var(--green-60);">Date:</span> 18 Aug</div>
+          </div>
+        </div>
+
+        <div class="expense-item">
+          <div class="expense-header">
+            <div style="display: flex; align-items: center;">
+              <span class="drag-handle">⋮⋮</span>
+              <div class="expense-title">Uber to Client Office</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="editExpense()">Edit</button>
+          </div>
+          <div class="drop-zone" id="dropZone2">
+            📷 Drag receipt image(s) here
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px;">
+            <div><span style="color: var(--green-60);">Type:</span> Transport</div>
+            <div><span style="color: var(--green-60);">Amount:</span> £24.50</div>
+            <div><span style="color: var(--green-60);">Date:</span> 18 Aug</div>
+          </div>
+        </div>
+
+        <div class="expense-item">
+          <div class="expense-header">
+            <div style="display: flex; align-items: center;">
+              <span class="drag-handle">⋮⋮</span>
+              <div class="expense-title">Team Coffee</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="editExpense()">Edit</button>
+          </div>
+          <div class="receipt-images">
+            <div class="receipt-image">receipt3.jpg</div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px;">
+            <div><span style="color: var(--green-60);">Type:</span> Meals</div>
+            <div><span style="color: var(--green-60);">Amount:</span> £8.00</div>
+            <div><span style="color: var(--green-60);">Date:</span> 18 Aug</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--green-20);">
+        <div style="flex: 1;">
+          <div style="font-size: 12px; color: var(--green-60); margin-bottom: 4px;">TOTAL TO SUBMIT</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--dark-green);">£45.00</div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-end;">
+          <button class="btn btn-secondary">Save Draft</button>
+          <button class="btn btn-primary">Submit All (3)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Tips for Batch Submission</h2>
+      </div>
+      <ul style="margin-left: 20px; font-size: 14px; line-height: 1.8; color: var(--dark-green);">
+        <li><strong>Drag images between expenses:</strong> Drop a receipt image directly into an expense card</li>
+        <li><strong>Reorder expenses:</strong> Grab the handle (⋮⋮) to drag and reorder expenses</li>
+        <li><strong>One or many receipts per expense:</strong> Some expenses have multiple receipts; drop them all in one card</li>
+        <li><strong>Quick edit:</strong> Click the Edit button to change details without leaving this page</li>
+        <li><strong>Save and continue:</strong> Use Save Draft to return later without losing your progress</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const batchDropZone = document.getElementById('batchDropZone');
+    batchDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      batchDropZone.classList.add('dragover');
+    });
+    batchDropZone.addEventListener('dragleave', () => {
+      batchDropZone.classList.remove('dragover');
+    });
+    batchDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      batchDropZone.classList.remove('dragover');
+      alert('In the real app, this would process the dropped files and create expense entries');
+    });
+
+    const dropZone2 = document.getElementById('dropZone2');
+    if (dropZone2) {
+      dropZone2.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone2.classList.add('dragover');
+      });
+      dropZone2.addEventListener('dragleave', () => {
+        dropZone2.classList.remove('dragover');
+      });
+      dropZone2.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone2.classList.remove('dragover');
+        dropZone2.innerHTML = '<div class="receipt-image">receipt2.jpg</div>';
+      });
+    }
+
+    function addNewExpense() {
+      alert('Add new expense form would appear');
+    }
+
+    function editExpense() {
+      alert('Edit form would appear for this expense');
+    }
+
+    function removeAllExpenses() {
+      if (confirm('Clear all expenses?')) {
+        document.getElementById('expenseList').innerHTML = '<p style="color: var(--green-60); text-align: center; padding: 32px;">No expenses yet</p>';
+      }
+    }
+  </script>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="expenses.html">All Expenses</a>
+    <a href="expense-detail.html">Expense Detail</a>
+    <a href="create-expense.html">Create Expense</a>
+    <a href="expense-types.html">Expense Types</a>
+    <a href="multi-receipt.html">Multi-Receipt</a>
+    <a href="finance-flagged.html">Finance — Flagged</a>
+    <a href="finance-detail.html">Finance — Review</a>
+  </div>
+</body>
+</html>

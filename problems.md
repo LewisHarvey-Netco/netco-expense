@@ -185,6 +185,28 @@ to the bash allowlist, or (b) clarify in AGENTS.md or the tooling docs that agen
 the Read/Glob tools over shell-based directory listing on Windows, since the bash allowlist is
 tuned for Unix commands and PowerShell cmdlets are not reliably covered.
 
+## 2026-08-20 — Docker Desktop may require commercial license
+
+**What was attempted:** Following opencode setup instructions that reference
+Docker Desktop.
+
+**What went wrong:** Docker Desktop's free tier is limited to organizations
+with fewer than 250 employees AND less than $10M annual revenue. Netcompany
+exceeds both thresholds, which means Docker Desktop use likely requires a
+paid commercial license. Using it without a license would be a compliance
+issue.
+
+**Root cause:** The opencode setup documentation recommends Docker Desktop
+without noting the commercial licensing requirements for large organizations.
+
+**Status:** Open.
+
+**Suggested fix:** Either (a) procure a Docker Desktop commercial license,
+(b) switch to an alternative container runtime with no commercial licensing
+restrictions (e.g., Docker Compose V2 standalone, podman-desktop, or
+colima), or (c) update the setup docs to clarify the licensing requirement
+so users are aware before installing.
+
 ## 2026-08-18 — No good way to reference small code snippets without overloading context
 
 **What was attempted:** Referencing a specific function, type, or small code

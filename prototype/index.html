@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Prototype Info</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="index.html" class="nav-link active">Prototype Info</a>
+    <a href="login.html" class="nav-link">Login</a>
+    <div class="nav-user">Prototype Guide</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Prototype Guide</h1>
+      <p class="page-subtitle">Overview of consultant and finance features</p>
+    </div>
+
+    <!-- Consultant Section -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">💼 Consultant Features</h2>
+      </div>
+      <p style="font-size: 14px; color: var(--green-60); margin-bottom: 20px;">Submit and manage your expenses</p>
+
+      <div style="display: grid; gap: 16px;">
+        <div style="border-left: 3px solid var(--green); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Dashboard</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Overview of your monthly expenses, approved total, flagged receipts, and recent activity at a glance.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--green); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">My Expenses</h3>
+          <p style="font-size: 13px; color: var(--green-60);">View all submitted expenses with filters by status (submitted, approved, flagged), type, and date range. Click any expense to see details.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--green); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Expense Detail</h3>
+          <p style="font-size: 13px; color: var(--green-60);">View receipt details, daily food cap summary for that day, flag reason (if flagged), and communicate with finance about issues.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--green); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Create New Expense</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Submit a single receipt with description, type, amount, currency, region, project, and image. See live warnings if you exceed daily food caps (£40/day, £25 dinner, £15 lunch, £10 breakfast).</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--green); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Multi-Receipt Batch Upload</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Fast-track multiple expenses at once. Set project, region, and currency at the top — then edit description, type, amount, and date for each expense. Total updates in real-time.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--green); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Expense Types</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Save templates for your most common expense settings (currency, region, project). When creating an expense, select a type to auto-fill these fields — saves time on repetitive data entry.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Finance Section -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📊 Finance Features</h2>
+      </div>
+      <p style="font-size: 14px; color: var(--green-60); margin-bottom: 20px;">Review, approve, and flag submitted expenses</p>
+
+      <div style="display: grid; gap: 16px;">
+        <div style="border-left: 3px solid var(--coral); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Flagged Queue</h3>
+          <p style="font-size: 13px; color: var(--green-60);">See all receipts flagged for review (over daily cap, missing info, duplicates, etc.). Filter by flag reason, submitter, or region. Quick stats show pending items and total at risk.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--coral); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Review Expense</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Review a flagged receipt with full details, receipt image, daily food cap breakdown for that date, and why it was flagged. Choose to approve, reject, or partially approve (e.g., approve £25 of a £62 dinner). Communicate directly with the submitter.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--coral); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">All Expenses</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Full view of all submitted expenses (247+ at a time) across all consultants. Filter by status, submitter, type, or date range. Export for reporting.</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--coral); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Statistics Dashboard</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Monitor key metrics: total expenses, total amount, flagged count, approved count. See breakdown by expense type, top submitters, common flag reasons, and queue health (pending, aging, overdue).</p>
+        </div>
+
+        <div style="border-left: 3px solid var(--coral); padding-left: 16px;">
+          <h3 style="font-size: 15px; font-weight: 600; color: var(--dark-green); margin-bottom: 6px;">Communication Thread</h3>
+          <p style="font-size: 13px; color: var(--green-60);">Built-in messaging between finance and submitter on each flagged receipt. Discuss issues, request additional info, or explain decisions without leaving the app.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Features -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">✨ Key Features (Both Roles)</h2>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--dark-green); margin-bottom: 8px;">Daily Food Cap Tracking</h4>
+          <p style="font-size: 13px; color: var(--green-60);">Real-time display of daily food allowance (£40/day total, with sub-caps for breakfast, lunch, dinner). Warns consultants before they exceed limits; helps finance identify violations.</p>
+        </div>
+
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--dark-green); margin-bottom: 8px;">Flexible Filtering</h4>
+          <p style="font-size: 13px; color: var(--green-60);">Filter expenses by status, type, date range, amount, submitter, region, and more. Export data for reconciliation and reporting.</p>
+        </div>
+
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--dark-green); margin-bottom: 8px;">Receipt Images</h4>
+          <p style="font-size: 13px; color: var(--green-60);">Drag-and-drop or click-to-upload receipt images. Finance can view receipts inline when reviewing flagged expenses.</p>
+        </div>
+
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--dark-green); margin-bottom: 8px;">Two-Way Communication</h4>
+          <p style="font-size: 13px; color: var(--green-60);">Message thread on each flagged expense. Consultants can explain, finance can ask questions — all in one place.</p>
+        </div>
+
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--dark-green); margin-bottom: 8px;">Batch Operations</h4>
+          <p style="font-size: 13px; color: var(--green-60);">Submit multiple receipts at once with shared settings (project, currency, region), then customize each item. Saves time on repetitive submissions.</p>
+        </div>
+
+        <div>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--dark-green); margin-bottom: 8px;">Saved Templates</h4>
+          <p style="font-size: 13px; color: var(--green-60);">Create expense types to auto-fill common settings. No need to re-enter project/currency/region every time.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Explore -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🚀 How to Explore</h2>
+      </div>
+      <ol style="font-size: 14px; color: var(--dark-green); line-height: 1.8; margin-left: 20px;">
+        <li><strong>Login as Consultant:</strong> Use <code style="background: var(--green-10); padding: 2px 6px; border-radius: 2px;">john@netcompany.com</code> to see consultant features</li>
+        <li><strong>Login as Finance:</strong> Use <code style="background: var(--green-10); padding: 2px 6px; border-radius: 2px;">finance@netcompany.com</code> to see finance features</li>
+        <li><strong>Try Editing:</strong> All forms and inputs are live — change amounts, dates, descriptions, and see totals update in real-time</li>
+        <li><strong>Explore Flows:</strong> Click between pages to see the full user journey for each role</li>
+        <li><strong>View Interactions:</strong> Try drag-and-drop zones, dropdowns, and filters to understand the interaction patterns</li>
+      </ol>
+    </div>
+
+    <div style="text-align: center; padding: 32px 0; color: var(--green-60); font-size: 13px;">
+      <p>This is a static HTML prototype showing the proposed user flows and UI patterns.</p>
+      <p>No data is saved — refresh the page to reset to defaults.</p>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="index.html">Info</a>
+    <a href="login.html">Login</a>
+    <a href="consultant/dashboard.html">Consultant</a>
+    <a href="finance/flagged.html">Finance</a>
+  </div>
+</body>
+</html>

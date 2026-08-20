@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — Finance: Flagged Receipts</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="flagged.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="flagged.html" class="nav-link active">Flagged Queue</a>
+    <a href="all.html" class="nav-link">All Expenses</a>
+    <a href="stats.html" class="nav-link">Statistics</a>
+    <div class="nav-user">finance@netcompany.com (Finance)</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Flagged Receipts</h1>
+      <p class="page-subtitle">Finance review queue — receipts requiring attention</p>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Flag Reason</label>
+        <select class="filter-input">
+          <option>All</option>
+          <option>Over Daily Cap</option>
+          <option>Missing Receipt</option>
+          <option>Incomplete Info</option>
+          <option>Duplicate</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Submitter</label>
+        <input type="text" class="filter-input" placeholder="Name or email">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Region</label>
+        <select class="filter-input">
+          <option>All Regions</option>
+          <option>UK</option>
+          <option>Sweden</option>
+          <option>Germany</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="height: 36px;">Apply Filters</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Pending Review (8)</h2>
+        <div style="display: flex; gap: 8px;">
+          <span style="font-size: 12px; color: var(--green-60); display: flex; align-items: center;">
+            ⚠ 2 over daily cap, 3 missing info, 3 duplicates
+          </span>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Submitter</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Flag Reason</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="location.href='review.html?id=1'">
+              <td>15 Aug 2025</td>
+              <td>John Smith</td>
+              <td>Client Dinner — The Ivy</td>
+              <td>Dinner</td>
+              <td>£62.00</td>
+              <td><span class="badge badge-flagged">Over daily cap</span></td>
+              <td><a href="review.html?id=1" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr onclick="location.href='review.html?id=2'">
+              <td>15 Aug 2025</td>
+              <td>John Smith</td>
+              <td>Train to Manchester</td>
+              <td>Transport</td>
+              <td>£45.00</td>
+              <td><span class="badge badge-flagged">Missing receipt</span></td>
+              <td><a href="review.html?id=2" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr onclick="location.href='review.html?id=3'">
+              <td>14 Aug 2025</td>
+              <td>Sarah Johnson</td>
+              <td>Team Lunch</td>
+              <td>Lunch</td>
+              <td>£25.00</td>
+              <td><span class="badge badge-flagged">Duplicate submission</span></td>
+              <td><a href="review.html?id=3" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr onclick="location.href='review.html?id=4'">
+              <td>12 Aug 2025</td>
+              <td>Mike Chen</td>
+              <td>Hotel Stay — Berlin</td>
+              <td>Accommodation</td>
+              <td>£180.00</td>
+              <td><span class="badge badge-flagged">Missing project info</span></td>
+              <td><a href="review.html?id=4" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+            <tr onclick="location.href='review.html?id=5'">
+              <td>10 Aug 2025</td>
+              <td>Emily Davis</td>
+              <td>Conference Registration</td>
+              <td>Other</td>
+              <td>£350.00</td>
+              <td><span class="badge badge-flagged">Requires approval</span></td>
+              <td><a href="review.html?id=5" class="btn btn-secondary btn-sm">Review</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Quick Stats</h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+        <div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--coral);">8</div>
+          <div style="font-size: 12px; color: var(--green-60);">Pending Review</div>
+        </div>
+        <div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--dark-green);">£1,247.50</div>
+          <div style="font-size: 12px; color: var(--green-60);">Total at Risk</div>
+        </div>
+        <div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--dark-green);">5</div>
+          <div style="font-size: 12px; color: var(--green-60);">Awaiting Response</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="../index.html">Info</a>
+    <a href="../login.html">Login</a>
+    <a href="flagged.html">Home</a>
+    <a href="all.html">All</a>
+    <a href="stats.html">Stats</a>
+    <a href="../consultant/dashboard.html">Consultant</a>
+  </div>
+</body>
+</html>

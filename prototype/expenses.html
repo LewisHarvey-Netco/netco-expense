@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcompany Expenses — All Expenses</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-brand">Netcompany Expenses</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="expenses.html" class="nav-link active">All Expenses</a>
+    <a href="create-expense.html" class="nav-link">New Expense</a>
+    <a href="multi-receipt.html" class="nav-link">Multi-Receipt</a>
+    <a href="expense-types.html" class="nav-link">Expense Types</a>
+    <div class="nav-user">john@netcompany.com</div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">All Expenses</h1>
+      <p class="page-subtitle">View and manage all your submitted expenses</p>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select class="filter-input">
+          <option>All</option>
+          <option>Submitted</option>
+          <option>Approved</option>
+          <option>Flagged</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Type</label>
+        <select class="filter-input">
+          <option>All Types</option>
+          <option>Breakfast</option>
+          <option>Lunch</option>
+          <option>Dinner</option>
+          <option>Transport</option>
+          <option>Accommodation</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Date Range</label>
+        <input type="date" class="filter-input" value="2025-08-01">
+        <span style="font-size: 12px; color: var(--green-60); margin-top: 4px;">to</span>
+        <input type="date" class="filter-input" value="2025-08-31">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Amount Range</label>
+        <input type="number" class="filter-input" placeholder="Min">
+        <span style="font-size: 12px; color: var(--green-60); margin-top: 4px;">to</span>
+        <input type="number" class="filter-input" placeholder="Max">
+      </div>
+      <button class="btn btn-primary" style="height: 36px;">Apply Filters</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Expenses (47 total)</h2>
+        <div>
+          <button class="btn btn-secondary btn-sm">Export</button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt Date</th>
+              <th>Submitted</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>18 Aug 2025</td>
+              <td>18 Aug 2025</td>
+              <td>Working Lunch — Pret</td>
+              <td>Lunch</td>
+              <td>£12.50</td>
+              <td><span class="badge badge-submitted">Submitted</span></td>
+            </tr>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>17 Aug 2025</td>
+              <td>17 Aug 2025</td>
+              <td>Client Coffee Meeting</td>
+              <td>Meals</td>
+              <td>£8.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>16 Aug 2025</td>
+              <td>16 Aug 2025</td>
+              <td>Uber to Airport</td>
+              <td>Transport</td>
+              <td>£32.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>15 Aug 2025</td>
+              <td>15 Aug 2025</td>
+              <td>Client Dinner — The Ivy</td>
+              <td>Dinner</td>
+              <td>£62.00</td>
+              <td><span class="badge badge-flagged">Flagged</span></td>
+            </tr>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>15 Aug 2025</td>
+              <td>15 Aug 2025</td>
+              <td>Train to Manchester</td>
+              <td>Transport</td>
+              <td>£45.00</td>
+              <td><span class="badge badge-flagged">Flagged</span></td>
+            </tr>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>14 Aug 2025</td>
+              <td>14 Aug 2025</td>
+              <td>Breakfast at Hotel</td>
+              <td>Breakfast</td>
+              <td>£9.50</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+            <tr onclick="location.href='expense-detail.html'">
+              <td>12 Aug 2025</td>
+              <td>12 Aug 2025</td>
+              <td>Team Lunch</td>
+              <td>Lunch</td>
+              <td>£15.00</td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-footer">
+    <span>PROTOTYPE NAV:</span>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="expenses.html">All Expenses</a>
+    <a href="expense-detail.html">Expense Detail</a>
+    <a href="create-expense.html">Create Expense</a>
+    <a href="expense-types.html">Expense Types</a>
+    <a href="multi-receipt.html">Multi-Receipt</a>
+    <a href="finance-flagged.html">Finance — Flagged</a>
+    <a href="finance-detail.html">Finance — Review</a>
+  </div>
+</body>
+</html>
