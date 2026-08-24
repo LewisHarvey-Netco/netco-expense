@@ -11,7 +11,11 @@ test('logs in as finance and lands on review page', async ({ page }) => {
   await page.click('button[type="submit"]');
 
   await expect(page).toHaveURL(/\/review/);
-  await expect(page.getByText('Review Queue', { exact: true })).toBeVisible();
-  await expect(page.getByText('Bob Madsen')).toBeVisible();
+  await expect(page.getByText('All Expenses', { exact: true })).toBeVisible();
+  await page.waitForTimeout(1000);
+  await expect(
+    page.getByText('Client lunch meeting at Restaurant Noma'),
+  ).toBeVisible();
+  await expect(page.getByRole('banner').getByText('Bob Madsen')).toBeVisible();
   await page.waitForTimeout(2000);
 });
