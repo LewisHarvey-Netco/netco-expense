@@ -1,7 +1,7 @@
-import { Badge } from '@/components/ui/badge'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
 import DataTable, { type Column } from '@/components/DataTable'
-import { cn } from '@/lib/utils'
 import type { Expense, ExpenseStatus } from '@/types'
+import type { VariantProps } from 'class-variance-authority'
 
 interface ExpenseTableProps {
   expenses: Expense[]
@@ -9,11 +9,15 @@ interface ExpenseTableProps {
   getSubmitterName?: (submitterId: string) => string
 }
 
-const STATUS_STYLES: Record<ExpenseStatus, string> = {
-  Approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Submitted: 'bg-sky-50 text-sky-700 border-sky-200',
-  'Changes Requested': 'bg-amber-50 text-amber-700 border-amber-200',
-  Resubmitted: 'bg-violet-50 text-violet-700 border-violet-200',
+type BadgeVariant = VariantProps<typeof badgeVariants>['variant']
+
+// Reuses the shared Badge variants (tied to Netcompany's CSS tokens) rather than
+// hardcoding arbitrary Tailwind colors. See DESIGN-GUIDELINES.md.
+const STATUS_VARIANTS: Record<ExpenseStatus, BadgeVariant> = {
+  Approved: 'default',
+  Submitted: 'secondary',
+  'Changes Requested': 'destructive',
+  Resubmitted: 'outline',
 }
 
 function formatDate(dateStr: string): string {
@@ -80,12 +84,7 @@ export default function ExpenseTable({
       key: 'status',
       label: 'Status',
       render: (expense) => (
-        <Badge
-          variant="outline"
-          className={cn('inline-flex', STATUS_STYLES[expense.status])}
-        >
-          {expense.status}
-        </Badge>
+        <Badge variant={STATUS_VARIANTS[expense.status]}>{expense.status}</Badge>
       ),
     },
   ]

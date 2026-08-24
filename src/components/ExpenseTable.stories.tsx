@@ -87,7 +87,7 @@ export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Shows all four expense statuses: Approved (green), Submitted (blue), Changes Requested (amber), Resubmitted (violet). Click any row to test navigation.',
+        story: 'Shows all four expense statuses using the shared Badge variants: Approved (default), Submitted (secondary), Changes Requested (destructive), Resubmitted (outline). Click any row to test navigation.',
       },
     },
   },
