@@ -116,11 +116,15 @@ re-evaluate whether Context is still appropriate before reflexively adding anoth
 
 ## Data Model
 
-The expense data model is defined in **JSON Schema Draft 2020-12** in `docs/data-models/expense.schema.json`, with a Markdown summary in `docs/data-models/expense.md`. TypeScript interfaces (`Expense`, `ExpenseType`, `ExpenseStatus`) in `src/types.ts` are derived from the schema.
+The expense data model is defined in **JSON Schema Draft 2020-12** in `src/schemas/expense.schema.json`. TypeScript interfaces (`Expense`, `ExpenseType`, `ExpenseStatus`) in `src/types.ts` are derived from the schema. A Markdown summary is maintained in `docs/data-models/expense.md` for reference.
 
-The JSON Schema is the authoritative source of truth. See `docs/decisions/0004-expense-data-model-json-schema.md`.
+The JSON Schema in `src/schemas/` is the authoritative source of truth.
 
-Mock expenses are stored in `src/mocks/expenses.json` (~10 records covering all statuses, types, and submitters).
+**Runtime Validation:** All expense data is validated against the JSON Schema via `src/lib/expense-validation.ts` (using `ajv`). This includes mock expenses in `src/mocks/expenses.json`, API responses (when a backend exists), and form submissions. The validation functions are:
+- `validateAndParseExpense(data)` — validates and returns typed `Expense`, or throws with details
+- `isValidExpense(data)` — type guard that checks without throwing
+
+See `docs/decisions/0004-expense-data-model-json-schema.md` for rationale and consequences.
 
 ## Context Usage
 

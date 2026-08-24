@@ -1,6 +1,6 @@
 # Expense Data Model
 
-**Authority:** See `expense.schema.json` (JSON Schema Draft 2020-12) for the machine-readable specification.
+**Authority:** See `src/schemas/expense.schema.json` (JSON Schema Draft 2020-12) for the authoritative machine-readable specification. TypeScript types are in `src/types.ts`, derived from the schema.
 
 ## Overview
 

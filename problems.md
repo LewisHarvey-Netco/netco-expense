@@ -257,3 +257,35 @@ offset/limit — which requires two steps and is error-prone.
 reference a specific symbol, function, or line range without loading the
 entire file. Even a "find definition" tool (like IDE go-to-definition)
 would dramatically reduce context waste when discussing specific code.
+
+## 2026-08-24 — Read tool bypasses .gitignore via absolute path
+
+**What was attempted:** Relying on `.gitignore` to prevent the agent from
+reading sensitive or irrelevant files (e.g., `node_modules/`, `.env`,
+`dist/`).
+
+**What went wrong:** The read tool can access files by absolute path even
+when they are listed in `.gitignore`. The `.gitignore` file has no effect
+on the agent's file read permissions.
+
+**Root cause:** `.gitignore` only controls git tracking, not tool-level
+file access. The read tool operates on the filesystem directly and does
+not consult `.gitignore`.
+
+**Status:** Worked around.
+
+**Solution:** Add explicit directives in `AGENTS.md` to define which
+directories and files the agent should not read:
+
+```
+## Project Structure
+- src/: main application code, agent should work here
+- scripts/: build/deploy scripts, agent may read but not modify
+- node_modules/: DO NOT read or analyze, ever
+- .env: DO NOT read, contains secrets
+- dist/: generated output, ignore entirely
+```
+
+**Suggested fix:** The read tool should respect `.gitignore` by default,
+or the opencode configuration should provide a way to define read
+exclusions independently of git.

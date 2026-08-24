@@ -4,6 +4,14 @@
 
 Demo expense app built to experiment with Feniks AI capabilities. Start from scratch — no existing codebase conventions to follow.
 
+## Project Structure
+
+- `src/`: main application code, agent should work here
+- `scripts/`: build/deploy scripts, agent may read but not modify
+- `node_modules/`: DO NOT read or analyze, ever
+- `.env`: DO NOT read, contains secrets
+- `dist/`: generated output, ignore entirely
+
 ## Architecture
 
 `docs/architecture.md` is the source of truth for the architectural patterns this codebase must follow (routing, auth/context, state management, forms, testing boundaries, and where new architectural boundaries like a service/API layer should go). Consult it — and follow the patterns it documents — before making any change that touches these areas; don't invent a conflicting pattern. Significant architectural decisions and their rationale are recorded in `docs/decisions/` — check there before revisiting a decision, and add a new ADR when making another one.
