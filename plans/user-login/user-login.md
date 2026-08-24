@@ -48,7 +48,10 @@ Router v7 for navigation/route-guarding, and Vitest for automated tests.
   - `/review` — finance home (placeholder page).
   - `/` — always redirects: to role home if logged in, `/login` if not.
     No content of its own.
-  - `*` (catch-all) — redirects to `/`. No dedicated 404 page.
+  - `*` (catch-all) — renders a dedicated 404 page (`NotFoundPage`) with a
+    "Go home" button back to `/`. (Originally redirected to `/` with no
+    404 page; changed later — see
+    `docs/decisions/architecture/0009-catch-all-404-page.md`.)
 - **Route guarding:** `<ProtectedRoute allowedRoles={...}>` wrapper.
   Unauthenticated → redirect to `/login`. Authenticated but wrong role
   (e.g. consultant hitting `/review`) → redirect to their own role home.
@@ -322,8 +325,10 @@ Run in order, fixing issues before proceeding:
      back to `/review`.
    - Refresh the page while logged in → still logged in (session
      persists via `sessionStorage`).
-   - Visit an unknown path (e.g. `/foo`) → ends up redirected to role
-     home or `/login`.
+    - Visit an unknown path (e.g. `/foo`) → shows the 404 page ("Page
+      not found") with a "Go home" button back to `/`. (Originally
+      redirected to role home or `/login`; changed later — see
+      `docs/decisions/architecture/0009-catch-all-404-page.md`.)
 
 ## 6. Risks / Open Questions
 

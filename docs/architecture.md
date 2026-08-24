@@ -58,11 +58,18 @@ data-router/loader API). Route table:
 | `/review` | `ReviewPage` | `finance` role only |
 | `/review/:id` | `ExpenseDetailPage` | `finance` role only |
 | `/` | `RootRedirect` (inline) | Redirects to role home if logged in, else `/login` |
-| `*` (catch-all) | — | Redirects to `/` |
+| `*` (catch-all) | `NotFoundPage` | Public — renders a 404 page with a "Go home" button back to `/` |
 
 Key principle: **there is no "return to originally requested URL" behavior.** After login, or
 when a route guard rejects access, the user always lands on their role's default home
 (`roleHome()` in `src/types.ts`). This is an intentional simplification, not an oversight.
+
+Unmatched URLs (anything not in the route table above) render `NotFoundPage` instead of silently
+redirecting to `/`. This is deliberate: a silent redirect makes a missing/mistyped route
+indistinguishable from a normal navigation, whereas a 404 page makes the problem visible. See
+`docs/decisions/architecture/0009-catch-all-404-page.md`. `NotFoundPage` is public (not wrapped in
+`ProtectedRoute`) since a 404 shouldn't require login — its "Go home" button navigates to `/`,
+which then applies the redirect rule above.
 
 Route protection is implemented by a single reusable guard, not per-page checks:
 
@@ -79,7 +86,8 @@ ad-hoc auth checks inside the page component.
 ## Component Structure
 
 - `src/pages/` — route-level components (`LoginPage`, `ExpensesPage`, `ReviewPage`,
-  `ExpenseDetailPage`). These own page layout and compose shared components + shadcn primitives.
+  `ExpenseDetailPage`, `NotFoundPage`). These own page layout and compose shared components +
+  shadcn primitives.
 - `src/components/` — shared, hand-written components used across pages (`Header`,
   `ProtectedRoute`, `ExpenseTable`, `FilterPanel`, `ReviewDecisionForm`).
 - `src/components/ui/` — shadcn/ui-generated primitives (Button, Input, Card, etc.). These are

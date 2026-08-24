@@ -5,6 +5,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import LoginPage from '@/pages/LoginPage'
 import ExpensesPage from '@/pages/ExpensesPage'
 import ReviewPage from '@/pages/ReviewPage'
+import NotFoundPage from '@/pages/NotFoundPage'
 
 function RootRedirect() {
   const { user } = useAuth()
@@ -35,7 +36,7 @@ function App() {
         }
       />
       <Route path="/" element={<RootRedirect />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
