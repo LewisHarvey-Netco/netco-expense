@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 - Define Expense Data Model & Schema
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Create `src/mocks/expenses.json` with ~10 expenses, ensuring representation of:
   - All four statuses: Submitted, Approved, Changes Requested, Resubmitted
