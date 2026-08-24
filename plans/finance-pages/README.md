@@ -66,7 +66,7 @@ Each ticket is independent after its blockers complete:
 
 ## Files
 
-All tickets are in `issues/` as individual markdown files:
+All tickets are in `tasks/` as individual markdown files:
 - `01-define-expense-model.md`
 - `02-create-mock-expenses.md`
 - `03-create-expense-table-component.md`

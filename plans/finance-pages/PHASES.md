@@ -104,9 +104,9 @@ Final phase: write Playwright E2E tests covering the full finance review workflo
 
 ```
 01 → 02 → 03 → 04 → 06 → 11
-         ↘    ↘  ↗  ↘  ↗
-          → 07 → 09 → 10 → 11
-          → 08 → 09
+          ↘    ↘  ↗  ↘  ↗
+           → 07 → 09 → 10 → 11
+           → 08 → 09
 ```
 
 **Critical path:** 01 → 02 → 03 → 04 → 06 → 11 (6 tickets, sequential)
