@@ -13,6 +13,8 @@ The All Expenses page (`/review`) needs to filter expenses by status, submitter,
 
 Filters are applied **on-demand** via an "Apply Filters" button, not in real-time. Clearing filters resets the filter criteria to empty, causing the filtered list to equal the full dataset again (no re-fetch).
 
+**Date range contract:** `dateRange.from`/`dateRange.to` are interpreted as **UTC calendar days** — each `Date` is normalized to its UTC day (year/month/day in UTC) before comparison, and the range is inclusive of both bounds. The date range filters on `receiptDate` (an ISO `YYYY-MM-DD` string). Callers must construct range dates as UTC midnights (e.g. `new Date('YYYY-MM-DD')`, which parses as UTC) — passing a local-midnight `Date` from a non-UTC timezone would shift the boundary by a day. `FilterPanel` always produces UTC-midnight dates from its `Input type="date"` values, so the app is internally consistent.
+
 ## Rationale
 
 - **Mock data is small:** The current dataset (~10 expenses) fits comfortably in memory. Loading once and filtering in-memory is simpler than fetching on every filter change.

@@ -16,6 +16,21 @@ export type ExpenseType = 'Breakfast' | 'Lunch' | 'Dinner' | 'Transport' | 'Acco
 
 export type ExpenseStatus = 'Submitted' | 'Approved' | 'Changes Requested' | 'Resubmitted'
 
+export const EXPENSE_TYPES: readonly [ExpenseType, ...ExpenseType[]] = [
+  'Breakfast',
+  'Lunch',
+  'Dinner',
+  'Transport',
+  'Accommodation',
+]
+
+export const EXPENSE_STATUSES: readonly [ExpenseStatus, ...ExpenseStatus[]] = [
+  'Submitted',
+  'Approved',
+  'Changes Requested',
+  'Resubmitted',
+]
+
 export interface Expense {
   id: string
   submitterId: string

@@ -15,6 +15,9 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src')
     }
   },
+  optimizeDeps: {
+    include: ['@testing-library/dom', 'aria-query', 'lz-string']
+  },
   test: {
     projects: [{
       extends: true,

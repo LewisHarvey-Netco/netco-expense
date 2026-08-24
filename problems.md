@@ -289,3 +289,207 @@ directories and files the agent should not read:
 **Suggested fix:** The read tool should respect `.gitignore` by default,
 or the opencode configuration should provide a way to define read
 exclusions independently of git.
+
+## 2026-08-24 — shadcn CLI writes components to a literal `@` directory on Windows
+
+**What was attempted:** `npx shadcn@latest add select checkbox` to add two
+shadcn/ui components (per AGENTS.md convention: "add new ones via
+`npx shadcn@latest add <name>`, don't hand-write them").
+
+**What went wrong:** The CLI created the files at a literal `@/components/ui/`
+directory in the project root instead of `src/components/ui/` (the `@` alias
+from `components.json` was not resolved to `src/`). The CLI output even
+showed the broken path: `@\components\ui\select.tsx`. The files had to be
+manually copied to `src/components/ui/` and the stray `@` directory removed.
+Additionally, the CLI did not install the `lucide-react` dependency that the
+generated components import — it had to be added separately with
+`npm install lucide-react`.
+
+**Root cause:** Likely a Windows path-resolution bug in the shadcn CLI's
+alias handling (the `@` alias in `components.json` → `@/components` was
+treated as a relative path segment rather than resolved against the Vite
+alias config). The missing `lucide-react` install suggests the CLI's
+dependency detection also didn't run (or failed silently) on this setup.
+
+**Status:** Worked around — files moved to `src/components/ui/`,
+`lucide-react` installed manually. The stray `@/` directory could not be
+removed by the agent: `rm`/`rmdir`/`Remove-Item` are all denied by the bash
+permission policy, so the user must delete it manually (it is not tracked by
+git and should be excluded from commits).
+
+**Suggested fix:** Before adding shadcn components on Windows, verify the
+files landed in `src/components/ui/` (not a literal `@/` folder) and that
+`lucide-react` is in `package.json`. Consider pinning a shadcn CLI version
+known to handle Windows paths, or adding a post-step to the AGENTS.md
+convention that checks file location after `npx shadcn@latest add`.
+
+## 2026-08-24 — Bash permission policy blocks most PowerShell cmdlets and complex one-liners
+
+**What was attempted:** Routine session work: checking file existence
+(`Test-Path`), listing directories (`Get-ChildItem`), deleting files
+(`Remove-Item`, `del`, `rm`), and running compound PowerShell one-liners
+(variables + loops + `Select-String` pipelines) to inspect the production
+bundle.
+
+**What went wrong:**
+- `Test-Path`, `Get-ChildItem`, `Remove-Item`, and `del` were all denied —
+  the bash allowlist is tuned for Unix command names (`ls`, `cat`, `grep`,
+  `rm`, ...) and does not recognize their PowerShell cmdlet equivalents.
+  (Extends the 2026-08-18 `Get-ChildItem` entry.)
+- File deletion is effectively impossible for the agent: `rm *` and
+  `rmdir *` are explicit denies, and the PowerShell equivalents
+  (`Remove-Item`, `del`) are denied too. A stray `@/` directory (from the
+  shadcn CLI bug, previous entry) and a temporary debug test file could not
+  be removed; the debug file was moved to the temp dir via `mv` (ask →
+  approved) instead.
+- Compound PowerShell one-liners (e.g. `$js = Get-ChildItem ...; foreach
+  (...) { Select-String ... }`) were denied even though each constituent
+  command is allowed — the permission matcher appears to evaluate the whole
+  command string, not the individual statements.
+- Unix tools that are on the allowlist (`grep`, `rg`) are simply not
+  installed on this Windows machine, so the "allowed" fallbacks don't exist.
+
+**Root cause:** The bash permission allowlist in `opencode.json` lists
+Unix command names; on Windows/PowerShell the equivalent cmdlets are not
+covered, and multi-statement commands are not decomposed before matching.
+Deletion commands are deny-listed by name (`rm`, `rmdir`) without
+PowerShell equivalents being considered.
+
+**Status:** Worked around. File inspection via the Read/Glob tools and
+`ls`; bundle inspection via `node -e "..."` one-liners (node is allowed);
+unwanted files moved to `C:\Users\lehar\AppData\Local\Temp\opencode` via
+`mv` (user-approved) instead of deleted. The stray `@/` directory at the
+project root still needs manual deletion by the user.
+
+**Commands that work for bundle inspection (for the user, in a normal
+terminal):**
+```powershell
+npm run build   # prints dist asset sizes (raw + gzip)
+node -e "const s=require('fs').readFileSync('dist/assets/'+require('fs').readdirSync('dist/assets').find(f=>f.endsWith('.js')),'utf8');console.log([...new Set(s.match(/lucide-[a-z0-9-]+/g)||[])])"
+```
+(the second lists which lucide icons are actually in the bundle)
+
+**Suggested fix:** (a) Add the common PowerShell cmdlets (`Test-Path *`,
+`Get-ChildItem *`, `Remove-Item *`) to the bash allowlist/denylist
+deliberately, or document that agents must use Read/Glob/`ls` and `node -e`
+on Windows; (b) make the permission matcher decompose `;`-separated
+statements before matching; (c) provide an approved deletion path for the
+agent (e.g. allow `Remove-Item` for files inside the workspace) so temp
+artifacts don't have to be moved to a temp dir.
+
+## 2026-08-24 — Bash permission policy blocks most PowerShell cmdlets and complex one-liners
+
+**What was attempted:** Routine inspection and cleanup via the bash tool
+(PowerShell 5.1): `Get-ChildItem -Recurse`, `Test-Path`, `Remove-Item` /
+`del` (to delete a stray `@/` directory and a temporary debug test file),
+and a multi-statement one-liner (`$js = Get-ChildItem ...; foreach ...
+Select-String ...`) to count icon occurrences in the production bundle.
+
+**What went wrong:** All of the above were denied by the bash permission
+policy. Only a narrow Unix-style allowlist works reliably: `ls`, `cat`,
+`grep`, `node -e`, `npm run *`, `git status/log/diff`, etc. Consequences
+during the session:
+- Could not delete files at all (`rm`, `rmdir`, `Remove-Item`, `del` all
+  denied). A stray `@/` directory (shadcn CLI bug) and a temporary debug
+  test file had to be worked around: the debug file was moved to
+  `C:\Users\lehar\AppData\Local\Temp\opencode` via `mv` (allowed with
+  approval), and the `@/` directory still needs manual deletion by the user.
+- Bundle inspection had to fall back to `node -e` one-liners reading the
+  file directly, which is clunkier and was aborted by the user as
+  unproductive.
+
+**Root cause:** The permission allowlist in `opencode.json` is tuned for
+Unix shell commands. On Windows/PowerShell, common cmdlets
+(`Get-ChildItem`, `Test-Path`, `Remove-Item`, `Select-String` in pipelines,
+variable assignments + loops) are not covered, and the fallback default is
+deny. Related earlier entry: "Get-ChildItem with -LiteralPath fails
+consistently in bash tool" (2026-08-18).
+
+**Status:** Open. Worked around by using the Read/Glob tools for file
+inspection, `ls`/`node -e` for checks, and `mv` to relocate (not delete)
+unwanted files. The stray `@/` directory at the repo root still requires
+manual deletion by the user.
+
+**Suggested fix:** Add the read-only PowerShell cmdlets actually needed on
+Windows (`Get-ChildItem *`, `Test-Path *`, `Select-String *`) to the bash
+allowlist, and decide on an explicit policy for file deletion
+(`Remove-Item`/`del`) — either allow with confirmation or document that the
+user must delete files manually.
+
+## 2026-08-24 — `git reset --soft` / `--mixed` not covered by the git permission policy
+
+**What was attempted:** The user asked to review work before committing,
+after a commit had already been made. Tried `git reset --soft HEAD~1` to
+undo the commit while keeping all changes staged (fully reversible, no
+working-tree changes).
+
+**What went wrong:** Denied. The permission policy only recognizes
+`git reset --hard *` (explicitly denied); `git reset --soft` and
+`git reset --mixed` match no rule and fall through to the default deny.
+The agent cannot undo its own commits, even in the safest (soft) mode —
+only the user can, from a normal terminal.
+
+**Root cause:** The git allowlist in `opencode.json` enumerates specific
+subcommands (`status`, `log`, `diff`, `add` (ask), `commit` (ask), ...)
+but never considered `git reset` in its non-hard forms, which are the
+normal tool for amending/undoing local commits.
+
+**Status:** Open. Worked around by asking the user to run
+`git reset --soft HEAD~1` manually if they want to undo the commit.
+
+**Suggested fix:** Add `git reset --soft *` and `git reset --mixed *` to
+the git rules as "ask" (they only affect local, unpushed state and never
+touch the working tree in the soft/mixed case).
+
+## 2026-08-24 — Storybook vitest project fails on aria-query `elementRoles` import (pre-existing)
+
+**What was attempted:** Running the full test suite (`npm run test`) after
+implementing ticket 05 (filter logic + FilterPanel). The suite has two
+projects: jsdom (unit/component tests) and storybook (runs every
+`.stories.tsx` in headless chromium via `@storybook/addon-vitest`).
+
+**What went wrong:** All 7 story files fail (including the 6 that existed
+before this session's changes — Button, Card, Input, Alert, Badge,
+ExpenseTable) with the same infrastructure error:
+
+```
+Error: Failed to import test file
+  .../@storybook/addon-vitest/dist/vitest-plugin/setup-file-with-project-annotations.js
+Caused by: SyntaxError: The requested module
+  '/node_modules/aria-query/lib/index.js' does not provide an export named 'elementRoles'
+```
+
+The jsdom project passes fully (60/60 tests).
+
+**Root cause (corrected):** NOT a version mismatch. The installed
+`aria-query@5.3.0` does export `elementRoles` (verified in its CJS build).
+The real cause: the storybook project runs in a real browser (chromium via
+`@vitest/browser-playwright`). `@testing-library/dom` (imported by the
+Storybook setup file) does ESM named imports from CJS-only packages
+(`aria-query`, `lz-string`). Vite's dep scanner only scans app entry points,
+not test/setup files, so those CJS deps were never pre-bundled — Vite served
+the raw CJS files to the browser, whose native ESM loader can't read CJS
+`exports.x` as named exports. Hence "does not provide an export named
+'elementRoles'" (and, once that was fixed, the same error for `lz-string`).
+Verified pre-existing and unrelated to this session's code: the 6 story files
+that existed before ticket 05 failed identically, and `git diff
+package-lock.json` showed the only lockfile change was `lucide-react`.
+
+**Status:** Resolved.
+
+**Solution:** Add the CJS deps (and the ESM package that imports them) to
+`optimizeDeps.include` in `vitest.config.ts` so Vite pre-bundles them into
+proper ESM for the browser:
+
+```ts
+optimizeDeps: {
+  include: ['@testing-library/dom', 'aria-query', 'lz-string']
+}
+```
+
+After this, the full suite passes: 15/15 test files, 87 tests (63 jsdom +
+24 storybook/chromium).
+
+**Note:** If a new CJS-only dep is later pulled in by the Storybook setup or
+a test file, the same "does not provide an export named X" error will recur
+in the storybook project — add that package to `optimizeDeps.include` too.
