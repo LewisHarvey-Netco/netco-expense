@@ -8,8 +8,8 @@ describe planned backend, storage, or infrastructure work — see `TODO.md` for 
 
 Netco Expense is currently a **frontend-only single-page application (SPA)**. There is no backend
 service, no database, and no network API calls. All application state lives in the browser
-(React state/context + `sessionStorage`), and "data" is a hardcoded mock file bundled with the
-app (`src/mocks/users.json`).
+(React state/context + `sessionStorage`), and "data" is hardcoded mock files bundled with the
+app (`src/mocks/users.json`, `src/mocks/expenses.json`).
 
 ```mermaid
 flowchart TD
@@ -21,9 +21,13 @@ flowchart TD
         APP --> LP[LoginPage]
         APP --> EP[ExpensesPage - consultant]
         APP --> RP[ReviewPage - finance]
+        APP --> RDP[ExpenseDetailPage - finance]
         LP --> AC
         EP --> AC
         RP --> AC
+        RDP --> AC
+        RP --> MOCK2[mocks/expenses.json]
+        RDP --> MOCK2
     end
 ```
 
@@ -52,6 +56,7 @@ data-router/loader API). Route table:
 | `/login` | `LoginPage` | Public |
 | `/expenses` | `ExpensesPage` | `consultant` role only |
 | `/review` | `ReviewPage` | `finance` role only |
+| `/review/:id` | `ExpenseDetailPage` | `finance` role only |
 | `/` | `RootRedirect` (inline) | Redirects to role home if logged in, else `/login` |
 | `*` (catch-all) | — | Redirects to `/` |
 
@@ -73,10 +78,10 @@ ad-hoc auth checks inside the page component.
 
 ## Component Structure
 
-- `src/pages/` — route-level components (`LoginPage`, `ExpensesPage`, `ReviewPage`). These own
-  page layout and compose shared components + shadcn primitives.
+- `src/pages/` — route-level components (`LoginPage`, `ExpensesPage`, `ReviewPage`,
+  `ExpenseDetailPage`). These own page layout and compose shared components + shadcn primitives.
 - `src/components/` — shared, hand-written components used across pages (`Header`,
-  `ProtectedRoute`). Currently minimal because the app itself is minimal.
+  `ProtectedRoute`, `ExpenseTable`, `FilterPanel`, `ReviewDecisionForm`).
 - `src/components/ui/` — shadcn/ui-generated primitives (Button, Input, Card, etc.). These are
   vendored source, not a package dependency — see `AGENTS.md` for the convention of adding new
   ones via the shadcn CLI rather than hand-writing them.
@@ -94,14 +99,28 @@ state library (no React Query/SWR) — because there is no server to fetch from.
 State lives in two places today:
 
 1. **Local component state** (`useState`) for ephemeral, page-local concerns (e.g. `LoginPage`'s
-   `loginError`, react-hook-form's internal form state).
+   `loginError`, react-hook-form's internal form state, expense list and filter criteria on
+   `ReviewPage`).
 2. **`AuthContext`** for the one piece of state that is genuinely cross-cutting: the logged-in
    user. This is intentionally the *only* context in the app.
+
+**In-memory filtering:** `ReviewPage` loads all mock expenses once on mount into local state.
+Filtering is implemented as a pure function (`filterExpenses()`) that returns a new filtered
+array without mutating the original. The full dataset stays in memory; clearing filters resets
+the filter criteria, not the data. See `docs/decisions/0005-in-memory-filtering-pattern.md`.
 
 Given the app's current size, plain Context is sufficient. If more cross-cutting state is added
 in the future (e.g. a shared expenses list consumed by both `ExpensesPage` and `ReviewPage`),
 re-evaluate whether Context is still appropriate before reflexively adding another provider — see
 `docs/decisions/0001-auth-state-via-react-context.md`.
+
+## Data Model
+
+The expense data model is defined in **JSON Schema Draft 2020-12** in `docs/data-models/expense.schema.json`, with a Markdown summary in `docs/data-models/expense.md`. TypeScript interfaces (`Expense`, `ExpenseType`, `ExpenseStatus`) in `src/types.ts` are derived from the schema.
+
+The JSON Schema is the authoritative source of truth. See `docs/decisions/0004-expense-data-model-json-schema.md`.
+
+Mock expenses are stored in `src/mocks/expenses.json` (~10 records covering all statuses, types, and submitters).
 
 ## Context Usage
 
@@ -182,6 +201,9 @@ Two distinct layers, each with a different purpose (see
   user would, through an actual dev server. These validate things RTL/jsdom can't (real
   navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e`.
 
+E2E tests cover the finance review workflow: login as finance → navigate to All Expenses → filter
+→ view detail → approve/request changes → verify status update.
+
 There are currently no isolated unit tests for individual functions (e.g. `roleHome()`) — coverage
 is achieved through the integration-style tests above, which was a deliberate choice given the
 app's current size, not an oversight.
@@ -197,5 +219,11 @@ app's current size, not an oversight.
 - **No premature abstraction:** there is no service layer, no state management library, and no
   feature-folder structure, because the current app doesn't need them yet. Introduce these
   deliberately, with a documented reason (ideally an ADR), rather than by convention or habit.
-- **Mock data is explicitly temporary:** anything reading `src/mocks/users.json` is expected to
-  be replaced when real backend auth exists (tracked in `TODO.md`, Blocking Go-Live tier).
+- **Mock data is explicitly temporary:** anything reading `src/mocks/` is expected to be replaced
+  when a real backend exists (tracked in `TODO.md`, Blocking Go-Live tier).
+- **Expense data model is schema-first:** `docs/data-models/expense.schema.json` is the
+  authoritative source; TypeScript interfaces are derived from it. See ADR-0004.
+- **Filtering is pure and in-memory:** `filterExpenses()` is a pure function; the full dataset
+  stays in component state. See ADR-0005.
+- **Status workflow is a state machine:** Four statuses (Submitted, Approved, Changes Requested,
+  Resubmitted) with defined transitions. See ADR-0007.
