@@ -14,7 +14,7 @@
 ## Nice-to-Have
 *(Low priority, polish)*
 
-- [ ] Find a cleaner way to slow down E2E tests for visual inspection instead of `waitForTimeout` on every line (e.g., Playwright Trace Viewer or a dedicated watch mode)
+- [x] Find a cleaner way to slow down E2E tests for visual inspection instead of `waitForTimeout` on every line (e.g., Playwright Trace Viewer or a dedicated watch mode) — resolved via Playwright's built-in `slowMo` launch option, configurable with `PLAYWRIGHT_SLOW_MO` env var
 - [ ] Add dark mode toggle
 - [ ] Add expense export (CSV/PDF) functionality
 - [ ] Add keyboard shortcuts for common actions

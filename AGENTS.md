@@ -26,7 +26,7 @@ Keep this documentation up to date: when a change introduces, removes, or alters
 - **Forms:** react-hook-form + zod + shadcn's `Form` component.
 - **Testing:** Multi-layer strategy:
   - **Vitest + React Testing Library** — component/unit tests, colocated `.test.tsx` files. Run `npm run test`.
-  - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser).
+  - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser). For debugging, use `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed` (PowerShell) to slow down operations (in milliseconds).
   - **Storybook** — Visual component development & testing. Run `npm run storybook`. Stories live in `.stories.tsx` files alongside components.
 - **Linting:** oxlint (Vite's default). Run `npm run lint`.
 - **Commands:**

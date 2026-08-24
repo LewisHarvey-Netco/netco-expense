@@ -207,7 +207,9 @@ Three distinct layers, each with a different purpose (see
   interactively.
 - **Playwright** (`e2e/`) — full-browser end-to-end tests that exercise the app the way a real
   user would, through an actual dev server. These validate things RTL/jsdom can't (real
-  navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e`.
+  navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e` (headless)
+  or `npm run test:e2e:headed` (visible browser). Use `PLAYWRIGHT_SLOW_MO=<ms>` to slow down
+  actions for visual debugging, e.g. (PowerShell) `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`.
 
 E2E tests cover the finance review workflow: login as finance → navigate to All Expenses → filter
 → view detail → approve/request changes → verify status update.

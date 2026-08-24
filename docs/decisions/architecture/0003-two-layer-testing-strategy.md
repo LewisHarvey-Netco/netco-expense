@@ -37,6 +37,7 @@ Use two distinct, deliberately non-overlapping test layers:
 - As the app grows, some logic may become complex enough to warrant dedicated unit tests
   alongside the two existing layers; that should be a deliberate addition, not a replacement for
   either existing layer.
-- Playwright E2E tests intentionally slow themselves down with `waitForTimeout` calls for visual
-  inspection during `test:e2e:headed` runs — tracked as a Nice-to-Have cleanup in `TODO.md`, not a
-  reflection of the overall testing architecture.
+- Playwright E2E tests run at full speed by default. For visual inspection during
+  `test:e2e:headed` runs, use Playwright's built-in `slowMo` launch option via the
+  `PLAYWRIGHT_SLOW_MO` env var (see `playwright.config.ts`) rather than adding manual
+  `waitForTimeout` calls to test files.
