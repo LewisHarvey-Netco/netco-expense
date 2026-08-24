@@ -24,9 +24,10 @@ Keep this documentation up to date: when a change introduces, removes, or alters
 - **Routing:** React Router v7 (classic JSX `<BrowserRouter>`/`<Routes>`/`<Route>`).
 - **Styling:** Tailwind v4 + shadcn/ui (New York style, lucide-react icons). shadcn components live in `src/components/ui/` — add new ones via `npx shadcn@latest add <name>`, don't hand-write them.
 - **Forms:** react-hook-form + zod + shadcn's `Form` component.
-- **Testing:** Two-layer strategy:
+- **Testing:** Multi-layer strategy:
   - **Vitest + React Testing Library** — component/unit tests, colocated `.test.tsx` files. Run `npm run test`.
   - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser).
+  - **Storybook** — Visual component development & testing. Run `npm run storybook`. Stories live in `.stories.tsx` files alongside components.
 - **Linting:** oxlint (Vite's default). Run `npm run lint`.
 - **Commands:**
   - `npm install` — install dependencies
@@ -35,6 +36,7 @@ Keep this documentation up to date: when a change introduces, removes, or alters
   - `npm run lint` — run oxlint
   - `npm run test` — run Vitest tests
   - `npm run test:ui` — run Vitest with UI dashboard
+  - `npm run storybook` — start Storybook component development server
   - `npm run test:e2e` — run Playwright E2E tests (headless)
   - `npm run test:e2e:headed` — run Playwright E2E tests (visible browser)
   - `npm run preview` — preview production build

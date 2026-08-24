@@ -193,7 +193,7 @@ synchronous and local to the browser tab.
 
 ## Testing Architecture
 
-Two distinct layers, each with a different purpose (see
+Three distinct layers, each with a different purpose (see
 `docs/decisions/0003-two-layer-testing-strategy.md`):
 
 - **Vitest + React Testing Library** (`src/App.test.tsx`, colocated `.test.tsx` files) —
@@ -201,6 +201,10 @@ Two distinct layers, each with a different purpose (see
   inside a `MemoryRouter`, and drive it through user-facing interactions (typing, clicking) rather
   than calling internal functions directly. This is the primary place login/routing/auth logic is
   verified. Run via `npm run test`.
+- **Storybook** (`.stories.tsx` files) — Visual component development and manual testing. Renders
+  individual components in isolation with different prop combinations. Run via `npm run storybook`.
+  Useful for QA visual verification before integration and for exploring component behavior
+  interactively.
 - **Playwright** (`e2e/`) — full-browser end-to-end tests that exercise the app the way a real
   user would, through an actual dev server. These validate things RTL/jsdom can't (real
   navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e`.
