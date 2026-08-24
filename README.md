@@ -40,10 +40,11 @@ A static HTML/CSS prototype has been built to explore user flows, interaction pa
 - Expense type templates
 
 **How to run:**
+Run from the project root:
 ```
 npx serve prototype
 ```
-Then open `http://localhost:3000` or navigate directly to `prototype/index.html` in your browser.
+Then open `http://localhost:3000` in your browser. (Make sure you're in the project root, not inside the `prototype/` directory, or the path won't resolve correctly.)
 
 **Quick start:**
 - Visit `prototype/index.html` for a guided tour of all features
