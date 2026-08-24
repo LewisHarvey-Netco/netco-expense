@@ -63,6 +63,8 @@ tools, etc.).
 **Root cause:** OpenCode for Feniks currently ships as a Windows-only
 application and cannot be installed or run inside WSL.
 
+**Discussion:** [Viva Engage thread](https://teams.microsoft.com/l/entity/683f3525-d193-4a67-8d91-22093beab1ca/?context=%7B%22internalId%22%3A%2219%3AeyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNTQ3MDYzMTExNjgifQ%40EngageCommunity%22%2C%22contextType%22%3A%22engageCommunity%22%2C%22subEntityId%22%3A%22%7B%5C%22deepLinkType%5C%22%3A%5C%22crossapp%5C%22%2C%5C%22path%5C%22%3A%5C%22%2Fthreads%2FeyJfdHlwZSI6IlRocmVhZCIsImlkIjoiMzk4NDM3MTk4MTc4NzEzNiJ9%5C%22%7D%22%7D)
+
 **Status:** Open. Workaround: ensure Node.js and other project tooling are
 installed on the Windows side (not just WSL) so the agent can operate on
 them. Alternatively, run the agent on a Linux machine directly.
