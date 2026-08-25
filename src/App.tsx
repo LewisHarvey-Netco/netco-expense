@@ -5,6 +5,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import LoginPage from '@/pages/LoginPage'
 import ExpensesPage from '@/pages/ExpensesPage'
 import ReviewPage from '@/pages/ReviewPage'
+import ExpenseDetailPage from '@/pages/ExpenseDetailPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 function RootRedirect() {
@@ -32,6 +33,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['finance']}>
             <ReviewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/review/:id"
+        element={
+          <ProtectedRoute allowedRoles={['finance']}>
+            <ExpenseDetailPage />
           </ProtectedRoute>
         }
       />

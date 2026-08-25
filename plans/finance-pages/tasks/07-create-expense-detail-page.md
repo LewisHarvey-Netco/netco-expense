@@ -4,12 +4,12 @@
 
 **Blocked by:** 02 - Create Mock Expenses Dataset
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Create `src/pages/ExpenseDetailPage.tsx` as route-level component
-- [ ] Add route to `src/App.tsx`: `<Route path="/review/:id" element={<ProtectedRoute role="finance"><ExpenseDetailPage /></ProtectedRoute>} />`
-- [ ] Load expense by ID from mock data (or route param)
-- [ ] Left column display (styled card or section):
+- [x] Create `src/pages/ExpenseDetailPage.tsx` as route-level component
+- [x] Add route to `src/App.tsx`: `<Route path="/review/:id" element={<ProtectedRoute role="finance"><ExpenseDetailPage /></ProtectedRoute>} />`
+- [x] Load expense by ID from mock data (or route param)
+- [x] Left column display (styled card or section):
   - Amount (prominent, formatted with currency)
   - Type (badge)
   - Date (receiptDate, formatted)
@@ -18,10 +18,10 @@
   - Project
   - Description
   - Receipt image placeholder (static image or "Receipt not yet uploaded" message)
-- [ ] Right column placeholder (empty space or "Loading..." — review form added in next ticket)
-- [ ] Handle missing/invalid expense ID gracefully (404 or redirect)
-- [ ] Apply styling per DESIGN-GUIDELINES (restrained, Netcompany palette)
-- [ ] Write component tests verifying:
+- [x] Right column placeholder (empty space or "Loading..." — review form added in next ticket)
+- [x] Handle missing/invalid expense ID gracefully (404 or redirect)
+- [x] Apply styling per DESIGN-GUIDELINES (restrained, Netcompany palette)
+- [x] Write component tests verifying:
   - Correct expense details are displayed
   - Invalid expense ID shows error or redirects
   - All fields render with correct formatting

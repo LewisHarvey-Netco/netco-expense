@@ -493,3 +493,37 @@ After this, the full suite passes: 15/15 test files, 87 tests (63 jsdom +
 **Note:** If a new CJS-only dep is later pulled in by the Storybook setup or
 a test file, the same "does not provide an export named X" error will recur
 in the storybook project — add that package to `optimizeDeps.include` too.
+
+## 2026-08-25 — `/code-review` referenced by the implement skill but no such skill/command exists
+
+**What was attempted:** Following the `implement` skill's workflow for ticket
+07 (Expense Detail Page): "Once done, use /code-review to review the work."
+Searched for a code-review skill or command: not in the session's
+`available_skills` list (only `customize-opencode`, `grill-me`, `implement`,
+`mattpocock-skills-write-a-prd`, `to-tickets`), not in
+`.opencode/` in the project, and not in `~/.config/opencode/`.
+
+**What went wrong:** The `implement` skill instructs the agent to run
+`/code-review` as the final step, but no such skill or custom command is
+installed anywhere the agent can load it. The agent cannot invoke it, so the
+work either goes unreviewed or the agent has to fall back to an ad-hoc
+manual review (re-reading the diff, checking against the ticket, design
+guidelines, and architecture docs) that is not the standardized, repeatable
+review the skill implies.
+
+**Root cause:** The `implement` skill references a `/code-review` step that
+was never installed/configured in this environment (no entry in
+`.opencode/skills/`, no custom command in `~/.config/opencode/`, and it is
+not one of opencode's built-in skills). The skill and the environment are
+out of sync.
+
+**Status:** Worked around — performed a manual self-review of the diff
+(ticket checklist, DESIGN-GUIDELINES, `docs/architecture.md`, ADRs, lint
+output) in place of `/code-review`, and flagged the gap to the user.
+
+**Suggested fix:** Either (a) install/add a `code-review` skill or custom
+command (e.g. under `.opencode/skills/code-review/` or
+`~/.config/opencode/`) so the `implement` skill's final step works, or
+(b) update the `implement` skill to not reference `/code-review` (or to
+describe the manual review fallback it should perform when the skill is
+absent).

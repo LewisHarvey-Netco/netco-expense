@@ -1,23 +1,11 @@
-import { Badge, type badgeVariants } from '@/components/ui/badge'
+import { Badge, STATUS_VARIANTS } from '@/components/ui/badge'
 import DataTable, { type Column } from '@/components/DataTable'
-import type { Expense, ExpenseStatus } from '@/types'
-import type { VariantProps } from 'class-variance-authority'
+import type { Expense } from '@/types'
 
 interface ExpenseTableProps {
   expenses: Expense[]
   onRowClick?: (id: string) => void
   getSubmitterName?: (submitterId: string) => string
-}
-
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant']
-
-// Reuses the shared Badge variants (tied to Netcompany's CSS tokens) rather than
-// hardcoding arbitrary Tailwind colors. See DESIGN-GUIDELINES.md.
-const STATUS_VARIANTS: Record<ExpenseStatus, BadgeVariant> = {
-  Approved: 'default',
-  Submitted: 'secondary',
-  'Changes Requested': 'destructive',
-  Resubmitted: 'outline',
 }
 
 function formatDate(dateStr: string): string {
