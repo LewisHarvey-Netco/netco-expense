@@ -18,4 +18,6 @@ Run typechecking regularly, single test files regularly, and the full test suite
 
 Once done, use /code-review to review the work.
 
+New components should be added to storybook
+
 DONT commit your work, the user will review.

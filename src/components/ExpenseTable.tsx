@@ -30,6 +30,7 @@ export default function ExpenseTable({
     {
       key: 'submittedAt',
       label: 'Submitted',
+      className: 'w-[110px]',
       render: (expense) => (
         <span className="text-muted-foreground">
           {formatDate(expense.submittedAt)}
@@ -39,6 +40,7 @@ export default function ExpenseTable({
     {
       key: 'submitter',
       label: 'Submitter',
+      className: 'w-[130px] truncate',
       render: (expense) =>
         getSubmitterName
           ? getSubmitterName(expense.submitterId)
@@ -47,21 +49,21 @@ export default function ExpenseTable({
     {
       key: 'description',
       label: 'Description',
+      className: 'truncate',
       render: (expense) => (
-        <span className="max-w-[240px] truncate" title={expense.description}>
-          {expense.description}
-        </span>
+        <span title={expense.description}>{expense.description}</span>
       ),
-      className: 'max-w-[240px]',
     },
     {
       key: 'type',
       label: 'Type',
+      className: 'w-[120px]',
       render: (expense) => expense.type,
     },
     {
       key: 'amount',
       label: 'Amount',
+      className: 'w-[120px]',
       render: (expense) => (
         <span className="tabular-nums">
           {formatAmount(expense.amount, expense.currency)}
@@ -71,6 +73,7 @@ export default function ExpenseTable({
     {
       key: 'status',
       label: 'Status',
+      className: 'w-[140px]',
       render: (expense) => (
         <Badge variant={STATUS_VARIANTS[expense.status]}>{expense.status}</Badge>
       ),
@@ -83,6 +86,7 @@ export default function ExpenseTable({
       columns={columns}
       onRowClick={onRowClick}
       emptyMessage="No expenses to display."
+      tableClassName="min-w-[760px]"
     />
   )
 }

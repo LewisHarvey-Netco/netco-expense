@@ -20,6 +20,7 @@ interface DataTableProps<T extends { id: string }> {
   columns: Column<T>[]
   onRowClick?: (id: string) => void
   emptyMessage?: string
+  tableClassName?: string
 }
 
 export default function DataTable<T extends { id: string }>({
@@ -27,6 +28,7 @@ export default function DataTable<T extends { id: string }>({
   columns,
   onRowClick,
   emptyMessage = 'No data to display.',
+  tableClassName,
 }: DataTableProps<T>) {
   if (data.length === 0) {
     return (
@@ -37,11 +39,13 @@ export default function DataTable<T extends { id: string }>({
   }
 
   return (
-    <Table>
+    <Table className={cn('table-fixed', tableClassName)}>
       <TableHeader>
         <TableRow>
           {columns.map((col) => (
-            <TableHead key={col.key}>{col.label}</TableHead>
+            <TableHead key={col.key} className={col.className}>
+              {col.label}
+            </TableHead>
           ))}
         </TableRow>
       </TableHeader>
