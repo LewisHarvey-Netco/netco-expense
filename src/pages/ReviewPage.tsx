@@ -27,7 +27,7 @@ export default function ReviewPage() {
     <div className="min-h-svh bg-background">
       <Header />
       <main className="mx-auto w-full max-w-6xl px-6 py-8">
-        <h2 className="mb-6 text-2xl font-semibold">All Expenses</h2>
+        <h1 className="mb-6 text-2xl font-semibold">All Expenses</h1>
         <div className="grid gap-6 lg:grid-cols-[280px_1fr] lg:items-start">
           <FilterPanel
             submitters={submitters}
