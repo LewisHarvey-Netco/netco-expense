@@ -20,3 +20,4 @@
   - Clearing filters shows all expenses again (full count restored)
   - Multiple filters work together (AND logic)
   - Original `allExpenses` data is never mutated
+,

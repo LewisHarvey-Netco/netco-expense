@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '@/components/Header'
+import PageTitle from '@/components/PageTitle'
 import ExpenseTable from '@/components/ExpenseTable'
 import FilterPanel from '@/components/FilterPanel'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,7 +28,7 @@ export default function ReviewPage() {
     <div className="min-h-svh bg-background">
       <Header />
       <main className="mx-auto w-full max-w-6xl px-6 py-8">
-        <h1 className="mb-6 text-2xl font-semibold">All Expenses</h1>
+        <PageTitle className="mb-6">All Expenses</PageTitle>
         <div className="grid gap-6 lg:grid-cols-[280px_1fr] lg:items-start">
           <FilterPanel
             submitters={submitters}

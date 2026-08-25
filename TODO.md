@@ -18,3 +18,11 @@
 - [ ] Add dark mode toggle
 - [ ] Add expense export (CSV/PDF) functionality
 - [ ] Add keyboard shortcuts for common actions
+
+
+### REVIEW
+- [ ] run an accessability review 
+- [ ] text overlapping on table on smaller screens
+- [ ] dd/mm/yyyy showing by default on filters, and it overlaps
+- [ ] Common Page elements (H1, H2, H3) should share their tailwind for consistency
+

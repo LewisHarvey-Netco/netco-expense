@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import PageTitle from '@/components/PageTitle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -10,7 +11,7 @@ export default function NotFoundPage() {
       <Card className="w-full max-w-sm">
         <CardContent className="flex flex-col items-center gap-4 py-4 text-center">
           <p className="text-sm font-medium text-muted-foreground">404</p>
-          <h1 className="text-xl font-semibold">Page not found</h1>
+          <PageTitle className="text-xl">Page not found</PageTitle>
           <p className="text-sm text-muted-foreground">
             The page you're looking for doesn't exist or may have moved.
           </p>
