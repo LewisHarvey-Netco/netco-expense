@@ -24,6 +24,21 @@ import type { FilterCriteria } from '@/lib/filterExpenses'
 const ALL_SUBMITTERS = 'all'
 const ALL_SUBMITTERS_LABEL = 'All submitters'
 
+const MIN_PICKABLE_YEARS_BACK = 5
+
+function toInputDate(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+const today = new Date()
+const MAX_DATE = toInputDate(today)
+const MIN_DATE = toInputDate(
+  new Date(today.getFullYear() - MIN_PICKABLE_YEARS_BACK, today.getMonth(), today.getDate()),
+)
+
 const filterFormSchema = z
   .object({
     status: z.array(z.enum(EXPENSE_STATUSES)),
@@ -175,11 +190,13 @@ export default function FilterPanel({ submitters, onApply, onClear }: FilterPane
 
           <div className="flex flex-col gap-2">
             <Label>Date range</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
               <Input
                 id="dateFrom"
                 type="date"
                 aria-label="From date"
+                min={MIN_DATE}
+                max={MAX_DATE}
                 {...form.register('dateFrom')}
                 aria-invalid={!!form.formState.errors.dateFrom}
               />
@@ -187,6 +204,8 @@ export default function FilterPanel({ submitters, onApply, onClear }: FilterPane
                 id="dateTo"
                 type="date"
                 aria-label="To date"
+                min={MIN_DATE}
+                max={MAX_DATE}
                 {...form.register('dateTo')}
                 aria-invalid={!!form.formState.errors.dateTo}
               />
