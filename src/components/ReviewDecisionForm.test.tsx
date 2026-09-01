@@ -112,4 +112,26 @@ describe('ReviewDecisionForm', () => {
       screen.getByText('Comment is required when requesting changes'),
     ).toBeInTheDocument()
   })
+
+  describe('disabled', () => {
+    it('disables all controls when disabled', () => {
+      render(<ReviewDecisionForm onSubmit={vi.fn()} disabled />)
+      expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Request Changes' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Submit Decision' })).toBeDisabled()
+    })
+
+    it('cannot select a decision or submit when disabled', async () => {
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+      render(<ReviewDecisionForm onSubmit={onSubmit} disabled />)
+      await user.click(screen.getByRole('button', { name: 'Approve' }))
+      expect(screen.getByRole('button', { name: 'Approve' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      )
+      await user.click(screen.getByRole('button', { name: 'Submit Decision' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+  })
 })

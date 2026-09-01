@@ -1,14 +1,18 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { ChevronLeftIcon, ReceiptIcon } from 'lucide-react'
 import Header from '@/components/Header'
 import PageTitle from '@/components/PageTitle'
+import ReviewDecisionForm, { type ReviewDecision } from '@/components/ReviewDecisionForm'
 import { Badge, STATUS_VARIANTS } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import mockExpenses from '@/mocks/expenses'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useRepository } from '@/context/RepositoryContext'
 import users from '@/mocks/users.json'
 import NotFoundPage from '@/pages/NotFoundPage'
+import type { Expense, ExpenseStatus } from '@/types'
 
 function getSubmitterName(submitterId: string): string {
   return users.find((u) => u.id === submitterId)?.name ?? submitterId
@@ -44,13 +48,80 @@ function DetailField({
   )
 }
 
+// Finance can record a decision only while the expense is awaiting (re)review.
+// "Approved" is terminal and "Changes Requested" is waiting on the consultant
+// to resubmit, so neither accepts a new decision (see ADR-0007).
+const DECIDABLE_STATUSES: readonly ExpenseStatus[] = ['Submitted', 'Resubmitted']
+
+function isDecidable(status: ExpenseStatus): boolean {
+  return DECIDABLE_STATUSES.includes(status)
+}
+
+function decisionMessage(status: ExpenseStatus): string {
+  if (status === 'Approved') {
+    return 'Decision recorded. This expense has been approved.'
+  }
+  return 'Changes have been requested. Waiting for the consultant to resubmit.'
+}
+
 export default function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const expense = mockExpenses.find((e) => e.id === id)
+  const repo = useRepository()
+
+  const [expense, setExpense] = useState<Expense | null>(null)
+  const [loaded, setLoaded] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!id) {
+      setExpense(null)
+      setLoaded(true)
+      return
+    }
+    let cancelled = false
+    setLoaded(false)
+    repo.getExpense(id).then((result) => {
+      if (cancelled) return
+      setExpense(result)
+      setLoaded(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [id, repo])
+
+  if (!loaded) {
+    return (
+      <div className="min-h-svh bg-background">
+        <Header />
+        <main className="mx-auto w-full max-w-6xl px-6 py-8">
+          <p className="text-sm text-muted-foreground">Loading expense…</p>
+        </main>
+      </div>
+    )
+  }
 
   if (!expense) {
     return <NotFoundPage />
+  }
+
+  const canDecide = isDecidable(expense.status)
+
+  async function handleDecision(decision: ReviewDecision, comment?: string) {
+    if (!id) return
+    const status: ExpenseStatus = decision === 'approve' ? 'Approved' : 'Changes Requested'
+    setSubmitting(true)
+    setError(null)
+    try {
+      const updated = await repo.updateExpenseStatus(id, status, comment)
+      setExpense(updated)
+    } catch {
+      setError('Failed to record the decision. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -109,10 +180,21 @@ export default function ExpenseDetailPage() {
             <CardHeader>
               <CardTitle>Review Decision</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                The review decision form will appear here.
-              </p>
+            <CardContent className="flex flex-col gap-4">
+              {!canDecide && (
+                <Alert>
+                  <AlertDescription>{decisionMessage(expense.status)}</AlertDescription>
+                </Alert>
+              )}
+              <ReviewDecisionForm
+                disabled={!canDecide || submitting}
+                onSubmit={handleDecision}
+              />
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
         </div>

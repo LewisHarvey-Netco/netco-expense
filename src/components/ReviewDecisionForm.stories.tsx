@@ -26,3 +26,18 @@ export const Default: Story = {
     },
   },
 }
+
+export const Disabled: Story = {
+  args: {
+    onSubmit: () => {},
+    disabled: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'All controls are disabled. Used when no decision can be recorded for the expense (e.g. it is already approved, or changes have already been requested and it is awaiting a resubmission).',
+      },
+    },
+  },
+}

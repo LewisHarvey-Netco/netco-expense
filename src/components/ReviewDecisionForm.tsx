@@ -26,9 +26,11 @@ type DecisionFormValues = z.infer<typeof decisionFormSchema>
 
 interface ReviewDecisionFormProps {
   onSubmit: (decision: ReviewDecision, comment?: string) => void
+  /** Disables all controls; used when no decision can be recorded for the expense. */
+  disabled?: boolean
 }
 
-export default function ReviewDecisionForm({ onSubmit }: ReviewDecisionFormProps) {
+export default function ReviewDecisionForm({ onSubmit, disabled = false }: ReviewDecisionFormProps) {
   const form = useForm<DecisionFormValues>({
     resolver: zodResolver(decisionFormSchema),
     defaultValues: {
@@ -39,6 +41,7 @@ export default function ReviewDecisionForm({ onSubmit }: ReviewDecisionFormProps
   const decision = form.watch('decision')
 
   function selectDecision(value: ReviewDecision) {
+    if (disabled) return
     form.setValue('decision', value, { shouldValidate: true })
   }
 
@@ -59,6 +62,7 @@ export default function ReviewDecisionForm({ onSubmit }: ReviewDecisionFormProps
             type="button"
             variant={decision === 'approve' ? 'default' : 'outline'}
             aria-pressed={decision === 'approve'}
+            disabled={disabled}
             onClick={() => selectDecision('approve')}
           >
             Approve
@@ -67,6 +71,7 @@ export default function ReviewDecisionForm({ onSubmit }: ReviewDecisionFormProps
             type="button"
             variant={decision === 'request-changes' ? 'secondary' : 'outline'}
             aria-pressed={decision === 'request-changes'}
+            disabled={disabled}
             onClick={() => selectDecision('request-changes')}
           >
             Request Changes
@@ -83,6 +88,7 @@ export default function ReviewDecisionForm({ onSubmit }: ReviewDecisionFormProps
           <Textarea
             id="review-decision-comment"
             placeholder="Explain what changes are needed"
+            disabled={disabled}
             {...form.register('comment')}
             aria-invalid={!!form.formState.errors.comment}
           />
@@ -92,7 +98,9 @@ export default function ReviewDecisionForm({ onSubmit }: ReviewDecisionFormProps
         </div>
       )}
 
-      <Button type="submit">Submit Decision</Button>
+      <Button type="submit" disabled={disabled}>
+        Submit Decision
+      </Button>
     </form>
   )
 }

@@ -259,8 +259,12 @@ rationale.
 
 ### Reads vs. Writes
 
-- **Reads** (e.g., loading expense list) currently load directly from mock data in component state, no abstraction needed yet
-- **Writes** (e.g., approving an expense) flow through the repository (Task 08a) so mutations are isolated in memory and reversible in tests
+- **Reads** — the expense *list* (`ReviewPage`) still loads directly from mock data in component
+  state, no abstraction needed yet. The expense *detail* page (`ExpenseDetailPage`) loads its
+  expense through the repository (`getExpense`) on mount, so it always reflects the latest state
+  after a mutation (Task 09).
+- **Writes** (e.g., approving an expense) flow through the repository (Task 08a) so mutations are
+  isolated in memory and reversible in tests
 
 ## Data Flow
 
