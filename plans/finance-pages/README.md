@@ -2,9 +2,11 @@
 
 ## Overview
 
-This directory contains 11 tracer-bullet tickets for implementing the Finance Review Pages feature described in `plans/PRD-FINANCE-PAGES.md`.
+This directory contains 12 tracer-bullet tickets for implementing the Finance Review Pages feature described in `plans/PRD-FINANCE-PAGES.md`.
 
-Each ticket is a complete, demoable vertical slice cutting through all layers (schema, UI, tests). Tickets are numbered 01–11 in dependency order (blockers first), so you can work the frontier: any ticket whose dependencies are complete is ready to start.
+Each ticket is a complete, demoable vertical slice cutting through all layers (schema, UI, tests). Tickets are numbered 01–12 in dependency order (blockers first), so you can work the frontier: any ticket whose dependencies are complete is ready to start.
+
+**Note:** See `TASK-ADJUSTMENTS-01.md` for the architectural decision to introduce a mock repository pattern for data mutations (Tasks 08a, 09 affected).
 
 ## Ticket Breakdown
 
@@ -17,8 +19,9 @@ Each ticket is a complete, demoable vertical slice cutting through all layers (s
 | 05 | Implement Filter Logic & Form | 03 | Ready when 03 done |
 | 06 | Integrate Filters into All Expenses Page | 04, 05 | Ready when 04 & 05 done |
 | 07 | Create Expense Detail Page (/review/:id) | 02 | Ready when 02 done |
+| 08a | Create Mock Repository for Data Mutations | 02 | Ready when 02 done |
 | 08 | Build Review Decision Form Component | 02 | Ready when 02 done |
-| 09 | Integrate Decision Form & Status Updates | 07, 08 | Ready when 07 & 08 done |
+| 09 | Integrate Decision Form & Status Updates | 07, 08, 08a | Ready when 07, 08 & 08a done |
 | 10 | Add Navigation Link to Header | 04 | Ready when 04 done |
 | 11 | Add E2E Tests | 09, 10 | Ready when 09 & 10 done |
 
@@ -30,6 +33,14 @@ Each ticket is a complete, demoable vertical slice cutting through all layers (s
 - **Full dataset stays in memory** throughout the page lifecycle — filtering never removes data
 - **`filterExpenses()` is pure** — returns a new filtered array without mutating the original
 - **Clearing filters** resets the filter criteria, causing the filtered list to equal the full dataset again
+
+### Data Mutations (New: Task 08a)
+
+- **Repository pattern** — data mutations flow through an abstraction (`ExpenseRepository` interface)
+- **Mock implementation** — loads mock expenses into in-memory Map, mutations operate on the in-memory copy (not JSON files)
+- **Test isolation** — in-memory data is scoped to test, original JSON remains pristine for next test
+- **Future-proof** — when a backend API is added, swap the implementation (components unchanged)
+- See `TASK-ADJUSTMENTS-01.md` and `docs/decisions/architecture/0010-mock-repository-pattern.md` for rationale
 
 ### Vertical Slices
 

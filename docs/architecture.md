@@ -14,22 +14,27 @@ app (`src/mocks/users.json`, `src/mocks/expenses.json`).
 ```mermaid
 flowchart TD
     subgraph Browser
-        BR[BrowserRouter] --> APP[App / Routes]
-        APP --> AC[AuthContext]
-        AC --> SS[(sessionStorage)]
-        AC --> MOCK[mocks/users.json]
-        APP --> LP[LoginPage]
-        APP --> EP[ExpensesPage - consultant]
-        APP --> RP[ReviewPage - finance]
-        APP --> RDP[ExpenseDetailPage - finance]
-        LP --> AC
-        EP --> AC
-        RP --> AC
-        RDP --> AC
-        RP --> MOCK2[mocks/expenses.json]
-        RDP --> MOCK2
+        BrowserRouter --> AppRoutes[App / Routes]
+        AppRoutes --> AuthContext
+        AuthContext --> SessionStorage[(sessionStorage)]
+        AuthContext --> UsersMock[mocks/users.json]
+        AppRoutes --> LoginPage
+        AppRoutes --> ExpensesPage[ExpensesPage - consultant]
+        AppRoutes --> ReviewPage[ReviewPage - finance]
+        AppRoutes --> ExpenseDetailPage[ExpenseDetailPage - finance]
+        LoginPage --> AuthContext
+        ExpensesPage --> AuthContext
+        ReviewPage --> AuthContext
+        ExpenseDetailPage --> AuthContext
+        ReviewPage --> ExpensesMock[mocks/expenses.json]
+        ExpenseDetailPage --> ExpensesMock
+        ExpenseDetailPage --> RepositoryContext
+        RepositoryContext --> MockExpenseRepository
+        MockExpenseRepository --> InMemoryCache[(in-memory cache)]
     end
 ```
+
+Note: The `RepositoryContext` is introduced for data mutations in the finance review workflow (Tasks 09+). It abstracts expense updates behind an interface that will later be replaced with an API client.
 
 There is no server tier in this diagram because none exists. If/when a backend is introduced,
 this document should be updated and a new ADR should record the API/service boundary decision.
@@ -176,14 +181,37 @@ context/service.
 
 ## API / Service Boundaries
 
-**There are none today.** No `src/services/` or `src/api/` layer exists because there is no
-backend to call. `AuthContext` currently plays the role that an API/service layer would normally
-play (owning the one piece of "data access" the app has: reading `users.json`).
+### Authentication
 
-If a backend is introduced, expect this to change: `AuthContext` should call into a dedicated
-service/client layer rather than reading mock data directly, so the context stays about *state*
-and a new layer owns *data access*. This is a natural seam to introduce at that point — it does
-not exist yet, so it is not documented as if it does.
+`AuthContext` currently owns the one piece of "data access" the app had before the finance review workflow: reading and validating credentials from `mocks/users.json`. This is intentionally mock and is tracked for replacement in `TODO.md` (Blocking Go-Live tier).
+
+### Data Mutations (Finance Review Workflow) — PLANNED
+
+**Status:** Not yet implemented. Implementation will occur in Task 08a (`plans/finance-pages/tasks/08a-create-mock-repository.md`). Once complete, this section will be updated and moved to describe current architecture.
+
+Starting with the finance review workflow (expense approval/rejection), data mutations will flow through a repository abstraction:
+
+- **Interface:** `src/lib/repositories/ExpenseRepository.ts` — defines contract for expense data access
+- **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — mutates in-memory loaded data
+- **Provider:** `src/context/RepositoryContext.tsx` — React Context + `useRepository()` hook
+
+**Today (mock):** `MockRepository` loads mock expenses into memory on construction, provides methods that mutate the in-memory copy and return results.
+
+**Tomorrow (real backend):** Replace with `ApiRepository` (HTTP client calling a backend API) — same interface, different implementation. Components do not change.
+
+**Component usage pattern (future):**
+```typescript
+const repo = useRepository()
+const updated = await repo.updateExpenseStatus(id, status, comment)
+setExpense(updated)
+```
+
+This will establish the data-access boundary that was documented as "not yet existing" in earlier versions. See `docs/decisions/architecture/0010-mock-repository-pattern.md` for rationale.
+
+### Reads vs. Writes
+
+- **Reads** (e.g., loading expense list) currently load directly from mock data in component state, no abstraction needed yet
+- **Writes** (e.g., approving an expense) will flow through the repository (Tasks 08a+) to ensure mutations are isolated and reversible in tests
 
 ## Data Flow
 
