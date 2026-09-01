@@ -38,24 +38,32 @@
 
 17. As a finance reviewer, I want the "All Expenses" link in the navigation to take me to the review page so that I can quickly access the review interface.
 
+18. As a finance reviewer, when I return to the expense list after making a decision, I want the table to fetch fresh data from the repository so that I see the updated status immediately (not stale data).
+
+19. As a finance reviewer, I want to be assured that when I approve or request changes on an expense, the change is visible and persistent in the system so that I have confidence in the system's data integrity.
+
+20. As a finance reviewer, I want to see a brief loading indicator (and "Loading expenses…" message) when the list is fetching data so that I understand why the table might take a moment to appear.
+
+21. As a finance reviewer, if the app fails to load the expense list, I want to see a clear error message so that I understand what went wrong and know what to do next (e.g., try again or contact support).
+
 ### Consultant Stories
 
-18. As a consultant submitting an expense, I want the status to show "Changes Requested" so that I understand feedback is waiting.
+22. As a consultant submitting an expense, I want the status to show "Changes Requested" so that I understand feedback is waiting.
 
-19. As a consultant submitting an expense, I want to revise my expense after receiving feedback so that I can address the finance reviewer's concerns.
+23. As a consultant submitting an expense, I want to revise my expense after receiving feedback so that I can address the finance reviewer's concerns.
 
-20. As a consultant submitting an expense, I want the status to change to "Resubmitted" after I save my revision so that the finance reviewer knows I've acted on their feedback.
+24. As a consultant submitting an expense, I want the status to change to "Resubmitted" after I save my revision so that the finance reviewer knows I've acted on their feedback.
 
-21. As a consultant submitting an expense, I want the finance reviewer to be able to see my revised submission so that they can re-review with the corrections applied.
+25. As a consultant submitting an expense, I want the finance reviewer to be able to see my revised submission so that they can re-review with the corrections applied.
 
 ### System Stories
 
-22. As a system, I want expenses to support four statuses (Submitted, Approved, Changes Requested, Resubmitted) so that the workflow is clear and unambiguous.
+26. As a system, I want expenses to support four statuses (Submitted, Approved, Changes Requested, Resubmitted) so that the workflow is clear and unambiguous.
 
-23. As a system, I want expenses to support five types (Breakfast, Lunch, Dinner, Transport, Accommodation) so that policy compliance can be enforced by category.
+27. As a system, I want expenses to support five types (Breakfast, Lunch, Dinner, Transport, Accommodation) so that policy compliance can be enforced by category.
 
-24. As a system, I want the expense data model to include all necessary fields (id, submitterId, description, type, amount, currency, receiptDate, status, submittedAt, internalNotes, region, project) so that the review interface has all information needed.
+28. As a system, I want the expense data model to include all necessary fields (id, submitterId, description, type, amount, currency, receiptDate, status, submittedAt, internalNotes, region, project) so that the review interface has all information needed.
 
 ### System Administrator Stories
 
-25. As a system administrator, I want the expense data model documented in JSON Schema so that future integrations with a backend API can reference the authoritative format.
+29. As a system administrator, I want the expense data model documented in JSON Schema so that future integrations with a backend API can reference the authoritative format.
