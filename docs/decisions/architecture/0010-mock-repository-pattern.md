@@ -1,7 +1,7 @@
 # ADR-0010: Mock Repository Pattern for Data Mutations
 
 ## Status
-Accepted (Implementation pending — see Task 08a in plans/finance-pages/tasks/)
+Implemented (Task 08a, completed 2026-09-01)
 
 ## Context
 
@@ -40,16 +40,14 @@ This establishes a service/data-access boundary that did not exist before (see A
 - Components must call async methods (even though mock methods are synchronous) to prepare for real API calls later
 - Requires careful seeding/reset in tests to ensure each test starts with fresh data
 
-## Implementation (Pending)
+## Implementation
 
-This decision is planned but not yet implemented. Implementation will be done in Task 08a:
+Completed in Task 08a (`plans/finance-pages/tasks/08a-create-mock-repository.md`) on 2026-09-01:
 
 - `src/lib/repositories/ExpenseRepository.ts` — interface definition
 - `src/lib/repositories/MockExpenseRepository.ts` — mock implementation (in-memory mutations)
-- `src/context/RepositoryContext.tsx` — React Context to inject repository
-- Tests use `mockRepository.reset()` before each test to restore baseline data
-
-Once Task 08a is complete, this ADR will be updated to remove this "Pending" callout and the status will change to "Implemented".
+- `src/context/RepositoryContext.tsx` — React Context + `useRepository()` hook, with an app-wide `mockRepository` singleton seeded from a fresh copy of the mock expenses
+- Tests use `MockExpenseRepository.reset()` before each test to restore baseline data
 
 ## Related ADRs
 

@@ -34,7 +34,7 @@ flowchart TD
     end
 ```
 
-Note: The `RepositoryContext` is introduced for data mutations in the finance review workflow (Tasks 09+). It abstracts expense updates behind an interface that will later be replaced with an API client.
+Note: `RepositoryProvider` is mounted at the app root (`src/main.tsx`) and makes the expense data repository available to any component via `useRepository()`. It supports the data mutations of the finance review workflow (Tasks 09+); `ExpenseDetailPage` will be the first component to use it. See "Data Mutations" under "API / Service Boundaries".
 
 There is no server tier in this diagram because none exists. If/when a backend is introduced,
 this document should be updated and a new ADR should record the API/service boundary decision.
@@ -45,8 +45,9 @@ The app is a standard Vite + React + TypeScript SPA rendered client-side (`src/m
 composition root wraps the app in, from outermost to innermost:
 
 1. `<BrowserRouter>` (React Router v7, classic JSX API)
-2. `<AuthProvider>` (React Context, see below)
-3. `<App>` (route table)
+2. `<RepositoryProvider>` (React Context — exposes the expense data repository; see "Data Mutations")
+3. `<AuthProvider>` (React Context — see "Context Usage")
+4. `<App>` (route table)
 
 There is no server-side rendering, no data-router/loader API, and no code-splitting — the app is
 small enough that a single bundle and eager imports are sufficient.
@@ -114,8 +115,12 @@ State lives in two places today:
 1. **Local component state** (`useState`) for ephemeral, page-local concerns (e.g. `LoginPage`'s
    `loginError`, react-hook-form's internal form state, expense list and filter criteria on
    `ReviewPage`).
-2. **`AuthContext`** for the one piece of state that is genuinely cross-cutting: the logged-in
-   user. This is intentionally the *only* context in the app.
+2. **`AuthContext`** for the one piece of *state* that is genuinely cross-cutting: the logged-in
+   user.
+
+The app's other context, `RepositoryContext`, is not state management — it distributes the
+expense data repository (a service object, not mutable UI state) to components. See
+"Data Mutations" under "API / Service Boundaries".
 
 **In-memory filtering:** `ReviewPage` loads all mock expenses once on mount into local state.
 Filtering is implemented as a pure function (`filterExpenses()`) that returns a new filtered
@@ -141,7 +146,15 @@ See `docs/decisions/0004-expense-data-model-json-schema.md` for rationale and co
 
 ## Context Usage
 
-`src/context/AuthContext.tsx` is the only context in the app. It exposes:
+The app has two contexts with different jobs:
+
+- **`AuthContext`** (`src/context/AuthContext.tsx`) — shared *state*: the logged-in user.
+- **`RepositoryContext`** (`src/context/RepositoryContext.tsx`) — shared *service*: the expense
+  data repository. It holds no state of its own; it just makes the `mockRepository` singleton
+  available to components via `useRepository()`. See "Data Mutations" under "API / Service
+  Boundaries" for the full picture.
+
+`AuthContext` exposes:
 
 ```ts
 { user: User | null; login(email, password): { success, error?, user? }; logout(): void }
@@ -185,33 +198,69 @@ context/service.
 
 `AuthContext` currently owns the one piece of "data access" the app had before the finance review workflow: reading and validating credentials from `mocks/users.json`. This is intentionally mock and is tracked for replacement in `TODO.md` (Blocking Go-Live tier).
 
-### Data Mutations (Finance Review Workflow) — PLANNED
+### Data Mutations (Finance Review Workflow)
 
-**Status:** Not yet implemented. Implementation will occur in Task 08a (`plans/finance-pages/tasks/08a-create-mock-repository.md`). Once complete, this section will be updated and moved to describe current architecture.
+Data mutations (e.g. approving an expense, requesting changes) never happen directly in a
+component. They go through a **repository** — a small object that owns all reads and writes of
+expense data. A component asks the repository to change something and uses the result it gets
+back; it never edits the underlying data itself.
 
-Starting with the finance review workflow (expense approval/rejection), data mutations will flow through a repository abstraction:
+The three pieces:
 
-- **Interface:** `src/lib/repositories/ExpenseRepository.ts` — defines contract for expense data access
-- **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — mutates in-memory loaded data
-- **Provider:** `src/context/RepositoryContext.tsx` — React Context + `useRepository()` hook
+- **Interface:** `src/lib/repositories/ExpenseRepository.ts` — the contract any implementation
+  must fulfil: `getExpense(id)` and `updateExpenseStatus(id, status, comment?)`. Both return
+  Promises, so call sites are already shaped like they're talking to a network API.
+- **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — keeps a copy of the
+  mock expenses in an in-memory `Map`. `updateExpenseStatus` replaces the stored expense with a
+  **new** object (the original is never mutated) and returns it. `reset(expenses)` re-seeds the
+  map; tests use it to start from a clean state.
+- **Provider:** `src/context/RepositoryContext.tsx` — makes one repository instance available to
+  every component in the app (see below for how).
 
-**Today (mock):** `MockRepository` loads mock expenses into memory on construction, provides methods that mutate the in-memory copy and return results.
+**How components get the repository (React Context, briefly).** React Context is a built-in way
+to make one value available to any component in the tree without passing it through props, layer
+by layer. A `<Provider>` near the top of the tree holds the value; any component below it
+retrieves it with a hook:
 
-**Tomorrow (real backend):** Replace with `ApiRepository` (HTTP client calling a backend API) — same interface, different implementation. Components do not change.
+```tsx
+// src/context/RepositoryContext.tsx (simplified)
+<RepositoryContext.Provider value={repository}>{children}</RepositoryContext.Provider>
 
-**Component usage pattern (future):**
+// any component rendered below the provider:
+const repo = useRepository()
+```
+
+`RepositoryProvider` is mounted once in `src/main.tsx` (see the composition root above), so
+`useRepository()` works in any page or component. It throws a descriptive error if called outside
+the provider, so a missing provider fails loudly instead of silently returning `undefined`.
+
+**Where the data comes from.** On startup, `RepositoryContext.tsx` creates a single
+`MockExpenseRepository` (the exported `mockRepository` singleton) seeded with a **copy** of
+`src/mocks/expenses.json` (loaded and validated by `src/mocks/expenses.ts`). The copy matters:
+mutations happen on the repository's in-memory data, so the original mock module — and any
+component that reads it directly — is never affected.
+
+**Usage pattern in a component:**
+
 ```typescript
 const repo = useRepository()
 const updated = await repo.updateExpenseStatus(id, status, comment)
 setExpense(updated)
 ```
 
-This will establish the data-access boundary that was documented as "not yet existing" in earlier versions. See `docs/decisions/architecture/0010-mock-repository-pattern.md` for rationale.
+The component stores the returned expense in local state — the repository is the source of truth
+for what was saved, and the component just displays what it got back.
+
+**Swapping in a real backend.** Implement the same `ExpenseRepository` interface as an API client
+(HTTP calls to a backend), then pass it to `<RepositoryProvider repository={apiRepo}>` in
+`src/main.tsx`. Nothing else changes: components only know the interface, never the
+implementation. See `docs/decisions/architecture/0010-mock-repository-pattern.md` for the full
+rationale.
 
 ### Reads vs. Writes
 
 - **Reads** (e.g., loading expense list) currently load directly from mock data in component state, no abstraction needed yet
-- **Writes** (e.g., approving an expense) will flow through the repository (Tasks 08a+) to ensure mutations are isolated and reversible in tests
+- **Writes** (e.g., approving an expense) flow through the repository (Task 08a) so mutations are isolated in memory and reversible in tests
 
 ## Data Flow
 
