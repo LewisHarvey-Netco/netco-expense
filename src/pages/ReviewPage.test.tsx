@@ -60,7 +60,7 @@ describe('All Expenses page (/review)', () => {
     seedSession(financeUser)
     renderAppAt('/review')
 
-    expect(await screen.findByText('All Expenses')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'All Expenses' })).toBeInTheDocument()
     expect(screen.getByText('Client lunch meeting at Restaurant Noma')).toBeInTheDocument()
   })
 
@@ -78,7 +78,7 @@ describe('All Expenses page (/review)', () => {
     seedSession(financeUser)
     renderAppAt('/review')
 
-    await screen.findByText('All Expenses')
+    await screen.findByRole('heading', { name: 'All Expenses' })
     for (const expense of mockExpenses) {
       expect(screen.getByText(expense.description)).toBeInTheDocument()
     }
@@ -88,7 +88,7 @@ describe('All Expenses page (/review)', () => {
     seedSession(financeUser)
     renderAppAt('/review')
 
-    await screen.findByText('All Expenses')
+    await screen.findByRole('heading', { name: 'All Expenses' })
     expect(screen.getAllByRole('row')).toHaveLength(mockExpenses.length + 1)
   })
 
@@ -110,7 +110,7 @@ describe('Filtering on the All Expenses page', () => {
   async function renderAsFinance() {
     seedSession(financeUser)
     renderAppAt('/review')
-    await screen.findByText('All Expenses')
+    await screen.findByRole('heading', { name: 'All Expenses' })
   }
 
   it('shows the full count before any filters are applied', async () => {

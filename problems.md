@@ -568,3 +568,31 @@ directory still needs manual deletion by the user
 shadcn CLI Windows bug is fixed, after any `npx shadcn add` on this
 machine, check for a stray `@` directory at the repo root and verify the
 file landed in `src/components/ui/`.
+
+## 2026-09-01 — Storybook vitest project: transient "Failed to fetch dynamically imported module" on first run after adding a story
+
+**What was attempted:** Running the full test suite (`npm run test`) after
+adding `src/components/Header.stories.tsx` (ticket 10). The new story
+imports `react-router-dom` (MemoryRouter) and `@/context/AuthContext` —
+modules the other stories don't import, so the Storybook Vite server's
+dep graph changed.
+
+**What went wrong:** On the first full run, all 3 new Header stories
+failed with `TypeError: Failed to fetch dynamically imported module:
+http://localhost:63315/node_modules/.cache/storybook/.../sb-vitest/deps/
+@storybook_addon-docs_n_@storybook_react-dom-shim.js` while the 9
+pre-existing story files passed. Re-running the storybook project alone
+(`npm run test -- --project=storybook`) and then the full suite again
+passed 100% (23 files / 151 tests) with no code changes in between.
+
+**Root cause (likely):** Vite re-optimized dependencies mid-run because
+the new story introduced new modules to the browser project's dep graph;
+the chromium browser fetched a dep-shim chunk while it was still being
+written. The error names the docs-addon shim (not the new imports), which
+is consistent with a cache/optimization race rather than a problem with
+the story itself.
+
+**Status:** Resolved (transient). Workaround: if a story fails with
+"Failed to fetch dynamically imported module" under `node_modules/.cache/
+storybook/.../sb-vitest/deps/`, re-run before debugging the story; if it
+persists, clear `node_modules/.cache/storybook` and re-run.

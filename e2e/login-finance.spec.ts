@@ -7,7 +7,7 @@ test('logs in as finance and lands on review page', async ({ page }) => {
   await page.click('button[type="submit"]');
 
   await expect(page).toHaveURL(/\/review/);
-  await expect(page.getByText('All Expenses', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'All Expenses' })).toBeVisible();
   await expect(
     page.getByText('Client lunch meeting at Restaurant Noma'),
   ).toBeVisible();

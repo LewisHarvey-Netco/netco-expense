@@ -5,7 +5,7 @@ test('finance user sees all expenses on /review', async ({ page }) => {
   await loginAs(page, 'bob@netcompany.com');
 
   await expect(page).toHaveURL(/\/review/);
-  await expect(page.getByText('All Expenses', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'All Expenses' })).toBeVisible();
   await expect(page.getByText('Showing 10 of 10 expenses', { exact: true })).toBeVisible();
   await expect(
     page.getByText('Client lunch meeting at Restaurant Noma'),
