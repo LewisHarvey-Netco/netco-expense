@@ -4,22 +4,22 @@
 
 **Blocked by:** 07 - Create Expense Detail Page (/review/:id), 08 - Build Review Decision Form Component, 08a - Create Mock Repository for Data Mutations
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Implementation Checklist
 
-- [ ] Update `ExpenseDetailPage.tsx` to include ReviewDecisionForm in right column
-- [ ] Add local state for the current expense (loaded from mock on mount)
-- [ ] When ReviewDecisionForm submits:
+- [x] Update `ExpenseDetailPage.tsx` to include ReviewDecisionForm in right column
+- [x] Add local state for the current expense (loaded from mock on mount)
+- [x] When ReviewDecisionForm submits:
    - Call `useRepository().updateExpenseStatus(id, decision, comment)` (returns Promise<Expense>)
    - Update local `expense` state with the returned expense
    - Display success feedback (toast, message, or status badge color change)
-- [ ] After submission, disable the form (or navigate away, or show "Decision recorded")
-- [ ] Handle edge cases:
+- [x] After submission, disable the form (or navigate away, or show "Decision recorded")
+- [x] Handle edge cases:
    - Expense is already Approved or in final state (disable form or show read-only)
    - Network error (future — for now, repository handles it; component shows toast on error)
-- [ ] Validate status transitions follow the workflow (Submitted → Approved or Changes Requested, etc.)
-- [ ] Write integration tests verifying:
+- [x] Validate status transitions follow the workflow (Submitted → Approved or Changes Requested, etc.)
+- [x] Write integration tests verifying:
    - Mock `useRepository()` and verify `updateExpenseStatus()` is called with correct args
    - Clicking "Approve" calls repository and updates local state with returned expense
    - Clicking "Request Changes" with comment calls repository with both status and comment
@@ -28,4 +28,4 @@
 
 ## Documentation Updates
 
-- [ ] No architecture docs updates needed for this task (repository pattern was documented in task 08a)
+- [x] No architecture docs updates needed for this task (repository pattern was documented in task 08a)
