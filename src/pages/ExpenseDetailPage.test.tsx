@@ -119,6 +119,28 @@ describe('Expense detail page (/review/:id)', () => {
     expect(await screen.findByText('Receipt not yet uploaded')).toBeInTheDocument()
   })
 
+  it('displays the internal notes when present', async () => {
+    seedSession(financeUser)
+    const initial = makeExpense({
+      status: 'Changes Requested',
+      internalNotes: 'Receipt missing VAT breakdown. Please resubmit.',
+    })
+    const repo = createMockRepository(initial)
+    renderAppAt(`/review/${initial.id}`, repo)
+
+    expect(await screen.findByText('Receipt missing VAT breakdown. Please resubmit.')).toBeInTheDocument()
+  })
+
+  it('does not show an internal notes field when there are no notes', async () => {
+    seedSession(financeUser)
+    const initial = makeExpense({ status: 'Submitted', internalNotes: null })
+    const repo = createMockRepository(initial)
+    renderAppAt(`/review/${initial.id}`, repo)
+
+    expect(await screen.findByText('Expense Detail')).toBeInTheDocument()
+    expect(screen.queryByText('Internal notes')).not.toBeInTheDocument()
+  })
+
   it('shows a 404 page for an unknown expense id', async () => {
     seedSession(financeUser)
     renderAppAt('/review/does-not-exist')

@@ -10,6 +10,7 @@
 *(Important, but not blocking)*
 
 - [ ] Add error boundary component to catch unexpected React errors and show a fallback UI instead of crashing the app
+- [ ] Expand expense review notes from a single `internalNotes` string into a full conversation history (multiple timestamped entries), and display the full thread on the expense detail view instead of just the latest single note
 
 ## Nice-to-Have
 *(Low priority, polish)*

@@ -166,6 +166,11 @@ export default function ExpenseDetailPage() {
                 <DetailField label="Description" className="sm:col-span-2">
                   {expense.description}
                 </DetailField>
+                {expense.internalNotes && (
+                  <DetailField label="Internal notes" className="sm:col-span-2">
+                    {expense.internalNotes}
+                  </DetailField>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Receipt</p>
