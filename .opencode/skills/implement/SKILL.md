@@ -20,4 +20,6 @@ Once done, use /code-review to review the work.
 
 New components should be added to storybook
 
+if you are blocked form running a command due to permission issues or other blocks, flag the problem to the user and ask for directions on how to proceed. give recommendations
+
 DONT commit your work, the user will review.

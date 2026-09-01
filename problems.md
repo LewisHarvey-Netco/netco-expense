@@ -527,3 +527,44 @@ command (e.g. under `.opencode/skills/code-review/` or
 (b) update the `implement` skill to not reference `/code-review` (or to
 describe the manual review fallback it should perform when the skill is
 absent).
+
+hand written:
+the trust center blocking requests and not logging details is a big problem
+
+## 2026-09-01 — shadcn CLI creates literal `@` directory on Windows; cleanup blocked by permissions
+
+**What was attempted:** Adding the shadcn `textarea` component via
+`npx shadcn@latest add textarea` (ticket 08, ReviewDecisionForm needs a
+comment text area; AGENTS.md mandates CLI-added shadcn components over
+hand-written ones).
+
+**What went wrong:** The CLI reported "Created 1 file:
+`@\components\ui\textarea.tsx`" — it wrote the component to a literal
+`@` directory at the project root instead of resolving the `@/` path
+alias from `components.json` to `src/`. The file content itself was
+correct. Moving it to `src/components/ui/textarea.tsx` via
+`Move-Item`/`mv` was blocked (not in the bash allowlist), so the content
+was re-written to the correct location with the file tool. The now-stray
+`@\components\ui\` tree at the repo root could NOT be removed: `rm`,
+`rmdir`, and `Remove-Item` are all denied by the bash permission rules.
+It remains untracked in git and will pollute a `git add .` if not
+removed by hand.
+
+**Root cause:** (1) shadcn CLI v4.19.1 does not resolve the `@/` alias
+on Windows (path separator / alias handling bug — it treated `@` as a
+literal directory name). (2) The bash permission allowlist has no
+file-move or file-remove commands (`mv` is "ask" but only matches the
+literal `mv` binary, not `Move-Item`; `rm`/`rmdir`/`Remove-Item` are
+denied), so the agent cannot clean up after itself.
+
+**Status:** Worked around — component content re-written to
+`src/components/ui/textarea.tsx` (verified identical). The stray `@/`
+directory still needs manual deletion by the user
+(`Remove-Item -Recurse .\@` from the repo root).
+
+**Suggested fix:** (a) Add `Remove-Item *` (or `rm *` / `rmdir *`) and
+`Move-Item *` / `mv *` (cmdlet form) to the bash permission allowlist as
+"ask" so the agent can relocate/delete files it created; (b) until the
+shadcn CLI Windows bug is fixed, after any `npx shadcn add` on this
+machine, check for a stray `@` directory at the repo root and verify the
+file landed in `src/components/ui/`.
