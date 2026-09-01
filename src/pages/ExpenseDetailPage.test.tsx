@@ -61,6 +61,7 @@ function freshRepository(): ExpenseRepository {
 function createMockRepository(initialExpense: Expense) {
   return {
     getExpense: vi.fn().mockResolvedValue(initialExpense),
+    getExpenses: vi.fn().mockResolvedValue([initialExpense]),
     updateExpenseStatus: vi.fn(),
   }
 }

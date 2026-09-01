@@ -3,13 +3,12 @@
 ## Blocking Go-Live
 *(Must be done before release)*
 
-- [ ] Remove mocked users (`src/mocks/users.json`) and replace with real backend authentication once a backend exists.
+- [ ] Replace mock data with a real backend: remove `src/mocks/users.json` and `src/mocks/expenses.json`, backing both with real API calls — real user accounts for authentication, and an `ApiRepository` implementing `ExpenseRepository` for expense reads/writes. Server-side persistence replaces in-memory mock, so decisions are repulled from API rather than persisted client-side (see ADR-0011).
 - [ ] Implement token-based sessions: store JWT in sessionStorage instead of the user object, attach to API requests, and handle token expiry and refresh
 
 ## Should-Do
 *(Important, but not blocking)*
 
-- [ ] **Sync expense table with repository decisions** — When finance approves or requests changes on the detail page, the status updates correctly inline and persists in the repository. However, navigating back to `/review` shows the old mock data (table still displays "Submitted"). The `/review` table reads directly from the static mock module (ADR-0010), not from the repository, so it doesn't reflect decisions made on the detail page. This creates stale-data UX: user makes a decision, goes back to the list, and sees the old status. Needs design decision: sync the table to the repository, or refetch/poll, or accept this as a known limitation. See ADR-0010 for context.
 - [ ] Add error boundary component to catch unexpected React errors and show a fallback UI instead of crashing the app
 - [ ] Expand expense review notes from a single `internalNotes` string into a full conversation history (multiple timestamped entries), and display the full thread on the expense detail view instead of just the latest single note
 

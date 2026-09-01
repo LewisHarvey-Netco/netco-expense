@@ -99,6 +99,54 @@ describe('MockExpenseRepository', () => {
     })
   })
 
+  describe('getExpenses', () => {
+    it('returns all seeded expenses in order', async () => {
+      const e1 = makeExpense({ id: 'e1', description: 'First' })
+      const e2 = makeExpense({ id: 'e2', description: 'Second' })
+      const e3 = makeExpense({ id: 'e3', description: 'Third' })
+      const repo = new MockExpenseRepository([e1, e2, e3])
+
+      const expenses = await repo.getExpenses()
+
+      expect(expenses).toHaveLength(3)
+      expect(expenses[0]).toEqual(e1)
+      expect(expenses[1]).toEqual(e2)
+      expect(expenses[2]).toEqual(e3)
+    })
+
+    it('reflects prior mutations in the returned list', async () => {
+      const e1 = makeExpense({ id: 'e1', status: 'Submitted' })
+      const e2 = makeExpense({ id: 'e2', status: 'Submitted' })
+      const repo = new MockExpenseRepository([e1, e2])
+
+      await repo.updateExpenseStatus('e1', 'Approved')
+      const expenses = await repo.getExpenses()
+
+      expect(expenses).toHaveLength(2)
+      expect(expenses[0].status).toBe('Approved')
+      expect(expenses[1].status).toBe('Submitted')
+    })
+
+    it('returns a new array each time so external mutations do not affect internal state', async () => {
+      const e1 = makeExpense({ id: 'e1' })
+      const repo = new MockExpenseRepository([e1])
+
+      const firstCall = await repo.getExpenses()
+      firstCall[0] = makeExpense({ id: 'e1', description: 'Modified' })
+
+      const secondCall = await repo.getExpenses()
+      expect(secondCall[0].description).toBe(e1.description)
+    })
+
+    it('returns an empty array when no expenses are stored', async () => {
+      const repo = new MockExpenseRepository([])
+
+      const expenses = await repo.getExpenses()
+
+      expect(expenses).toEqual([])
+    })
+  })
+
   describe('reset', () => {
     it('restores baseline data after mutations', async () => {
       const baseline = [makeExpense({ id: 'e1', status: 'Submitted' })]

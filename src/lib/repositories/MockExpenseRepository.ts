@@ -20,6 +20,10 @@ export class MockExpenseRepository implements ExpenseRepository {
     return this.expenses.get(id) ?? null
   }
 
+  async getExpenses(): Promise<Expense[]> {
+    return Array.from(this.expenses.values())
+  }
+
   async updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense> {
     const expense = this.expenses.get(id)
     if (!expense) {

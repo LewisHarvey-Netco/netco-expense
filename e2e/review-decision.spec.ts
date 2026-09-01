@@ -3,14 +3,14 @@ import { loginAs } from './helpers';
 
 // Test data notes (see src/mocks/expenses.json):
 // - The mock repository is in-memory and re-seeded from the mock JSON on every
-//   page load (ADR-0010), so each test starts from the baseline mock data.
+//   page load (ADR-0010, extended by ADR-0011), so each test starts from the baseline mock data.
 // - The expenses used below all start as "Submitted", a decidable state (ADR-0007):
 //   - "Taxi to Copenhagen airport for client visit"  (e2b3c4d5-..., 420.00 DKK, Alice)
 //   - "Team dinner at client premises in London"      (e5e6f7a8-..., 156.75 GBP, Bob)
 //   - "Uber from office to client site in Amsterdam"  (e8b9c0d1-..., 35.50 EUR, Alice)
-// - The /review table reads directly from the mock module (ADR-0010), so it always
-//   shows baseline statuses. Persistence is therefore verified on the detail page,
-//   which reads from the repository.
+// - The /review page now reads from the repository via `getExpenses()` (ADR-0011), so when
+//   a decision is recorded, returning to /review shows the updated status immediately
+//   without a page reload.
 
 test('finance approves a submitted expense', async ({ page }) => {
   await loginAs(page, 'bob@netcompany.com');
@@ -85,8 +85,8 @@ test('a recorded decision persists across navigation', async ({ page }) => {
   await expect(page.getByText('Approved', { exact: true })).toBeVisible();
 
   // The repository is in-memory (ADR-0010), so the decision survives SPA
-  // navigation within the session. (A full page reload would reset to the
-  // mock baseline; the /review table also still shows baseline statuses.)
+  // navigation within the session. When returning to /review, the list now
+  // refetches from the repository (ADR-0011) and shows the updated status.
   await page.getByRole('button', { name: 'Back to All Expenses' }).click();
   await expect(page).toHaveURL(/\/review/);
   await page.getByText('Taxi to Copenhagen airport for client visit').click();
@@ -95,4 +95,32 @@ test('a recorded decision persists across navigation', async ({ page }) => {
   await expect(
     page.getByText('Decision recorded. This expense has been approved.'),
   ).toBeVisible();
+});
+
+test('the expense list shows updated status immediately on return from detail page', async ({ page }) => {
+  await loginAs(page, 'bob@netcompany.com');
+
+  // Start on the review list
+  await expect(page).toHaveURL(/\/review/);
+  const expenseRow = page.getByText('Taxi to Copenhagen airport for client visit');
+  await expect(expenseRow).toBeVisible();
+
+  // Navigate to the detail page
+  await expenseRow.click();
+  await expect(page).toHaveURL(/\/review\/e2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7/);
+
+  // Approve the expense
+  await page.getByRole('button', { name: 'Approve' }).click();
+  await page.getByRole('button', { name: 'Submit Decision' }).click();
+  await expect(page.getByText('Approved', { exact: true })).toBeVisible();
+
+  // Return to the list
+  await page.getByRole('button', { name: 'Back to All Expenses' }).click();
+  await expect(page).toHaveURL(/\/review/);
+
+  // The list should now show the updated status in the row
+  const rowWithApproved = page.locator('tbody tr', {
+    has: page.getByText('Taxi to Copenhagen airport for client visit'),
+  });
+  await expect(rowWithApproved.getByText('Approved')).toBeVisible();
 });

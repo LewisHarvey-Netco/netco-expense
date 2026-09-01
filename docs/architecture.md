@@ -26,15 +26,14 @@ flowchart TD
         ExpensesPage --> AuthContext
         ReviewPage --> AuthContext
         ExpenseDetailPage --> AuthContext
-        ReviewPage --> ExpensesMock[mocks/expenses.json]
-        ExpenseDetailPage --> ExpensesMock
+        ReviewPage --> RepositoryContext
         ExpenseDetailPage --> RepositoryContext
         RepositoryContext --> MockExpenseRepository
         MockExpenseRepository --> InMemoryCache[(in-memory cache)]
     end
 ```
 
-Note: `RepositoryProvider` is mounted at the app root (`src/main.tsx`) and makes the expense data repository available to any component via `useRepository()`. It supports the data mutations of the finance review workflow (Tasks 09+); `ExpenseDetailPage` will be the first component to use it. See "Data Mutations" under "API / Service Boundaries".
+Note: `RepositoryProvider` is mounted at the app root (`src/main.tsx`) and makes the expense data repository available to any component via `useRepository()`. Both `ReviewPage` and `ExpenseDetailPage` read and write through the repository. See "Data Mutations" and "Reads vs. Writes" under "API / Service Boundaries".
 
 There is no server tier in this diagram because none exists. If/when a backend is introduced,
 this document should be updated and a new ADR should record the API/service boundary decision.
@@ -122,8 +121,8 @@ The app's other context, `RepositoryContext`, is not state management — it dis
 expense data repository (a service object, not mutable UI state) to components. See
 "Data Mutations" under "API / Service Boundaries".
 
-**In-memory filtering:** `ReviewPage` loads all mock expenses once on mount into local state.
-Filtering is implemented as a pure function (`filterExpenses()`) that returns a new filtered
+**In-memory filtering:** `ReviewPage` loads all expenses from the repository on mount into local 
+state. Filtering is implemented as a pure function (`filterExpenses()`) that returns a new filtered
 array without mutating the original. The full dataset stays in memory; clearing filters resets
 the filter criteria, not the data. See `docs/decisions/0005-in-memory-filtering-pattern.md`.
 
@@ -208,12 +207,13 @@ back; it never edits the underlying data itself.
 The three pieces:
 
 - **Interface:** `src/lib/repositories/ExpenseRepository.ts` — the contract any implementation
-  must fulfil: `getExpense(id)` and `updateExpenseStatus(id, status, comment?)`. Both return
-  Promises, so call sites are already shaped like they're talking to a network API.
+  must fulfil: `getExpense(id)`, `getExpenses()`, and `updateExpenseStatus(id, status, comment?)`. 
+  All return Promises, so call sites are already shaped like they're talking to a network API.
 - **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — keeps a copy of the
-  mock expenses in an in-memory `Map`. `updateExpenseStatus` replaces the stored expense with a
-  **new** object (the original is never mutated) and returns it. `reset(expenses)` re-seeds the
-  map; tests use it to start from a clean state.
+  mock expenses in an in-memory `Map`. `getExpenses()` returns all stored expenses (reflecting any
+  prior mutations). `updateExpenseStatus` replaces the stored expense with a **new** object 
+  (the original is never mutated) and returns it. `reset(expenses)` re-seeds the map; tests use it 
+  to start from a clean state.
 - **Provider:** `src/context/RepositoryContext.tsx` — makes one repository instance available to
   every component in the app (see below for how).
 
@@ -259,12 +259,12 @@ rationale.
 
 ### Reads vs. Writes
 
-- **Reads** — the expense *list* (`ReviewPage`) still loads directly from mock data in component
-  state, no abstraction needed yet. The expense *detail* page (`ExpenseDetailPage`) loads its
-  expense through the repository (`getExpense`) on mount, so it always reflects the latest state
-  after a mutation (Task 09).
-- **Writes** (e.g., approving an expense) flow through the repository (Task 08a) so mutations are
-  isolated in memory and reversible in tests
+- **Reads** — both the expense *list* (`ReviewPage`) and the expense *detail* page 
+  (`ExpenseDetailPage`) load their expenses through the repository on mount via `getExpense()` 
+  and `getExpenses()` respectively. This ensures the list always shows the latest state (including
+  any mutations made on the detail page) when navigating back. See ADR-0011.
+- **Writes** (e.g., approving an expense) flow through the repository so mutations are
+  isolated in memory and reversible in tests.
 
 ## Data Flow
 

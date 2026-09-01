@@ -2,6 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { AuthProvider } from '@/context/AuthContext'
+import { RepositoryProvider } from '@/context/RepositoryContext'
+import { MockExpenseRepository } from '@/lib/repositories/MockExpenseRepository'
+import mockExpenses from '@/mocks/expenses'
 import App from '@/App'
 import '@testing-library/jest-dom'
 
@@ -14,12 +17,15 @@ function LocationCapture() {
 }
 
 function renderApp() {
+  const repo = new MockExpenseRepository(mockExpenses.map((e) => ({ ...e })))
   return render(
     <MemoryRouter initialEntries={['/login']}>
-      <AuthProvider>
-        <LocationCapture />
-        <App />
-      </AuthProvider>
+      <RepositoryProvider repository={repo}>
+        <AuthProvider>
+          <LocationCapture />
+          <App />
+        </AuthProvider>
+      </RepositoryProvider>
     </MemoryRouter>
   )
 }

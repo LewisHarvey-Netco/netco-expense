@@ -1,7 +1,7 @@
 import type { Expense, ExpenseStatus } from '@/types'
 
 /**
- * Data-access boundary for expense mutations (see ADR-0010).
+ * Data-access boundary for expense reads and mutations (see ADR-0010, extended by ADR-0011).
  *
  * Components depend on this interface, never on a concrete implementation.
  * Today the implementation is `MockExpenseRepository` (in-memory); when a real
@@ -12,5 +12,6 @@ import type { Expense, ExpenseStatus } from '@/types'
  */
 export interface ExpenseRepository {
   getExpense(id: string): Promise<Expense | null>
+  getExpenses(): Promise<Expense[]>
   updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense>
 }

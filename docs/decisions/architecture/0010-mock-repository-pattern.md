@@ -1,5 +1,7 @@
 # ADR-0010: Mock Repository Pattern for Data Mutations
 
+**Extended by ADR-0011** — now covers both reads and mutations.
+
 ## Status
 Implemented (Task 08a, completed 2026-09-01)
 
@@ -53,3 +55,4 @@ Completed in Task 08a (`plans/finance-pages/tasks/08a-create-mock-repository.md`
 
 - **ADR-0001** (Auth state via Context) — establishes Context as the pattern for shared app state
 - **ADR-0005** (In-memory filtering) — related in-memory data pattern; filtering also works with loaded data
+- **ADR-0011** (Expense List Reads via Repository) — extends this decision to reads; ReviewPage now calls `getExpenses()` on mount

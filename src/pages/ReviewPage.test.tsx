@@ -1,11 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router-dom'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { AuthProvider } from '@/context/AuthContext'
 import { RepositoryProvider } from '@/context/RepositoryContext'
 import { MockExpenseRepository } from '@/lib/repositories/MockExpenseRepository'
 import App from '@/App'
 import mockExpenses from '@/mocks/expenses'
+import type { Expense } from '@/types'
 import '@testing-library/jest-dom'
 
 const STORAGE_KEY = 'netco-expense-auth'
@@ -106,6 +108,62 @@ describe('All Expenses page (/review)', () => {
   })
 })
 
+describe('Loading and error states', () => {
+  it('shows a loading message while expenses are being fetched', async () => {
+    seedSession(financeUser)
+    const repository = new MockExpenseRepository(mockExpenses.map((e) => ({ ...e })))
+    // Delay the getExpenses response to test loading state
+    const originalGetExpenses = repository.getExpenses.bind(repository)
+    let resolveGetExpenses: (expenses: Expense[]) => void
+    repository.getExpenses = vi.fn(
+      () => new Promise<Expense[]>((resolve) => {
+        resolveGetExpenses = resolve
+      })
+    )
+    render(
+      <MemoryRouter initialEntries={['/review']}>
+        <RepositoryProvider repository={repository}>
+          <AuthProvider>
+            <LocationRecorder />
+            <App />
+          </AuthProvider>
+        </RepositoryProvider>
+      </MemoryRouter>
+    )
+
+    // Should show loading message while fetching
+    expect(screen.getByText('Loading expenses…')).toBeInTheDocument()
+
+    // Resolve the promise
+    resolveGetExpenses!(await originalGetExpenses())
+
+    // Should show expenses once loaded
+    await screen.findByRole('heading', { name: 'All Expenses' })
+    expect(screen.queryByText('Loading expenses…')).not.toBeInTheDocument()
+  })
+
+  it('shows an error alert if expenses fail to load', async () => {
+    seedSession(financeUser)
+    const repository = new MockExpenseRepository(mockExpenses.map((e) => ({ ...e })))
+    repository.getExpenses = vi.fn().mockRejectedValue(new Error('Network error'))
+    render(
+      <MemoryRouter initialEntries={['/review']}>
+        <RepositoryProvider repository={repository}>
+          <AuthProvider>
+            <LocationRecorder />
+            <App />
+          </AuthProvider>
+        </RepositoryProvider>
+      </MemoryRouter>
+    )
+
+    expect(
+      await screen.findByText('Failed to load expenses. Please try again.')
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'All Expenses' })).toBeInTheDocument()
+  })
+})
+
 describe('Filtering on the All Expenses page', () => {
   async function renderAsFinance() {
     seedSession(financeUser)
@@ -186,5 +244,57 @@ describe('Filtering on the All Expenses page', () => {
     await screen.findByText('Showing 1 of 10 expenses')
 
     expect(mockExpenses).toEqual(snapshot)
+  })
+})
+
+describe('Repository-driven list updates', () => {
+  it('shows updated status when returning from detail page after approval', async () => {
+    const user = userEvent.setup()
+    seedSession(financeUser)
+    const repository = new MockExpenseRepository(mockExpenses.map((e) => ({ ...e })))
+    render(
+      <MemoryRouter initialEntries={['/review']}>
+        <RepositoryProvider repository={repository}>
+          <AuthProvider>
+            <LocationRecorder />
+            <App />
+          </AuthProvider>
+        </RepositoryProvider>
+      </MemoryRouter>
+    )
+
+    // Start on review page, verify a submitted expense is visible
+    const submittedExpense = mockExpenses.find((e) => e.status === 'Submitted')
+    expect(submittedExpense).toBeDefined()
+    expect(await screen.findByText(submittedExpense!.description)).toBeInTheDocument()
+
+    // Click on the expense to navigate to detail page
+    await user.click(screen.getByText(submittedExpense!.description))
+    await waitFor(() => {
+      expect(visitedPaths).toContain(`/review/${submittedExpense!.id}`)
+    })
+
+    // Approve the expense
+    const approveButton = await screen.findByRole('button', { name: 'Approve' })
+    await user.click(approveButton)
+    const submitButton = screen.getByRole('button', { name: 'Submit Decision' })
+    await user.click(submitButton)
+
+    // Wait for the approval to be recorded
+    await screen.findByText('Approved')
+
+    // Navigate back to the list
+    const backButton = screen.getByRole('button', { name: /back to all expenses/i })
+    await user.click(backButton)
+
+    // The page should refetch from the repository and show the updated status
+    await waitFor(() => {
+      expect(visitedPaths).toContain('/review')
+    })
+
+    // Verify the expense now shows as Approved in the table
+    const allText = screen.getAllByText('Approved')
+    expect(allText.length).toBeGreaterThan(0)
+    expect(screen.getByText(submittedExpense!.description)).toBeInTheDocument()
   })
 })
