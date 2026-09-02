@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Add `showSubmitterFilter?: boolean` prop to `FilterPanel` component (defaults `true`)
-- [ ] Conditionally render submitter filter field based on `showSubmitterFilter` prop
-- [ ] Preserve all other filter behavior (status, type, date range unaffected)
-- [ ] Add tests in `FilterPanel.test.tsx` verifying: submitter filter is hidden when prop is false, visible when true, other filters unaffected
+- [x] Add `showSubmitterFilter?: boolean` prop to `FilterPanel` component (defaults `true`)
+- [x] Conditionally render submitter filter field based on `showSubmitterFilter` prop
+- [x] Preserve all other filter behavior (status, type, date range unaffected)
+- [x] Add tests in `FilterPanel.test.tsx` verifying: submitter filter is hidden when prop is false, visible when true, other filters unaffected
