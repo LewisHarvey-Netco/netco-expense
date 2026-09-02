@@ -95,6 +95,10 @@ ad-hoc auth checks inside the page component.
   shadcn primitives.
 - `src/components/` — shared, hand-written components used across pages (`Header`,
   `ProtectedRoute`, `ExpenseTable`, `FilterPanel`, `ReviewDecisionForm`).
+- `src/components/expenses/` — expense-domain components shared between the finance and
+  consultant views (`ExpenseDetailCard`, `ExpenseReviewSection`). `ExpenseReviewSection`
+  is finance-only: it owns the decidable-status logic (see ADR-0007) and renders the
+  decision status message plus `ReviewDecisionForm`.
 - `src/components/ui/` — shadcn/ui-generated primitives (Button, Input, Card, etc.). These are
   vendored source, not a package dependency — see `AGENTS.md` for the convention of adding new
   ones via the shadcn CLI rather than hand-writing them.
