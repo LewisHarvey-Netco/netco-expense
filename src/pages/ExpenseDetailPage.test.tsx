@@ -1,13 +1,12 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { AuthProvider } from '@/context/AuthContext'
 import { RepositoryProvider } from '@/context/RepositoryContext'
 import { MockExpenseRepository } from '@/lib/repositories/MockExpenseRepository'
 import type { ExpenseRepository } from '@/lib/repositories/ExpenseRepository'
 import App from '@/App'
-import ExpenseDetailPage from '@/pages/ExpenseDetailPage'
 import mockExpenses from '@/mocks/expenses'
 import type { Expense } from '@/types'
 import '@testing-library/jest-dom'
@@ -43,29 +42,6 @@ function renderAppAt(path: string, repository: ExpenseRepository = freshReposito
         <AuthProvider>
           <LocationRecorder />
           <App />
-        </AuthProvider>
-      </RepositoryProvider>
-    </MemoryRouter>,
-  )
-}
-
-/**
- * Renders the role-aware detail page directly (without the App route table or
- * ProtectedRoute) so the consultant view can be exercised before the
- * `/expenses/:id` route is wired up (see ticket 07).
- */
-function renderDetailPageAt(path: string, repository: ExpenseRepository = freshRepository()) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <RepositoryProvider repository={repository}>
-        <AuthProvider>
-          <LocationRecorder />
-          <Routes>
-            <Route path="/review/:id" element={<ExpenseDetailPage />} />
-            <Route path="/expenses/:id" element={<ExpenseDetailPage />} />
-            {/* Placeholder so the back-button navigation has a matching route. */}
-            <Route path="/expenses" element={<div>Expenses list</div>} />
-          </Routes>
         </AuthProvider>
       </RepositoryProvider>
     </MemoryRouter>,
@@ -182,7 +158,9 @@ describe('Expense detail page (/review/:id, finance)', () => {
     await waitFor(() => {
       expect(visitedPaths).toContain('/expenses')
     })
-    expect(await screen.findByText('My Expenses')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'My Expenses' }),
+    ).toBeInTheDocument()
   })
 
   it('redirects an unauthenticated user to /login', async () => {
@@ -210,7 +188,7 @@ describe('Expense detail page (/expenses/:id, consultant)', () => {
   it('displays the full details of the consultant\'s own expense', async () => {
     seedSession(consultantUser)
     const expense = mockExpenses[0]
-    renderDetailPageAt(`/expenses/${expense.id}`)
+    renderAppAt(`/expenses/${expense.id}`)
 
     const main = await screen.findByRole('main')
     expect(within(main).getByText('Expense Detail')).toBeInTheDocument()
@@ -227,7 +205,7 @@ describe('Expense detail page (/expenses/:id, consultant)', () => {
 
   it('does not show the review decision section', async () => {
     seedSession(consultantUser)
-    renderDetailPageAt(`/expenses/${mockExpenses[0].id}`)
+    renderAppAt(`/expenses/${mockExpenses[0].id}`)
 
     await screen.findByText('Expense Detail')
     expect(screen.queryByText('Review Decision')).not.toBeInTheDocument()
@@ -239,7 +217,7 @@ describe('Expense detail page (/expenses/:id, consultant)', () => {
   it('shows a 404 page when a consultant views another consultant\'s expense', async () => {
     seedSession(consultantUser)
     const otherExpense = mockExpenses.find((e) => e.submitterId !== consultantUser.id)!
-    renderDetailPageAt(`/expenses/${otherExpense.id}`)
+    renderAppAt(`/expenses/${otherExpense.id}`)
 
     expect(await screen.findByText('Page not found')).toBeInTheDocument()
     expect(screen.queryByText(otherExpense.description)).not.toBeInTheDocument()
@@ -248,7 +226,7 @@ describe('Expense detail page (/expenses/:id, consultant)', () => {
   it('navigates back to the consultant expense list', async () => {
     const user = userEvent.setup()
     seedSession(consultantUser)
-    renderDetailPageAt(`/expenses/${mockExpenses[0].id}`)
+    renderAppAt(`/expenses/${mockExpenses[0].id}`)
 
     await user.click(await screen.findByText('Back to My Expenses'))
 

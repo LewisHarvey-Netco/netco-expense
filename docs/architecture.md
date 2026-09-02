@@ -60,14 +60,14 @@ data-router/loader API). Route table:
 |---|---|---|
 | `/login` | `LoginPage` | Public |
 | `/expenses` | `ExpensesPage` | `consultant` role only |
+| `/expenses/:id` | `ExpenseDetailPage` (role-aware) | `consultant` role only |
 | `/review` | `ReviewPage` | `finance` role only |
 | `/review/:id` | `ExpenseDetailPage` (role-aware) | `finance` role only |
 | `/` | `RootRedirect` (inline) | Redirects to role home if logged in, else `/login` |
 | `*` (catch-all) | `NotFoundPage` | Public — renders a 404 page with a "Go home" button back to `/` |
 
-`ExpenseDetailPage` is a single **role-aware** page: it already serves `/review/:id` (finance) and
-will also serve the consultant `/expenses/:id` route once that route is added (ticket 07). See
-"Role-Aware Expense Detail" below.
+`ExpenseDetailPage` is a single **role-aware** page: it serves both `/review/:id` (finance) and
+`/expenses/:id` (consultant). See "Role-Aware Expense Detail" below.
 
 Key principle: **there is no "return to originally requested URL" behavior.** After login, or
 when a route guard rejects access, the user always lands on their role's default home
@@ -115,8 +115,8 @@ unmanageable; this is a decision to make deliberately, not by default.
 ## Role-Aware Expense Detail
 
 `ExpenseDetailPage` is a single page that serves both the finance review detail (`/review/:id`)
-and the consultant expense detail (`/expenses/:id`, added by ticket 07). It reads the current user
-via `useAuth()` and renders conditionally:
+and the consultant expense detail (`/expenses/:id`). It reads the current user via `useAuth()` and
+renders conditionally:
 
 - **Finance** — two-column layout: `ExpenseDetailCard` (left) and a "Review Decision" card
   wrapping `ExpenseReviewSection` (right). The review section's submit handler is wired to

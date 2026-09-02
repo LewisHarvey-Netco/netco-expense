@@ -29,6 +29,14 @@ function App() {
         }
       />
       <Route
+        path="/expenses/:id"
+        element={
+          <ProtectedRoute allowedRoles={['consultant']}>
+            <ExpenseDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/review"
         element={
           <ProtectedRoute allowedRoles={['finance']}>

@@ -50,7 +50,7 @@ export const FinanceOnReview: Story = {
     docs: {
       description: {
         story:
-          'Finance user on /review. The "All Expenses" link is visible and marked active.',
+          'Finance user on /review. The "Review Expenses" link is visible and marked active.',
       },
     },
   },
@@ -63,20 +63,33 @@ export const FinanceOnExpenseDetail: Story = {
     docs: {
       description: {
         story:
-          'Finance user on an expense detail page (/review/:id). The "All Expenses" link stays active on subpages.',
+          'Finance user on an expense detail page (/review/:id). The "Review Expenses" link stays active on subpages.',
       },
     },
   },
 }
 
-export const Consultant: Story = {
+export const ConsultantOnExpenses: Story = {
   render: () => <Header />,
   decorators: [withUser(consultantUser, '/expenses')],
   parameters: {
     docs: {
       description: {
         story:
-          'Consultant user on /expenses. The "All Expenses" link is not shown for non-finance roles.',
+          'Consultant user on /expenses. The "My Expenses" link is visible and marked active. The "Review Expenses" link is not shown for non-finance roles.',
+      },
+    },
+  },
+}
+
+export const ConsultantOnExpenseDetail: Story = {
+  render: () => <Header />,
+  decorators: [withUser(consultantUser, '/expenses/1')],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Consultant user on an expense detail page (/expenses/:id). The "My Expenses" link stays active on subpages.',
       },
     },
   },
