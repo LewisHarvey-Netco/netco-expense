@@ -21,7 +21,7 @@ flowchart TD
         AppRoutes --> LoginPage
         AppRoutes --> ExpensesPage[ExpensesPage - consultant]
         AppRoutes --> ReviewPage[ReviewPage - finance]
-        AppRoutes --> ExpenseDetailPage[ExpenseDetailPage - finance]
+        AppRoutes --> ExpenseDetailPage[ExpenseDetailPage - role-aware]
         LoginPage --> AuthContext
         ExpensesPage --> AuthContext
         ReviewPage --> AuthContext
@@ -61,9 +61,13 @@ data-router/loader API). Route table:
 | `/login` | `LoginPage` | Public |
 | `/expenses` | `ExpensesPage` | `consultant` role only |
 | `/review` | `ReviewPage` | `finance` role only |
-| `/review/:id` | `ExpenseDetailPage` | `finance` role only |
+| `/review/:id` | `ExpenseDetailPage` (role-aware) | `finance` role only |
 | `/` | `RootRedirect` (inline) | Redirects to role home if logged in, else `/login` |
 | `*` (catch-all) | `NotFoundPage` | Public — renders a 404 page with a "Go home" button back to `/` |
+
+`ExpenseDetailPage` is a single **role-aware** page: it already serves `/review/:id` (finance) and
+will also serve the consultant `/expenses/:id` route once that route is added (ticket 07). See
+"Role-Aware Expense Detail" below.
 
 Key principle: **there is no "return to originally requested URL" behavior.** After login, or
 when a route guard rejects access, the user always lands on their role's default home
@@ -107,6 +111,24 @@ There is currently no intermediate "feature" or "domain" folder layer (e.g. no
 `features/expenses/`) — the app is too small to need one. If the app grows (e.g. a real expense
 list, forms, filters), consider introducing a feature-oriented folder before it becomes
 unmanageable; this is a decision to make deliberately, not by default.
+
+## Role-Aware Expense Detail
+
+`ExpenseDetailPage` is a single page that serves both the finance review detail (`/review/:id`)
+and the consultant expense detail (`/expenses/:id`, added by ticket 07). It reads the current user
+via `useAuth()` and renders conditionally:
+
+- **Finance** — two-column layout: `ExpenseDetailCard` (left) and a "Review Decision" card
+  wrapping `ExpenseReviewSection` (right). The review section's submit handler is wired to
+  `repository.updateExpenseStatus()`.
+- **Consultant** — single-column layout: `ExpenseDetailCard` only (read-only).
+
+**Ownership check (consultants only).** After loading, the page verifies
+`expense.submitterId === user.id`. On a mismatch it renders the same 404 as an unknown id, so the
+response doesn't reveal that the expense exists. This is a **UX boundary only, not a security
+boundary**: the data-access boundary is the repository (`getExpensesBySubmitter()`), which must
+enforce authorization server-side once a real backend is introduced. Client-side checks alone are
+not sufficient for production. See `docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
 
 ## State Management
 
@@ -321,6 +343,10 @@ app's current size, not an oversight.
   directly or duplicates auth logic.
 - **Route access control lives in one place:** `ProtectedRoute`. Pages do not implement their own
   redirect-if-unauthorized logic.
+- **Role-aware rendering lives in the page, not the guard:** `ProtectedRoute` decides which role
+  may enter a route; the page (e.g. `ExpenseDetailPage`) decides what that role sees. Ownership
+  checks for scoped resources (consultant → own expenses only) live at the page level and fail
+  closed to the 404. See ADR-0012.
 - **shadcn `ui/` components are vendored, not authored:** don't hand-edit generated primitives
   beyond their `cva` variant config; see `AGENTS.md` styling rules.
 - **No premature abstraction:** there is no service layer, no state management library, and no

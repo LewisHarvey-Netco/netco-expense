@@ -596,3 +596,28 @@ the story itself.
 "Failed to fetch dynamically imported module" under `node_modules/.cache/
 storybook/.../sb-vitest/deps/`, re-run before debugging the story; if it
 persists, clear `node_modules/.cache/storybook` and re-run.
+
+## 2026-09-02 — Piping an allowed command breaks the bash permission match
+
+**What was attempted:** Running
+`npm run test -- src/pages/ExpenseDetailPage.test.tsx 2>&1 | Select-Object -Last 30`
+to run a single test file with truncated output.
+
+**What went wrong:** Denied. The bare `npm run test -- <file>` matches the
+`npm run *` allow rule, but appending `2>&1 | Select-Object -Last 30` makes
+the whole command string fail to match any rule. Same root cause as the
+2026-08-24 entries on compound one-liners: the permission matcher evaluates
+the entire command string, not the constituent commands.
+
+**Root cause:** The bash permission matcher does whole-string pattern
+matching; pipes and redirections change the string so it no longer matches
+the intended allow rule (`npm run *`).
+
+**Status:** Worked around — ran the command without the pipe (the tool
+auto-saves output to a file when it exceeds the limit) and used the Grep
+tool on the saved output file to extract pass/fail lines.
+
+**Suggested fix:** Either decompose pipelines before matching (match each
+`|`-separated segment against the rules), or document that agents should not
+pipe allowed commands and should rely on the tool's built-in output capture
+instead.

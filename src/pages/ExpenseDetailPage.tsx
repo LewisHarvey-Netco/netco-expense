@@ -1,78 +1,30 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import type { ReactNode } from 'react'
-import { ChevronLeftIcon, ReceiptIcon } from 'lucide-react'
+import { ChevronLeftIcon } from 'lucide-react'
 import Header from '@/components/Header'
 import PageTitle from '@/components/PageTitle'
-import ReviewDecisionForm, { type ReviewDecision } from '@/components/ReviewDecisionForm'
-import { Badge, STATUS_VARIANTS } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import ExpenseDetailCard from '@/components/expenses/ExpenseDetailCard'
+import ExpenseReviewSection from '@/components/expenses/ExpenseReviewSection'
+import type { ReviewDecision } from '@/components/ReviewDecisionForm'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useAuth } from '@/context/AuthContext'
 import { useRepository } from '@/context/RepositoryContext'
-import users from '@/mocks/users.json'
 import NotFoundPage from '@/pages/NotFoundPage'
 import type { Expense, ExpenseStatus } from '@/types'
-
-function getSubmitterName(submitterId: string): string {
-  return users.find((u) => u.id === submitterId)?.name ?? submitterId
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-function formatAmount(amount: number, currency: string): string {
-  return `${amount.toFixed(2)} ${currency}`
-}
-
-function DetailField({
-  label,
-  children,
-  className,
-}: {
-  label: string
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <div className={className}>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <div className="mt-1">{children}</div>
-    </div>
-  )
-}
-
-// Finance can record a decision only while the expense is awaiting (re)review.
-// "Approved" is terminal and "Changes Requested" is waiting on the consultant
-// to resubmit, so neither accepts a new decision (see ADR-0007).
-const DECIDABLE_STATUSES: readonly ExpenseStatus[] = ['Submitted', 'Resubmitted']
-
-function isDecidable(status: ExpenseStatus): boolean {
-  return DECIDABLE_STATUSES.includes(status)
-}
-
-function decisionMessage(status: ExpenseStatus): string {
-  if (status === 'Approved') {
-    return 'Decision recorded. This expense has been approved.'
-  }
-  return 'Changes have been requested. Waiting for the consultant to resubmit.'
-}
 
 export default function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const repo = useRepository()
+  const { user } = useAuth()
 
   const [expense, setExpense] = useState<Expense | null>(null)
   const [loaded, setLoaded] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [decisionError, setDecisionError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) {
@@ -82,11 +34,19 @@ export default function ExpenseDetailPage() {
     }
     let cancelled = false
     setLoaded(false)
-    repo.getExpense(id).then((result) => {
-      if (cancelled) return
-      setExpense(result)
-      setLoaded(true)
-    })
+    setLoadError(null)
+    repo
+      .getExpense(id)
+      .then((result) => {
+        if (cancelled) return
+        setExpense(result)
+        setLoaded(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setLoadError('Failed to load the expense. Please try again.')
+        setLoaded(true)
+      })
     return () => {
       cancelled = true
     }
@@ -103,22 +63,51 @@ export default function ExpenseDetailPage() {
     )
   }
 
+  // The page is served behind a ProtectedRoute, so a user is expected. Fail
+  // closed to the 404 if, against expectation, there is none.
+  if (!user) {
+    return <NotFoundPage />
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-svh bg-background">
+        <Header />
+        <main className="mx-auto w-full max-w-6xl px-6 py-8">
+          <PageTitle className="mb-6">Expense Detail</PageTitle>
+          <Alert variant="destructive">
+            <AlertDescription>{loadError}</AlertDescription>
+          </Alert>
+        </main>
+      </div>
+    )
+  }
+
   if (!expense) {
     return <NotFoundPage />
   }
 
-  const canDecide = isDecidable(expense.status)
+  // Ownership check (consultants only): a consultant may only view their own
+  // expenses. On a mismatch we render the same 404 as an unknown id so the
+  // response doesn't reveal that the expense exists (see ADR-0012).
+  if (user.role === 'consultant' && user.id !== expense.submitterId) {
+    return <NotFoundPage />
+  }
+
+  const isFinance = user.role === 'finance'
+  const backTo = isFinance ? '/review' : '/expenses'
+  const backLabel = isFinance ? 'Back to All Expenses' : 'Back to My Expenses'
 
   async function handleDecision(decision: ReviewDecision, comment?: string) {
     if (!id) return
     const status: ExpenseStatus = decision === 'approve' ? 'Approved' : 'Changes Requested'
     setSubmitting(true)
-    setError(null)
+    setDecisionError(null)
     try {
       const updated = await repo.updateExpenseStatus(id, status, comment)
       setExpense(updated)
     } catch {
-      setError('Failed to record the decision. Please try again.')
+      setDecisionError('Failed to record the decision. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -132,77 +121,36 @@ export default function ExpenseDetailPage() {
           variant="ghost"
           size="sm"
           className="mb-4 -ml-2"
-          onClick={() => navigate('/review')}
+          onClick={() => navigate(backTo)}
         >
           <ChevronLeftIcon />
-          Back to All Expenses
+          {backLabel}
         </Button>
         <PageTitle className="mb-6">Expense Detail</PageTitle>
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expense Details</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6">
-              <div>
-                <p className="text-sm text-muted-foreground">Amount</p>
-                <p className="mt-1 text-3xl font-semibold tabular-nums">
-                  {formatAmount(expense.amount, expense.currency)}
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <DetailField label="Type">
-                  <Badge variant="secondary">{expense.type}</Badge>
-                </DetailField>
-                <DetailField label="Status">
-                  <Badge variant={STATUS_VARIANTS[expense.status]}>{expense.status}</Badge>
-                </DetailField>
-                <DetailField label="Receipt date">{formatDate(expense.receiptDate)}</DetailField>
-                <DetailField label="Submitted by">
-                  {getSubmitterName(expense.submitterId)}
-                </DetailField>
-                <DetailField label="Region">{expense.region}</DetailField>
-                <DetailField label="Project">{expense.project}</DetailField>
-                <DetailField label="Description" className="sm:col-span-2">
-                  {expense.description}
-                </DetailField>
-                {expense.internalNotes && (
-                  <DetailField label="Internal notes" className="sm:col-span-2">
-                    {expense.internalNotes}
-                  </DetailField>
+        {isFinance ? (
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+            <ExpenseDetailCard expense={expense} role={user.role} />
+            <Card>
+              <CardHeader>
+                <CardTitle>Review Decision</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <ExpenseReviewSection
+                  expense={expense}
+                  disabled={submitting}
+                  onSubmit={handleDecision}
+                />
+                {decisionError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{decisionError}</AlertDescription>
+                  </Alert>
                 )}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Receipt</p>
-                <div className="mt-1 flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-8 text-muted-foreground">
-                  <ReceiptIcon />
-                  <p className="text-sm">Receipt not yet uploaded</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Review Decision</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {!canDecide && (
-                <Alert>
-                  <AlertDescription>{decisionMessage(expense.status)}</AlertDescription>
-                </Alert>
-              )}
-              <ReviewDecisionForm
-                disabled={!canDecide || submitting}
-                onSubmit={handleDecision}
-              />
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <ExpenseDetailCard expense={expense} role={user.role} />
+        )}
       </main>
     </div>
   )
