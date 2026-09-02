@@ -8,24 +8,32 @@ describe planned backend, storage, or infrastructure work — see `TODO.md` for 
 
 Netco Expense is currently a **frontend-only single-page application (SPA)**. There is no backend
 service, no database, and no network API calls. All application state lives in the browser
-(React state/context + `sessionStorage`), and "data" is a hardcoded mock file bundled with the
-app (`src/mocks/users.json`).
+(React state/context + `sessionStorage`), and "data" is hardcoded mock files bundled with the
+app (`src/mocks/users.json`, `src/mocks/expenses.json`).
 
 ```mermaid
 flowchart TD
     subgraph Browser
-        BR[BrowserRouter] --> APP[App / Routes]
-        APP --> AC[AuthContext]
-        AC --> SS[(sessionStorage)]
-        AC --> MOCK[mocks/users.json]
-        APP --> LP[LoginPage]
-        APP --> EP[ExpensesPage - consultant]
-        APP --> RP[ReviewPage - finance]
-        LP --> AC
-        EP --> AC
-        RP --> AC
+        BrowserRouter --> AppRoutes[App / Routes]
+        AppRoutes --> AuthContext
+        AuthContext --> SessionStorage[(sessionStorage)]
+        AuthContext --> UsersMock[mocks/users.json]
+        AppRoutes --> LoginPage
+        AppRoutes --> ExpensesPage[ExpensesPage - consultant]
+        AppRoutes --> ReviewPage[ReviewPage - finance]
+        AppRoutes --> ExpenseDetailPage[ExpenseDetailPage - finance]
+        LoginPage --> AuthContext
+        ExpensesPage --> AuthContext
+        ReviewPage --> AuthContext
+        ExpenseDetailPage --> AuthContext
+        ReviewPage --> RepositoryContext
+        ExpenseDetailPage --> RepositoryContext
+        RepositoryContext --> MockExpenseRepository
+        MockExpenseRepository --> InMemoryCache[(in-memory cache)]
     end
 ```
+
+Note: `RepositoryProvider` is mounted at the app root (`src/main.tsx`) and makes the expense data repository available to any component via `useRepository()`. Both `ReviewPage` and `ExpenseDetailPage` read and write through the repository. See "Data Mutations" and "Reads vs. Writes" under "API / Service Boundaries".
 
 There is no server tier in this diagram because none exists. If/when a backend is introduced,
 this document should be updated and a new ADR should record the API/service boundary decision.
@@ -36,8 +44,9 @@ The app is a standard Vite + React + TypeScript SPA rendered client-side (`src/m
 composition root wraps the app in, from outermost to innermost:
 
 1. `<BrowserRouter>` (React Router v7, classic JSX API)
-2. `<AuthProvider>` (React Context, see below)
-3. `<App>` (route table)
+2. `<RepositoryProvider>` (React Context — exposes the expense data repository; see "Data Mutations")
+3. `<AuthProvider>` (React Context — see "Context Usage")
+4. `<App>` (route table)
 
 There is no server-side rendering, no data-router/loader API, and no code-splitting — the app is
 small enough that a single bundle and eager imports are sufficient.
@@ -52,12 +61,20 @@ data-router/loader API). Route table:
 | `/login` | `LoginPage` | Public |
 | `/expenses` | `ExpensesPage` | `consultant` role only |
 | `/review` | `ReviewPage` | `finance` role only |
+| `/review/:id` | `ExpenseDetailPage` | `finance` role only |
 | `/` | `RootRedirect` (inline) | Redirects to role home if logged in, else `/login` |
-| `*` (catch-all) | — | Redirects to `/` |
+| `*` (catch-all) | `NotFoundPage` | Public — renders a 404 page with a "Go home" button back to `/` |
 
 Key principle: **there is no "return to originally requested URL" behavior.** After login, or
 when a route guard rejects access, the user always lands on their role's default home
 (`roleHome()` in `src/types.ts`). This is an intentional simplification, not an oversight.
+
+Unmatched URLs (anything not in the route table above) render `NotFoundPage` instead of silently
+redirecting to `/`. This is deliberate: a silent redirect makes a missing/mistyped route
+indistinguishable from a normal navigation, whereas a 404 page makes the problem visible. See
+`docs/decisions/architecture/0009-catch-all-404-page.md`. `NotFoundPage` is public (not wrapped in
+`ProtectedRoute`) since a 404 shouldn't require login — its "Go home" button navigates to `/`,
+which then applies the redirect rule above.
 
 Route protection is implemented by a single reusable guard, not per-page checks:
 
@@ -73,10 +90,11 @@ ad-hoc auth checks inside the page component.
 
 ## Component Structure
 
-- `src/pages/` — route-level components (`LoginPage`, `ExpensesPage`, `ReviewPage`). These own
-  page layout and compose shared components + shadcn primitives.
+- `src/pages/` — route-level components (`LoginPage`, `ExpensesPage`, `ReviewPage`,
+  `ExpenseDetailPage`, `NotFoundPage`). These own page layout and compose shared components +
+  shadcn primitives.
 - `src/components/` — shared, hand-written components used across pages (`Header`,
-  `ProtectedRoute`). Currently minimal because the app itself is minimal.
+  `ProtectedRoute`, `ExpenseTable`, `FilterPanel`, `ReviewDecisionForm`).
 - `src/components/ui/` — shadcn/ui-generated primitives (Button, Input, Card, etc.). These are
   vendored source, not a package dependency — see `AGENTS.md` for the convention of adding new
   ones via the shadcn CLI rather than hand-writing them.
@@ -94,18 +112,48 @@ state library (no React Query/SWR) — because there is no server to fetch from.
 State lives in two places today:
 
 1. **Local component state** (`useState`) for ephemeral, page-local concerns (e.g. `LoginPage`'s
-   `loginError`, react-hook-form's internal form state).
-2. **`AuthContext`** for the one piece of state that is genuinely cross-cutting: the logged-in
-   user. This is intentionally the *only* context in the app.
+   `loginError`, react-hook-form's internal form state, expense list and filter criteria on
+   `ReviewPage`).
+2. **`AuthContext`** for the one piece of *state* that is genuinely cross-cutting: the logged-in
+   user.
+
+The app's other context, `RepositoryContext`, is not state management — it distributes the
+expense data repository (a service object, not mutable UI state) to components. See
+"Data Mutations" under "API / Service Boundaries".
+
+**In-memory filtering:** `ReviewPage` loads all expenses from the repository on mount into local 
+state. Filtering is implemented as a pure function (`filterExpenses()`) that returns a new filtered
+array without mutating the original. The full dataset stays in memory; clearing filters resets
+the filter criteria, not the data. See `docs/decisions/0005-in-memory-filtering-pattern.md`.
 
 Given the app's current size, plain Context is sufficient. If more cross-cutting state is added
 in the future (e.g. a shared expenses list consumed by both `ExpensesPage` and `ReviewPage`),
 re-evaluate whether Context is still appropriate before reflexively adding another provider — see
 `docs/decisions/0001-auth-state-via-react-context.md`.
 
+## Data Model
+
+The expense data model is defined in **JSON Schema Draft 2020-12** in `src/schemas/expense.schema.json`. TypeScript interfaces (`Expense`, `ExpenseType`, `ExpenseStatus`) in `src/types.ts` are derived from the schema. A Markdown summary is maintained in `docs/data-models/expense.md` for reference.
+
+The JSON Schema in `src/schemas/` is the authoritative source of truth.
+
+**Runtime Validation:** All expense data is validated against the JSON Schema via `src/lib/expense-validation.ts` (using `ajv`). This includes mock expenses in `src/mocks/expenses.json`, API responses (when a backend exists), and form submissions. The validation functions are:
+- `validateAndParseExpense(data)` — validates and returns typed `Expense`, or throws with details
+- `isValidExpense(data)` — type guard that checks without throwing
+
+See `docs/decisions/0004-expense-data-model-json-schema.md` for rationale and consequences.
+
 ## Context Usage
 
-`src/context/AuthContext.tsx` is the only context in the app. It exposes:
+The app has two contexts with different jobs:
+
+- **`AuthContext`** (`src/context/AuthContext.tsx`) — shared *state*: the logged-in user.
+- **`RepositoryContext`** (`src/context/RepositoryContext.tsx`) — shared *service*: the expense
+  data repository. It holds no state of its own; it just makes the `mockRepository` singleton
+  available to components via `useRepository()`. See "Data Mutations" under "API / Service
+  Boundaries" for the full picture.
+
+`AuthContext` exposes:
 
 ```ts
 { user: User | null; login(email, password): { success, error?, user? }; logout(): void }
@@ -145,14 +193,78 @@ context/service.
 
 ## API / Service Boundaries
 
-**There are none today.** No `src/services/` or `src/api/` layer exists because there is no
-backend to call. `AuthContext` currently plays the role that an API/service layer would normally
-play (owning the one piece of "data access" the app has: reading `users.json`).
+### Authentication
 
-If a backend is introduced, expect this to change: `AuthContext` should call into a dedicated
-service/client layer rather than reading mock data directly, so the context stays about *state*
-and a new layer owns *data access*. This is a natural seam to introduce at that point — it does
-not exist yet, so it is not documented as if it does.
+`AuthContext` currently owns the one piece of "data access" the app had before the finance review workflow: reading and validating credentials from `mocks/users.json`. This is intentionally mock and is tracked for replacement in `TODO.md` (Blocking Go-Live tier).
+
+### Data Mutations (Finance Review Workflow)
+
+Data mutations (e.g. approving an expense, requesting changes) never happen directly in a
+component. They go through a **repository** — a small object that owns all reads and writes of
+expense data. A component asks the repository to change something and uses the result it gets
+back; it never edits the underlying data itself.
+
+The three pieces:
+
+- **Interface:** `src/lib/repositories/ExpenseRepository.ts` — the contract any implementation
+  must fulfil: `getExpense(id)`, `getExpenses()`, and `updateExpenseStatus(id, status, comment?)`. 
+  All return Promises, so call sites are already shaped like they're talking to a network API.
+- **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — keeps a copy of the
+  mock expenses in an in-memory `Map`. `getExpenses()` returns all stored expenses (reflecting any
+  prior mutations). `updateExpenseStatus` replaces the stored expense with a **new** object 
+  (the original is never mutated) and returns it. `reset(expenses)` re-seeds the map; tests use it 
+  to start from a clean state.
+- **Provider:** `src/context/RepositoryContext.tsx` — makes one repository instance available to
+  every component in the app (see below for how).
+
+**How components get the repository (React Context, briefly).** React Context is a built-in way
+to make one value available to any component in the tree without passing it through props, layer
+by layer. A `<Provider>` near the top of the tree holds the value; any component below it
+retrieves it with a hook:
+
+```tsx
+// src/context/RepositoryContext.tsx (simplified)
+<RepositoryContext.Provider value={repository}>{children}</RepositoryContext.Provider>
+
+// any component rendered below the provider:
+const repo = useRepository()
+```
+
+`RepositoryProvider` is mounted once in `src/main.tsx` (see the composition root above), so
+`useRepository()` works in any page or component. It throws a descriptive error if called outside
+the provider, so a missing provider fails loudly instead of silently returning `undefined`.
+
+**Where the data comes from.** On startup, `RepositoryContext.tsx` creates a single
+`MockExpenseRepository` (the exported `mockRepository` singleton) seeded with a **copy** of
+`src/mocks/expenses.json` (loaded and validated by `src/mocks/expenses.ts`). The copy matters:
+mutations happen on the repository's in-memory data, so the original mock module — and any
+component that reads it directly — is never affected.
+
+**Usage pattern in a component:**
+
+```typescript
+const repo = useRepository()
+const updated = await repo.updateExpenseStatus(id, status, comment)
+setExpense(updated)
+```
+
+The component stores the returned expense in local state — the repository is the source of truth
+for what was saved, and the component just displays what it got back.
+
+**Swapping in a real backend.** Implement the same `ExpenseRepository` interface as an API client
+(HTTP calls to a backend), then pass it to `<RepositoryProvider repository={apiRepo}>` in
+`src/main.tsx`. Nothing else changes: components only know the interface, never the
+implementation. See `docs/decisions/architecture/0010-mock-repository-pattern.md` for the full
+rationale.
+
+### Reads vs. Writes
+
+- **Reads** — both the expense *list* (`ReviewPage`) and the expense *detail* page 
+  (`ExpenseDetailPage`) load their expenses through the repository on mount via `getExpense()` 
+  and `getExpenses()` respectively. This ensures the list always shows the latest state (including
+  any mutations made on the detail page) when navigating back. See ADR-0011.
+- **Writes** (e.g., approving an expense) flow through the repository so mutations are
+  isolated in memory and reversible in tests.
 
 ## Data Flow
 
@@ -170,7 +282,7 @@ synchronous and local to the browser tab.
 
 ## Testing Architecture
 
-Two distinct layers, each with a different purpose (see
+Three distinct layers, each with a different purpose (see
 `docs/decisions/0003-two-layer-testing-strategy.md`):
 
 - **Vitest + React Testing Library** (`src/App.test.tsx`, colocated `.test.tsx` files) —
@@ -178,9 +290,18 @@ Two distinct layers, each with a different purpose (see
   inside a `MemoryRouter`, and drive it through user-facing interactions (typing, clicking) rather
   than calling internal functions directly. This is the primary place login/routing/auth logic is
   verified. Run via `npm run test`.
+- **Storybook** (`.stories.tsx` files) — Visual component development and manual testing. Renders
+  individual components in isolation with different prop combinations. Run via `npm run storybook`.
+  Useful for QA visual verification before integration and for exploring component behavior
+  interactively.
 - **Playwright** (`e2e/`) — full-browser end-to-end tests that exercise the app the way a real
   user would, through an actual dev server. These validate things RTL/jsdom can't (real
-  navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e`.
+  navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e` (headless)
+  or `npm run test:e2e:headed` (visible browser). Use `PLAYWRIGHT_SLOW_MO=<ms>` to slow down
+  actions for visual debugging, e.g. (PowerShell) `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`.
+
+E2E tests cover the finance review workflow: login as finance → navigate to All Expenses → filter
+→ view detail → approve/request changes → verify status update.
 
 There are currently no isolated unit tests for individual functions (e.g. `roleHome()`) — coverage
 is achieved through the integration-style tests above, which was a deliberate choice given the
@@ -197,5 +318,11 @@ app's current size, not an oversight.
 - **No premature abstraction:** there is no service layer, no state management library, and no
   feature-folder structure, because the current app doesn't need them yet. Introduce these
   deliberately, with a documented reason (ideally an ADR), rather than by convention or habit.
-- **Mock data is explicitly temporary:** anything reading `src/mocks/users.json` is expected to
-  be replaced when real backend auth exists (tracked in `TODO.md`, Blocking Go-Live tier).
+- **Mock data is explicitly temporary:** anything reading `src/mocks/` is expected to be replaced
+  when a real backend exists (tracked in `TODO.md`, Blocking Go-Live tier).
+- **Expense data model is schema-first:** `docs/data-models/expense.schema.json` is the
+  authoritative source; TypeScript interfaces are derived from it. See ADR-0004.
+- **Filtering is pure and in-memory:** `filterExpenses()` is a pure function; the full dataset
+  stays in component state. See ADR-0005.
+- **Status workflow is a state machine:** Four statuses (Submitted, Approved, Changes Requested,
+  Resubmitted) with defined transitions. See ADR-0007.

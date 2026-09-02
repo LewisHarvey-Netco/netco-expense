@@ -4,6 +4,14 @@
 
 Demo expense app built to experiment with Feniks AI capabilities. Start from scratch — no existing codebase conventions to follow.
 
+## Project Structure
+
+- `src/`: main application code, agent should work here
+- `scripts/`: build/deploy scripts, agent may read but not modify
+- `node_modules/`: DO NOT read or analyze, ever
+- `.env`: DO NOT read, contains secrets
+- `dist/`: generated output, ignore entirely
+
 ## Architecture
 
 `docs/architecture.md` is the source of truth for the architectural patterns this codebase must follow (routing, auth/context, state management, forms, testing boundaries, and where new architectural boundaries like a service/API layer should go). Consult it — and follow the patterns it documents — before making any change that touches these areas; don't invent a conflicting pattern. Significant architectural decisions and their rationale are recorded in `docs/decisions/` — check there before revisiting a decision, and add a new ADR when making another one.
@@ -16,9 +24,10 @@ Keep this documentation up to date: when a change introduces, removes, or alters
 - **Routing:** React Router v7 (classic JSX `<BrowserRouter>`/`<Routes>`/`<Route>`).
 - **Styling:** Tailwind v4 + shadcn/ui (New York style, lucide-react icons). shadcn components live in `src/components/ui/` — add new ones via `npx shadcn@latest add <name>`, don't hand-write them.
 - **Forms:** react-hook-form + zod + shadcn's `Form` component.
-- **Testing:** Two-layer strategy:
+- **Testing:** Multi-layer strategy:
   - **Vitest + React Testing Library** — component/unit tests, colocated `.test.tsx` files. Run `npm run test`.
-  - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser).
+  - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser). For debugging, use `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed` (PowerShell) to slow down operations (in milliseconds).
+  - **Storybook** — Visual component development & testing. Run `npm run storybook`. Stories live in `.stories.tsx` files alongside components.
 - **Linting:** oxlint (Vite's default). Run `npm run lint`.
 - **Commands:**
   - `npm install` — install dependencies
@@ -27,6 +36,7 @@ Keep this documentation up to date: when a change introduces, removes, or alters
   - `npm run lint` — run oxlint
   - `npm run test` — run Vitest tests
   - `npm run test:ui` — run Vitest with UI dashboard
+  - `npm run storybook` — start Storybook component development server
   - `npm run test:e2e` — run Playwright E2E tests (headless)
   - `npm run test:e2e:headed` — run Playwright E2E tests (visible browser)
   - `npm run preview` — preview production build

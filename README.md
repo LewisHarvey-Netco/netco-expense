@@ -61,6 +61,8 @@ npm run dev
 
 Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run test:ui`, `npm run test:e2e`, `npm run test:e2e:headed`, `npm run preview`.
 
+For visual debugging, slow down E2E actions with `PLAYWRIGHT_SLOW_MO=<ms>`, e.g. (PowerShell) `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`.
+
 ## Project Structure
 
 ```
