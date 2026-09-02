@@ -70,7 +70,7 @@ describe('Login flow', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Expenses')).toBeInTheDocument()
+      expect(screen.getByText('My Expenses')).toBeInTheDocument()
     })
   })
 

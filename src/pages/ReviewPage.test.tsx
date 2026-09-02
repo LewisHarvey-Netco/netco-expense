@@ -73,7 +73,7 @@ describe('All Expenses page (/review)', () => {
     await waitFor(() => {
       expect(visitedPaths).toContain('/expenses')
     })
-    expect(await screen.findByText('Expenses')).toBeInTheDocument()
+    expect(await screen.findByText('My Expenses')).toBeInTheDocument()
   })
 
   it('displays all expenses in the table', async () => {

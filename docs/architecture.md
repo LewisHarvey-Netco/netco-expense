@@ -329,6 +329,10 @@ Three distinct layers, each with a different purpose (see
   navigation, real rendering), at the cost of being slower. Run via `npm run test:e2e` (headless)
   or `npm run test:e2e:headed` (visible browser). Use `PLAYWRIGHT_SLOW_MO=<ms>` to slow down
   actions for visual debugging, e.g. (PowerShell) `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`.
+  When a test fails, Playwright captures a screenshot of the page at the moment of failure plus an
+  `error-context.md` snapshot of the page state and writes them to
+  `test-results/<test-name>-chromium/` (configured via `screenshot: 'only-on-failure'` in
+  `playwright.config.ts`); traces are recorded only on retry (`trace: 'on-first-retry'`).
 
 E2E tests cover the finance review workflow: login as finance → navigate to All Expenses → filter
 → view detail → approve/request changes → verify status update.

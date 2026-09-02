@@ -182,7 +182,7 @@ describe('Expense detail page (/review/:id, finance)', () => {
     await waitFor(() => {
       expect(visitedPaths).toContain('/expenses')
     })
-    expect(await screen.findByText('Expenses')).toBeInTheDocument()
+    expect(await screen.findByText('My Expenses')).toBeInTheDocument()
   })
 
   it('redirects an unauthenticated user to /login', async () => {

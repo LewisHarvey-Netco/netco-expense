@@ -7,6 +7,6 @@ test('logs in as consultant and lands on expenses page', async ({ page }) => {
   await page.click('button[type="submit"]');
 
   await expect(page).toHaveURL(/\/expenses/);
-  await expect(page.getByText('Expenses')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My Expenses' })).toBeVisible();
   await expect(page.getByRole('banner').getByText('Alice Nielsen')).toBeVisible();
 });

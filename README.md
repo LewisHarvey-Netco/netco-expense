@@ -65,6 +65,8 @@ Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run test:ui
 
 For visual debugging, slow down E2E actions with `PLAYWRIGHT_SLOW_MO=<ms>`, e.g. (PowerShell) `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`.
 
+When an E2E test fails, Playwright writes a screenshot of the page at the moment of failure plus an `error-context.md` snapshot of the page state to `test-results/<test-name>-chromium/` (configured via `screenshot: 'only-on-failure'` in `playwright.config.ts`) — open those to see what the app looked like when the test broke.
+
 ## Project Structure
 
 ```

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAs } from './helpers';
+import { loginAs, statusBadge } from './helpers';
 
 // Test data notes (see src/mocks/expenses.json):
 // - The mock repository is in-memory and re-seeded from the mock JSON on every
@@ -18,7 +18,7 @@ test('finance approves a submitted expense', async ({ page }) => {
   await page.getByText('Taxi to Copenhagen airport for client visit').click();
 
   await expect(page).toHaveURL(/\/review\/e2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7/);
-  await expect(page.getByText('Submitted', { exact: true })).toBeVisible();
+  await expect(statusBadge(page, 'Submitted')).toBeVisible();
 
   await page.getByRole('button', { name: 'Approve' }).click();
   await page.getByRole('button', { name: 'Submit Decision' }).click();
@@ -38,7 +38,7 @@ test('finance requests changes with a comment', async ({ page }) => {
   await page.getByText('Team dinner at client premises in London').click();
 
   await expect(page).toHaveURL(/\/review\/e5e6f7a8-b9c0-d1e2-f3a4-b5c6d7e8f9a0/);
-  await expect(page.getByText('Submitted', { exact: true })).toBeVisible();
+  await expect(statusBadge(page, 'Submitted')).toBeVisible();
 
   await page.getByRole('button', { name: 'Request Changes' }).click();
   await page
@@ -72,7 +72,7 @@ test('requesting changes without a comment shows a validation error', async ({ p
     page.getByText('Comment is required when requesting changes'),
   ).toBeVisible();
   // The decision was not recorded; the expense is still decidable.
-  await expect(page.getByText('Submitted', { exact: true })).toBeVisible();
+  await expect(statusBadge(page, 'Submitted')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Approve' })).toBeEnabled();
 });
 
