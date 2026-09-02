@@ -404,7 +404,20 @@ E2E tests cover both workflows. Finance: login → All Expenses → filter → v
 approve/request changes → verify status update (`review-*.spec.ts`). Consultant: login →
 own-expenses list (scoped, submitter filter hidden) → status/type/date filters → view read-only
 detail → back → and an ownership-mismatch 404 when a consultant opens an expense they did not
-submit (`expenses-consultant.spec.ts`, `login-consultant.spec.ts`).
+submit (`expenses-consultant.spec.ts`, `login-consultant.spec.ts`). Consultant editing:
+edit + resubmit a `Submitted` expense (status → `Resubmitted`, list reflects the update),
+address finance feedback on a `Changes Requested` expense, re-edit a `Resubmitted` expense
+before finance re-reviews, `Approved` immutability (disabled fields, no Resubmit button),
+error recovery from an invalid resubmission (inline validation error, corrected retry), and
+the full cycle where finance approves a `Resubmitted` expense and the consultant's subsequent
+visit is read-only (`expenses-consultant-edit.spec.ts`). Shared helpers live in
+`e2e/helpers.ts`: `loginAs` (full-load login), `loginAsSpa` (login without a full page load,
+so the in-memory repository state survives a logout → login cycle), `statusBadge` (the
+detail-page status badge, scoped to the badge element so it never matches the "Submitted"
+field label or the header's role badge) and `expectDetailPageLoaded` (waits for the
+"Expense Details" card to render before a status assertion — React Router updates the URL via
+pushState before it re-renders the route, so the list page's badges may still be in the DOM in
+between and an unscoped text locator would hit a strict-mode violation).
 
 There are currently no isolated unit tests for individual functions (e.g. `roleHome()`) — coverage
 is achieved through the integration-style tests above, which was a deliberate choice given the

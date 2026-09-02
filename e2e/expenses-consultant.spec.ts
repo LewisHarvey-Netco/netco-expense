@@ -81,8 +81,9 @@ test('consultant opens own expense detail, fields are read-only, back returns to
   await expect(page.getByLabel('Project')).toBeDisabled();
   await expect(page.getByLabel('Description')).toBeDisabled();
 
-  // Consultants do not see the finance review form.
-  await expect(page.getByRole('heading', { name: 'Review Decision' })).toHaveCount(0);
+  // Consultants do not see the finance review form. (CardTitle is a plain
+  // div, not a heading, so match by text.)
+  await expect(page.getByText('Review Decision', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Approve' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Back to My Expenses' }).click();

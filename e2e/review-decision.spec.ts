@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAs, statusBadge } from './helpers';
+import { loginAs, statusBadge, expectDetailPageLoaded } from './helpers';
 
 // Test data notes (see src/mocks/expenses.json):
 // - The mock repository is in-memory and re-seeded from the mock JSON on every
@@ -90,8 +90,9 @@ test('a recorded decision persists across navigation', async ({ page }) => {
   await page.getByRole('button', { name: 'Back to All Expenses' }).click();
   await expect(page).toHaveURL(/\/review/);
   await page.getByText('Taxi to Copenhagen airport for client visit').click();
+  await expectDetailPageLoaded(page);
 
-  await expect(page.getByText('Approved', { exact: true })).toBeVisible();
+  await expect(statusBadge(page, 'Approved')).toBeVisible();
   await expect(
     page.getByText('Decision recorded. This expense has been approved.'),
   ).toBeVisible();

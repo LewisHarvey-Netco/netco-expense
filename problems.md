@@ -674,3 +674,24 @@ rather than trusting the tool's success/failure message.
 **Suggested fix:** The edit tool should re-read the file from disk immediately before reporting
 success/failure, so the reported status always matches the on-disk state. If a "could not find
 oldString" is returned, it should be certain the change did NOT apply (not ambiguous).
+
+## 2026-09-02 — `git stash pop` conflicts on the tracked `test-results/.last-run.json` artifact
+
+**What was attempted:** Temporarily stashing tracked changes (`git stash push`) to verify
+whether a pre-existing E2E test failure was caused by the current session's changes, then
+restoring them with `git stash pop`.
+
+**What went wrong:** `git stash pop` failed with "Your local changes to the following files
+would be overwritten by merge: `test-results/.last-run.json`". The Playwright run had rewritten
+that file between the stash and the pop, so the pop refused to overwrite the working-tree copy.
+
+**Root cause:** `test-results/.last-run.json` is tracked by git but is a test-run artifact that
+Playwright rewrites on every run. Any git operation that touches the working tree (stash pop,
+checkout) can conflict with it after a test run.
+
+**Status:** Worked around — discarded the artifact's working-tree change
+(`git checkout -- test-results/.last-run.json`) and re-ran `git stash pop`.
+
+**Suggested fix:** Add `test-results/` (or at least `test-results/.last-run.json`) to
+`.gitignore` so test artifacts don't show up as tracked modifications and don't conflict with
+git operations.

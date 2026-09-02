@@ -156,8 +156,8 @@ export default function ExpenseDetailCard({
                   />
                 )}
               />
-              {errors.amount && (
-                <p className="text-xs text-destructive">{errors.amount.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.amount?.message}</p>
               )}
             </div>
             <div className="flex flex-col gap-2">
@@ -177,8 +177,8 @@ export default function ExpenseDetailCard({
                   />
                 )}
               />
-              {errors.currency && (
-                <p className="text-xs text-destructive">{errors.currency.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.currency?.message}</p>
               )}
             </div>
           </div>
@@ -212,8 +212,8 @@ export default function ExpenseDetailCard({
                   </Select>
                 )}
               />
-              {errors.type && (
-                <p className="text-xs text-destructive">{errors.type.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.type?.message}</p>
               )}
             </div>
 
@@ -242,8 +242,8 @@ export default function ExpenseDetailCard({
                   />
                 )}
               />
-              {errors.receiptDate && (
-                <p className="text-xs text-destructive">{errors.receiptDate.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.receiptDate?.message}</p>
               )}
             </div>
 
@@ -269,8 +269,8 @@ export default function ExpenseDetailCard({
                   />
                 )}
               />
-              {errors.region && (
-                <p className="text-xs text-destructive">{errors.region.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.region?.message}</p>
               )}
             </div>
 
@@ -291,8 +291,8 @@ export default function ExpenseDetailCard({
                   />
                 )}
               />
-              {errors.project && (
-                <p className="text-xs text-destructive">{errors.project.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.project?.message}</p>
               )}
             </div>
 
@@ -318,8 +318,8 @@ export default function ExpenseDetailCard({
                   />
                 )}
               />
-              {errors.description && (
-                <p className="text-xs text-destructive">{errors.description.message}</p>
+              {isEditable && (
+                <p className="min-h-4 text-xs text-destructive">{errors.description?.message}</p>
               )}
             </div>
 
