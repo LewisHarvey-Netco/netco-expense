@@ -29,7 +29,7 @@
   },
   {
     "id": "e3c4d5e6-f7a8-b9c0-d1e2-f3a4b5c6d7e8",
-    "submitterId": "u2",
+    "submitterId": "u3",
     "description": "Hotel stay during Berlin conference",
     "type": "Accommodation",
     "amount": 320,
@@ -57,7 +57,7 @@
   },
   {
     "id": "e5e6f7a8-b9c0-d1e2-f3a4-b5c6d7e8f9a0",
-    "submitterId": "u2",
+    "submitterId": "u3",
     "description": "Team dinner at client premises in London",
     "type": "Dinner",
     "amount": 156.75,
@@ -85,7 +85,7 @@
   },
   {
     "id": "e7a8b9c0-d1e2-f3a4-b5c6-d7e8f9a0b1c2",
-    "submitterId": "u2",
+    "submitterId": "u3",
     "description": "Business lunch with potential client in Frankfurt",
     "type": "Lunch",
     "amount": 95,
@@ -113,7 +113,7 @@
   },
   {
     "id": "e9c0d1e2-f3a4-b5c6-d7e8-f9a0b1c2d3e4",
-    "submitterId": "u2",
+    "submitterId": "u3",
     "description": "Airport parking for London trip",
     "type": "Transport",
     "amount": 48,

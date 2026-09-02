@@ -6,7 +6,7 @@ import { loginAs, statusBadge } from './helpers';
 //   page load (ADR-0010, extended by ADR-0011), so each test starts from the baseline mock data.
 // - The expenses used below all start as "Submitted", a decidable state (ADR-0007):
 //   - "Taxi to Copenhagen airport for client visit"  (e2b3c4d5-..., 420.00 DKK, Alice)
-//   - "Team dinner at client premises in London"      (e5e6f7a8-..., 156.75 GBP, Bob)
+//   - "Team dinner at client premises in London"      (e5e6f7a8-..., 156.75 GBP, Tom)
 //   - "Uber from office to client site in Amsterdam"  (e8b9c0d1-..., 35.50 EUR, Alice)
 // - The /review page now reads from the repository via `getExpenses()` (ADR-0011), so when
 //   a decision is recorded, returning to /review shows the updated status immediately

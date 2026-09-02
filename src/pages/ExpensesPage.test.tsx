@@ -27,7 +27,7 @@ const financeUser = {
 }
 
 const aliceExpenses = mockExpenses.filter((expense) => expense.submitterId === 'u1')
-const bobExpenses = mockExpenses.filter((expense) => expense.submitterId === 'u2')
+const tomExpenses = mockExpenses.filter((expense) => expense.submitterId === 'u3')
 
 let visitedPaths: string[] = []
 
@@ -90,7 +90,7 @@ describe('My Expenses page (/expenses)', () => {
     for (const expense of aliceExpenses) {
       expect(screen.getByText(expense.description)).toBeInTheDocument()
     }
-    for (const expense of bobExpenses) {
+    for (const expense of tomExpenses) {
       expect(screen.queryByText(expense.description)).not.toBeInTheDocument()
     }
   })

@@ -9,7 +9,7 @@ import { loginAs } from './helpers';
 //   - "Train ticket Copenhagen to Malmö"         (e6f7a8b9-..., 289.00 DKK, Resubmitted, receipt 2025-07-22)
 //   - "Uber from office to client site in Amsterdam" (e8b9c0d1-..., 35.50 EUR, Submitted, receipt 2025-07-28)
 //   - "Coffee and pastries for morning standup"  (e0d1e2f3-..., 28.90 EUR, Resubmitted, receipt 2025-07-30)
-// - "Hotel stay during Berlin conference" (e3c4d5e6-...) was submitted by u2, not Alice.
+// - "Hotel stay during Berlin conference" (e3c4d5e6-...) was submitted by u3 (Tom), not Alice.
 // - The mock repository is in-memory and re-seeded from the mock JSON on every
 //   page load (ADR-0010), so each test starts from the baseline mock data.
 
@@ -92,7 +92,7 @@ test('consultant opens own expense detail, fields are read-only, back returns to
 test('consultant cannot view an expense they did not submit', async ({ page }) => {
   await loginAs(page, 'alice@netcompany.com');
 
-  // e3c4d5e6-... was submitted by u2, not Alice. The ownership check renders
+  // e3c4d5e6-... was submitted by u3 (Tom), not Alice. The ownership check renders
   // the same 404 as an unknown id (ADR-0012) so the response doesn't reveal
   // that the expense exists.
   await page.goto('/expenses/e3c4d5e6-f7a8-b9c0-d1e2-f3a4b5c6d7e8');
