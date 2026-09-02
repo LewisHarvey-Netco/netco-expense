@@ -13,5 +13,6 @@ import type { Expense, ExpenseStatus } from '@/types'
 export interface ExpenseRepository {
   getExpense(id: string): Promise<Expense | null>
   getExpenses(): Promise<Expense[]>
+  getExpensesBySubmitter(submitterId: string): Promise<Expense[]>
   updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense>
 }

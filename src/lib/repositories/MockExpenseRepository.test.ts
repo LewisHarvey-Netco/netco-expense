@@ -147,6 +147,94 @@ describe('MockExpenseRepository', () => {
     })
   })
 
+  describe('getExpensesBySubmitter', () => {
+    it('returns an empty array when no expenses match the submitter ID', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', submitterId: 'u1' })])
+
+      const expenses = await repo.getExpensesBySubmitter('u2')
+
+      expect(expenses).toEqual([])
+    })
+
+    it('returns an empty array when no expenses are stored', async () => {
+      const repo = new MockExpenseRepository([])
+
+      const expenses = await repo.getExpensesBySubmitter('u1')
+
+      expect(expenses).toEqual([])
+    })
+
+    it('returns all expenses when they all belong to the requested consultant', async () => {
+      const e1 = makeExpense({ id: 'e1', submitterId: 'u1' })
+      const e2 = makeExpense({ id: 'e2', submitterId: 'u1' })
+      const repo = new MockExpenseRepository([e1, e2])
+
+      const expenses = await repo.getExpensesBySubmitter('u1')
+
+      expect(expenses).toHaveLength(2)
+      expect(expenses[0]).toEqual(e1)
+      expect(expenses[1]).toEqual(e2)
+    })
+
+    it('returns only the requested consultant\'s expenses when multiple consultants are present', async () => {
+      const alice1 = makeExpense({ id: 'e1', submitterId: 'u1' })
+      const bob1 = makeExpense({ id: 'e2', submitterId: 'u2' })
+      const alice2 = makeExpense({ id: 'e3', submitterId: 'u1' })
+      const bob2 = makeExpense({ id: 'e4', submitterId: 'u2' })
+      const repo = new MockExpenseRepository([alice1, bob1, alice2, bob2])
+
+      const aliceExpenses = await repo.getExpensesBySubmitter('u1')
+      const bobExpenses = await repo.getExpensesBySubmitter('u2')
+
+      expect(aliceExpenses).toEqual([alice1, alice2])
+      expect(bobExpenses).toEqual([bob1, bob2])
+    })
+
+    it('preserves insertion order of the filtered expenses', async () => {
+      const e1 = makeExpense({ id: 'e1', submitterId: 'u1', description: 'First' })
+      const e2 = makeExpense({ id: 'e2', submitterId: 'u1', description: 'Second' })
+      const other = makeExpense({ id: 'e3', submitterId: 'u2' })
+      const e3 = makeExpense({ id: 'e4', submitterId: 'u1', description: 'Third' })
+      const repo = new MockExpenseRepository([e1, other, e2, e3])
+
+      const expenses = await repo.getExpensesBySubmitter('u1')
+
+      expect(expenses.map((e) => e.id)).toEqual(['e1', 'e2', 'e4'])
+    })
+
+    it('reflects prior mutations in the returned list', async () => {
+      const e1 = makeExpense({ id: 'e1', submitterId: 'u1', status: 'Submitted' })
+      const e2 = makeExpense({ id: 'e2', submitterId: 'u2', status: 'Submitted' })
+      const repo = new MockExpenseRepository([e1, e2])
+
+      await repo.updateExpenseStatus('e1', 'Approved')
+      const expenses = await repo.getExpensesBySubmitter('u1')
+
+      expect(expenses).toHaveLength(1)
+      expect(expenses[0].status).toBe('Approved')
+    })
+
+    it('returns a new array each time so external mutations do not affect internal state', async () => {
+      const e1 = makeExpense({ id: 'e1', submitterId: 'u1' })
+      const repo = new MockExpenseRepository([e1])
+
+      const firstCall = await repo.getExpensesBySubmitter('u1')
+      firstCall[0] = makeExpense({ id: 'e1', submitterId: 'u1', description: 'Modified' })
+
+      const secondCall = await repo.getExpensesBySubmitter('u1')
+      expect(secondCall[0].description).toBe(e1.description)
+    })
+
+    it('is async and returns a Promise (prepared for backend swap)', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1' })])
+
+      const pending = repo.getExpensesBySubmitter('u1')
+
+      expect(pending).toBeInstanceOf(Promise)
+      await expect(pending).resolves.toHaveLength(1)
+    })
+  })
+
   describe('reset', () => {
     it('restores baseline data after mutations', async () => {
       const baseline = [makeExpense({ id: 'e1', status: 'Submitted' })]

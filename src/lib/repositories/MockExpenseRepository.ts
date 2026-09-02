@@ -24,6 +24,10 @@ export class MockExpenseRepository implements ExpenseRepository {
     return Array.from(this.expenses.values())
   }
 
+  async getExpensesBySubmitter(submitterId: string): Promise<Expense[]> {
+    return Array.from(this.expenses.values()).filter((expense) => expense.submitterId === submitterId)
+  }
+
   async updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense> {
     const expense = this.expenses.get(id)
     if (!expense) {

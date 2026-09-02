@@ -207,8 +207,12 @@ back; it never edits the underlying data itself.
 The three pieces:
 
 - **Interface:** `src/lib/repositories/ExpenseRepository.ts` — the contract any implementation
-  must fulfil: `getExpense(id)`, `getExpenses()`, and `updateExpenseStatus(id, status, comment?)`. 
-  All return Promises, so call sites are already shaped like they're talking to a network API.
+  must fulfil: `getExpense(id)`, `getExpenses()`, `getExpensesBySubmitter(submitterId)`, and
+  `updateExpenseStatus(id, status, comment?)`. All return Promises, so call sites are already
+  shaped like they're talking to a network API. `getExpensesBySubmitter(submitterId)` is the
+  consultant-scoped read: it returns only expenses whose `submitterId` matches, establishing the
+  data-access boundary for consultant queries (it will enforce authorization server-side once a
+  real backend is introduced).
 - **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — keeps a copy of the
   mock expenses in an in-memory `Map`. `getExpenses()` returns all stored expenses (reflecting any
   prior mutations). `updateExpenseStatus` replaces the stored expense with a **new** object 
