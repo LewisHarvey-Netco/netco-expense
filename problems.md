@@ -621,3 +621,29 @@ tool on the saved output file to extract pass/fail lines.
 `|`-separated segment against the rules), or document that agents should not
 pipe allowed commands and should rely on the tool's built-in output capture
 instead.
+
+## 2026-09-02 — Playwright 1.62 removed `toHaveTextContent`; confusing TypeError at runtime
+
+**What was attempted:** Writing a new Playwright E2E test
+(`e2e/expenses-consultant.spec.ts`) using `expect(locator).toHaveTextContent('Lunch')` — the
+matcher used in countless Playwright examples and docs.
+
+**What went wrong:** The test failed with `TypeError:
+expect(...).toHaveTextContent is not a function`. No deprecation warning, no hint about the
+replacement — just a runtime TypeError that looks like a test-setup problem rather than a
+removed API. The installed `@playwright/test@1.62.1` type definitions
+(`node_modules/playwright/types/test.d.ts`) expose only `toHaveText` (exact match) and
+`toContainText` (substring match); `toHaveTextContent` no longer exists.
+
+**Root cause:** Playwright removed the long-deprecated `toHaveTextContent` matcher in a recent
+release (the repo has no pinned version history showing when the jump happened — the lockfile
+simply has 1.62.1). Code written against older Playwright docs/examples breaks silently at
+runtime.
+
+**Status:** Worked around — used `toContainText` (substring) for the select-trigger assertion,
+since the trigger's accessible text includes the chevron glyph (`"Lunch▼"`), which also rules
+out exact-match `toHaveText`.
+
+**Suggested fix:** Pin `@playwright/test` in `package.json` (or at least note the version in
+AGENTS.md) so matcher availability is predictable, and remember that on 1.62+ the text
+matchers are `toHaveText` / `toContainText`.

@@ -34,6 +34,22 @@ The detail page previously rendered everything inline (detail fields + review fo
 - **404 on ownership mismatch.** Rendering the identical 404 as an unknown id avoids leaking the existence of another consultant's expense.
 - **UX boundary, not a security boundary.** The client-side ownership check is an early-redirect optimization. The data-access boundary is the repository (`getExpensesBySubmitter()`), which must enforce authorization server-side once a real backend is introduced. Client-side checks alone are not sufficient for production.
 
+## Alternatives Considered
+
+- **Separate pages per role** (`ReviewDetailPage` + `ConsultantExpenseDetailPage`). Rejected: both
+  pages would render the same `ExpenseDetailCard` and share the same load/error/ownership logic,
+  so the split duplicates the load path, state, and layout scaffolding for a difference that is
+  only "does the review section render?" — more code to keep in sync on every change to the detail
+  card or load handling.
+- **Configuration-object pattern** (one page driven by a per-role config: which sections render,
+  which back link, etc.). Rejected: the only role difference today is the review section and the
+  back link; a config layer abstracts a two-case branch into indirection without buying
+  extensibility (there is no third role in scope). Revisit if a third viewer role appears.
+- **Redirect on ownership mismatch** (e.g. to `/expenses`) instead of rendering the 404 in place.
+  Rejected: a redirect reveals that the resource exists (the user is sent somewhere meaningful
+  about *their* data), and a client-side redirect is an extra hop for no benefit; rendering the
+  same 404 as an unknown id keeps the two failure cases indistinguishable.
+
 ## Consequences
 
 - `ExpenseDetailPage` is role-aware and is rendered by two routes with different `allowedRoles`; it must stay correct for both.

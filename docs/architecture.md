@@ -67,7 +67,7 @@ data-router/loader API). Route table:
 | `*` (catch-all) | `NotFoundPage` | Public — renders a 404 page with a "Go home" button back to `/` |
 
 `ExpenseDetailPage` is a single **role-aware** page: it serves both `/review/:id` (finance) and
-`/expenses/:id` (consultant). See "Role-Aware Expense Detail" below.
+`/expenses/:id` (consultant). See "Consultant Expense Viewing" below.
 
 Key principle: **there is no "return to originally requested URL" behavior.** After login, or
 when a route guard rejects access, the user always lands on their role's default home
@@ -112,7 +112,14 @@ There is currently no intermediate "feature" or "domain" folder layer (e.g. no
 list, forms, filters), consider introducing a feature-oriented folder before it becomes
 unmanageable; this is a decision to make deliberately, not by default.
 
-## Role-Aware Expense Detail
+## Consultant Expense Viewing
+
+Consultants can view their own submitted expenses (read-only) at `/expenses` (list) and
+`/expenses/:id` (detail), reusing the table and detail layouts already built for the finance
+review workflow. Finance behaviour is unchanged: `/review` still lists all expenses and
+`/review/:id` still shows the review decision form.
+
+### Role-aware detail component
 
 `ExpenseDetailPage` is a single page that serves both the finance review detail (`/review/:id`)
 and the consultant expense detail (`/expenses/:id`). It reads the current user via `useAuth()` and
@@ -123,12 +130,45 @@ renders conditionally:
   `repository.updateExpenseStatus()`.
 - **Consultant** — single-column layout: `ExpenseDetailCard` only (read-only).
 
+**Why a single page, not two.** Both roles render the same `ExpenseDetailCard`, share one load
+path and one set of page state, and differ only in layout and the presence of the review section.
+A single role-aware page keeps that logic centralized (one place to load, validate, and update the
+expense) and avoids duplicating the card and its state across two pages. The role branch lives in
+its natural context: `ProtectedRoute` (with `allowedRoles`) keeps the roles from colliding at the
+entry point, and `useAuth()` inside the page is where the role is already known. See
+`docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
+
 **Ownership check (consultants only).** After loading, the page verifies
 `expense.submitterId === user.id`. On a mismatch it renders the same 404 as an unknown id, so the
 response doesn't reveal that the expense exists. This is a **UX boundary only, not a security
 boundary**: the data-access boundary is the repository (`getExpensesBySubmitter()`), which must
 enforce authorization server-side once a real backend is introduced. Client-side checks alone are
-not sufficient for production. See `docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
+not sufficient for production. See
+`docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
+
+### Repository-level filtering
+
+The consultant list is scoped at the data-access layer, not the UI. `ExpensesPage` fetches via
+`repository.getExpensesBySubmitter(user.id)`, which returns only expenses whose `submitterId`
+matches. This is the data-access boundary for consultant queries: the repository, not the
+component, decides what a consultant may read. The UI reinforces it (the consultant `FilterPanel`
+hides the submitter filter via `showSubmitterFilter={false}`), but the enforcement point is the
+repository so it will carry over to a real backend. See
+`docs/decisions/architecture/0010-mock-repository-pattern.md`.
+
+### Phase 2 vision
+
+The detail card is built to become editable without a refactor. The fields that will be
+consultant-editable in phase 2 (amount, currency, type, receipt date, region, project,
+description) are already rendered as **disabled** react-hook-form fields validated by the Zod
+schema in `src/schemas/expense.ts`; workflow-managed fields (status, submission date, submitter,
+internal notes, receipt) remain plain display elements. Enabling editing is therefore a matter of
+un-disabling those fields and wiring the form's `onSubmit` to a new
+`repository.updateExpense()`, which will update the fields and transition the status to
+`Resubmitted`. Editing will be locked when the status is `Approved` (terminal). The finance
+review form (`ExpenseReviewSection`) is unaffected. The `Resubmitted` status transition and
+inline editing are out of scope for the current phase — see
+`plans/consultant-expense-viewing/PRD-consultant-expense-viewing.md` (Out of Scope).
 
 ## State Management
 
@@ -334,8 +374,11 @@ Three distinct layers, each with a different purpose (see
   `test-results/<test-name>-chromium/` (configured via `screenshot: 'only-on-failure'` in
   `playwright.config.ts`); traces are recorded only on retry (`trace: 'on-first-retry'`).
 
-E2E tests cover the finance review workflow: login as finance → navigate to All Expenses → filter
-→ view detail → approve/request changes → verify status update.
+E2E tests cover both workflows. Finance: login → All Expenses → filter → view detail →
+approve/request changes → verify status update (`review-*.spec.ts`). Consultant: login →
+own-expenses list (scoped, submitter filter hidden) → status/type/date filters → view read-only
+detail → back → and an ownership-mismatch 404 when a consultant opens an expense they did not
+submit (`expenses-consultant.spec.ts`, `login-consultant.spec.ts`).
 
 There are currently no isolated unit tests for individual functions (e.g. `roleHome()`) — coverage
 is achieved through the integration-style tests above, which was a deliberate choice given the
