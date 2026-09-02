@@ -129,6 +129,16 @@ export default function ExpenseDetailPage() {
     }
   }
 
+  // A consultant resubmits their own expense. The card owns the submission
+  // feedback (loading/success/error); the page only performs the data mutation
+  // and refreshes the displayed expense. Rejections propagate to the card,
+  // which surfaces the inline error and keeps the button enabled for retry.
+  async function handleResubmit(updatedExpense: Expense) {
+    if (!id) return
+    const updated = await repo.updateExpense(id, updatedExpense)
+    setExpense(updated)
+  }
+
   return (
     <div className="min-h-svh bg-background">
       <Header />
@@ -145,7 +155,12 @@ export default function ExpenseDetailPage() {
         <PageTitle className="mb-6">Expense Detail</PageTitle>
         {isFinance ? (
           <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-            <ExpenseDetailCard expense={expense} role={user.role} isEditable={isEditable} />
+            <ExpenseDetailCard
+              expense={expense}
+              role={user.role}
+              isEditable={isEditable}
+              onResubmit={handleResubmit}
+            />
             <Card>
               <CardHeader>
                 <CardTitle>Review Decision</CardTitle>
@@ -165,7 +180,12 @@ export default function ExpenseDetailPage() {
             </Card>
           </div>
         ) : (
-          <ExpenseDetailCard expense={expense} role={user.role} isEditable={isEditable} />
+          <ExpenseDetailCard
+            expense={expense}
+            role={user.role}
+            isEditable={isEditable}
+            onResubmit={handleResubmit}
+          />
         )}
       </main>
     </div>

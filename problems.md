@@ -647,3 +647,30 @@ out exact-match `toHaveText`.
 **Suggested fix:** Pin `@playwright/test` in `package.json` (or at least note the version in
 AGENTS.md) so matcher availability is predictable, and remember that on 1.62+ the text
 matchers are `toHaveText` / `toContainText`.
+
+## 2026-09-02 — Edit tool reports "Could not find oldString" but the edit was applied
+
+**What was attempted:** A sequence of `edit` calls on `src/pages/ExpenseDetailPage.test.tsx`
+and `src/components/expenses/ExpenseDetailCard.stories.tsx` (adding a new `describe` block,
+then adding a `const` to it; adding a Storybook `decorators` array).
+
+**What went wrong:** Several `edit` calls returned `Could not find oldString in the file` even
+though the `oldString` was present in the file (and, on re-reading, the intended change WAS in
+the file). Conversely, an earlier call that reported "Edit applied successfully" needed a
+re-read to confirm the exact resulting content. The net effect: the reported success/failure
+status did not reliably reflect the file's actual state, so every edit had to be followed by a
+`read`/`grep` to verify what really landed. This is distinct from the shadcn/permission issues
+above — it is the edit tool's own confirmation being unreliable.
+
+**Root cause:** Unknown. Possibly a race between applying the edit and re-reading the file for
+the match/confirmation check, or stale in-memory file state when edits are made in quick
+succession on the same file. Not reproducible on demand (some edits in the same session
+reported correctly), which makes it hard to pin down.
+
+**Status:** Worked around — after every `edit` (especially on a file just edited), re-read the
+affected region or `grep` for the expected text to confirm the real state before proceeding,
+rather than trusting the tool's success/failure message.
+
+**Suggested fix:** The edit tool should re-read the file from disk immediately before reporting
+success/failure, so the reported status always matches the on-disk state. If a "could not find
+oldString" is returned, it should be certain the change did NOT apply (not ambiguous).

@@ -75,8 +75,9 @@ finance feedback without manual support. Two questions needed deciding:
 - The card now shows inline validation errors (on blur) for the editable fields, matching the
   error-display convention of `LoginPage` and `ReviewDecisionForm`.
 - The resubmit action (submit → `repository.updateExpense()` → status `Resubmitted` →
-  feedback) is a separate step tracked in `plans/consultant-expense-editing/`; until it lands,
-  an editable form has no submit button yet.
+  feedback) is implemented by ADR-0014: the card's `onResubmit` callback is wired by
+  `ExpenseDetailPage` to `repository.updateExpense()`, and the "Resubmit" button appears whenever
+  `isEditable` is true and a callback is supplied.
 - Supersedes the read-only consultant detail described in ADR-0012's consequences for the
   non-terminal statuses; the ownership check (consultants see only their own expenses) is
   unchanged and still gates the editable view.

@@ -52,7 +52,7 @@ test('consultant opens own expense detail, fields are read-only, back returns to
   await page.getByText('Client lunch meeting at Restaurant Noma').click();
 
   await expect(page).toHaveURL(
-    /\/expenses\/e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6/,
+    /\/expenses\/e1a2b3c4-d5e6-4f7a-8b9c-d1e2f3a4b5c6/,
   );
   await expect(page.getByRole('heading', { name: 'Expense Detail' })).toBeVisible();
 
@@ -95,7 +95,7 @@ test('consultant cannot view an expense they did not submit', async ({ page }) =
   // e3c4d5e6-... was submitted by u3 (Tom), not Alice. The ownership check renders
   // the same 404 as an unknown id (ADR-0012) so the response doesn't reveal
   // that the expense exists.
-  await page.goto('/expenses/e3c4d5e6-f7a8-b9c0-d1e2-f3a4b5c6d7e8');
+  await page.goto('/expenses/e3c4d5e6-f7a8-4b9c-8d1e-f3a4b5c6d7e8');
 
   await expect(page.getByText('404')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();

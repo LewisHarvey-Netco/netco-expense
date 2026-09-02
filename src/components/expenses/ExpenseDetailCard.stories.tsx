@@ -1,10 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { MemoryRouter } from 'react-router-dom'
 import ExpenseDetailCard from '@/components/expenses/ExpenseDetailCard'
 import type { Expense } from '@/types'
 
 const meta: Meta<typeof ExpenseDetailCard> = {
   title: 'Components/ExpenseDetailCard',
   component: ExpenseDetailCard,
+  // The card uses useNavigate for the "Back to Expenses" link, so every story
+  // needs a Router in scope.
+  decorators: [
+    (Story) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
   parameters: {
     layout: 'padded',
   },
@@ -14,7 +24,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const baseExpense: Expense = {
-  id: 'e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6',
+    id: 'e1a2b3c4-d5e6-4f7a-8b9c-d1e2f3a4b5c6',
   submitterId: 'u1',
   description: 'Client lunch meeting at Restaurant Noma',
   type: 'Lunch',
@@ -124,6 +134,44 @@ export const Finance: Story = {
       description: {
         story:
           'Viewed by finance. Identical to the default card; the internal notes field is shown with a "No notes yet" placeholder when empty — the same behaviour for every role.',
+      },
+    },
+  },
+}
+
+export const EditableWithResubmit: Story = {
+  args: {
+    expense: { ...baseExpense, status: 'Submitted' },
+    role: 'consultant',
+    isEditable: true,
+    // Resolves after a short delay so the "Resubmitting…" loading state is
+    // visible; on fulfilment the success message and "Back to Expenses" link
+    // appear (the success message auto-dismisses after ~3 seconds).
+    onResubmit: () => new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consultant with a wired onResubmit callback. The "Resubmit" button is shown; clicking it validates the form, shows a loading state while the (simulated) update is in flight, then an inline success message and a "Back to Expenses" link.',
+      },
+    },
+  },
+}
+
+export const ResubmitFails: Story = {
+  args: {
+    expense: { ...baseExpense, status: 'Submitted' },
+    role: 'consultant',
+    isEditable: true,
+    // Rejects so the inline error is shown and the button stays enabled for retry.
+    onResubmit: () => Promise.reject(new Error('Network error')),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consultant whose resubmit fails. Clicking "Resubmit" shows an inline error message and keeps the button enabled so the user can retry immediately.',
       },
     },
   },

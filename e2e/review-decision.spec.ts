@@ -17,7 +17,7 @@ test('finance approves a submitted expense', async ({ page }) => {
 
   await page.getByText('Taxi to Copenhagen airport for client visit').click();
 
-  await expect(page).toHaveURL(/\/review\/e2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7/);
+  await expect(page).toHaveURL(/\/review\/e2b3c4d5-e6f7-4a8b-9c0d-e2f3a4b5c6d7/);
   await expect(statusBadge(page, 'Submitted')).toBeVisible();
 
   await page.getByRole('button', { name: 'Approve' }).click();
@@ -37,7 +37,7 @@ test('finance requests changes with a comment', async ({ page }) => {
 
   await page.getByText('Team dinner at client premises in London').click();
 
-  await expect(page).toHaveURL(/\/review\/e5e6f7a8-b9c0-d1e2-f3a4-b5c6d7e8f9a0/);
+  await expect(page).toHaveURL(/\/review\/e5e6f7a8-b9c0-4d1e-8f3a-b5c6d7e8f9a0/);
   await expect(statusBadge(page, 'Submitted')).toBeVisible();
 
   await page.getByRole('button', { name: 'Request Changes' }).click();
@@ -63,7 +63,7 @@ test('requesting changes without a comment shows a validation error', async ({ p
 
   await page.getByText('Uber from office to client site in Amsterdam').click();
 
-  await expect(page).toHaveURL(/\/review\/e8b9c0d1-e2f3-a4b5-c6d7-e8f9a0b1c2d3/);
+  await expect(page).toHaveURL(/\/review\/e8b9c0d1-e2f3-4a4b-9c6d-e8f9a0b1c2d3/);
 
   await page.getByRole('button', { name: 'Request Changes' }).click();
   await page.getByRole('button', { name: 'Submit Decision' }).click();
@@ -107,7 +107,7 @@ test('the expense list shows updated status immediately on return from detail pa
 
   // Navigate to the detail page
   await expenseRow.click();
-  await expect(page).toHaveURL(/\/review\/e2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7/);
+  await expect(page).toHaveURL(/\/review\/e2b3c4d5-e6f7-4a8b-9c0d-e2f3a4b5c6d7/);
 
   // Approve the expense
   await page.getByRole('button', { name: 'Approve' }).click();

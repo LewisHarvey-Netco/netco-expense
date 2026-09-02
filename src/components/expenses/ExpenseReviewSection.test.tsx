@@ -7,7 +7,7 @@ import '@testing-library/jest-dom'
 
 function makeExpense(overrides: Partial<Expense> = {}): Expense {
   return {
-    id: 'e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6',
+    id: 'e1a2b3c4-d5e6-4f7a-8b9c-d1e2f3a4b5c6',
     submitterId: 'u1',
     description: 'Client lunch meeting at Restaurant Noma',
     type: 'Lunch',

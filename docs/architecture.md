@@ -161,7 +161,7 @@ hides the submitter filter via `showSubmitterFilter={false}`), but the enforceme
 repository so it will carry over to a real backend. See
 `docs/decisions/architecture/0010-mock-repository-pattern.md`.
 
-### Consultant editing (phase 2, in progress)
+### Consultant editing
 
 The detail card's consultant-editable fields (amount, currency, type, receipt date, region,
 project, description) are react-hook-form fields validated by the Zod schema in
@@ -173,11 +173,16 @@ viewer's role and the expense status: consultants get `true` for `Submitted`,
 `Changes Requested`, and `Resubmitted`, and `false` for `Approved`; finance always gets
 `false`. See ADR-0013.
 
-The remaining piece is the resubmit flow: wiring the form's submit to
-`repository.updateExpense()` (which updates the fields and transitions the status to
-`Resubmitted`, and rejects `Approved` expenses) plus the loading/success/error feedback —
-tracked in `plans/consultant-expense-editing/`. The finance review form
-(`ExpenseReviewSection`) is unaffected.
+**Resubmit.** When `isEditable` is true the card also renders a "Resubmit" button (gated on an
+`onResubmit` callback prop). On a valid submit the card calls `onResubmit` with the form values
+plus the expense's `id` and renders all submission feedback itself — a loading state on the
+button while pending, an inline success message (auto-dismissed after ~3s) plus a "Back to
+Expenses" link on fulfilment, and an inline error with the button left enabled for retry on
+rejection. The page supplies `onResubmit` as a handler that calls
+`repository.updateExpense(id, updatedExpense)` (which updates the fields, transitions the status
+to `Resubmitted`, and rejects `Approved` expenses) and stores the returned expense, re-rendering
+the card with the new status. This extends the ADR-0008 "form dumb / page smart, callback-driven"
+pattern; see ADR-0014. The finance review form (`ExpenseReviewSection`) is unaffected.
 
 ## State Management
 
@@ -266,8 +271,10 @@ together via `@hookform/resolvers/zod`. The app has three forms:
 - **`ExpenseDetailCard`** — the expense detail form. Its seven consultant-editable fields are
   validated by the shared `expenseSchema` (Zod) in `src/schemas/expense.ts`; the form validates
   on blur and shows inline field errors. The fields are disabled unless the card's `isEditable`
-  prop is true (see ADR-0013). The submit handler (resubmit) is not wired yet — that is the
-  remaining piece of the consultant editing feature.
+  prop is true (see ADR-0013). When `isEditable` and an `onResubmit` callback are both supplied,
+  a "Resubmit" button submits the form: the card calls `onResubmit` with the form values plus the
+  expense's `id` and renders the loading/success/error feedback itself, while the page performs
+  the `repository.updateExpense()` mutation (see ADR-0014).
 
 All forms follow the same pattern: zod schema → `useForm({ resolver: zodResolver(...) })` →
 shadcn `Input`/`Label` bound via `register()` or `Controller` → submit handler calling into the

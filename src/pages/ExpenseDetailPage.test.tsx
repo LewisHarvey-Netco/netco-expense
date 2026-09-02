@@ -419,3 +419,103 @@ describe('form editability by role and status', () => {
     )
   })
 })
+
+describe('consultant resubmit integration', () => {
+  // The card validates the whole form (including the expense id) against the
+  // Zod schema, which requires a strict RFC 4122 UUID. The default makeExpense
+  // id is not a valid UUID, so these tests use a real one.
+  const resubmitId = 'e1a2b3c4-d5e6-4f7a-8b9c-d1e2f3a4b5c6'
+
+  it.each(['Submitted', 'Changes Requested', 'Resubmitted'] as const)(
+    'resubmitting a %s expense calls updateExpense and updates the displayed status to Resubmitted',
+    async (status) => {
+      const user = userEvent.setup()
+      seedSession(consultantUser)
+      const initial = makeExpense({ id: resubmitId, status })
+      const repo = createMockRepository(initial)
+      repo.updateExpense.mockResolvedValue({ ...initial, status: 'Resubmitted' })
+      renderAppAt(`/expenses/${resubmitId}`, repo)
+
+      await user.click(await screen.findByRole('button', { name: 'Resubmit' }))
+
+      await waitFor(() =>
+        expect(repo.updateExpense).toHaveBeenCalledWith(
+          resubmitId,
+          expect.objectContaining({ description: initial.description, amount: 100 }),
+        ),
+      )
+      expect(await screen.findByText('Resubmitted')).toBeInTheDocument()
+    },
+  )
+
+  it('passes the edited amount to updateExpense', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    repo.updateExpense.mockResolvedValue({ ...initial, status: 'Resubmitted', amount: 250 })
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    const amount = await screen.findByLabelText('Amount')
+    await user.clear(amount)
+    await user.type(amount, '250')
+    await user.click(screen.getByRole('button', { name: 'Resubmit' }))
+
+    await waitFor(() =>
+      expect(repo.updateExpense).toHaveBeenCalledWith(
+        resubmitId,
+        expect.objectContaining({ amount: 250 }),
+      ),
+    )
+  })
+
+  it('shows a success message and a Back to Expenses link after a successful resubmit', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    repo.updateExpense.mockResolvedValue({ ...initial, status: 'Resubmitted' })
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    await user.click(await screen.findByRole('button', { name: 'Resubmit' }))
+
+    expect(await screen.findByText('Expense resubmitted successfully.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back to Expenses' })).toBeInTheDocument()
+  })
+
+  it('shows an error and keeps the Resubmit button enabled when the update fails', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    repo.updateExpense.mockRejectedValue(new Error('Network error'))
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    await user.click(await screen.findByRole('button', { name: 'Resubmit' }))
+
+    expect(
+      await screen.findByText('Failed to resubmit the expense. Please try again.'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Resubmit' })).toBeEnabled()
+  })
+
+  it('does not show a Resubmit button for a finance viewer', async () => {
+    seedSession(financeUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    renderAppAt(`/review/${resubmitId}`, repo)
+
+    await screen.findByText('Expense Detail')
+    expect(screen.queryByRole('button', { name: 'Resubmit' })).not.toBeInTheDocument()
+  })
+
+  it('does not show a Resubmit button for an approved expense', async () => {
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Approved' })
+    const repo = createMockRepository(initial)
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    await screen.findByText('Expense Detail')
+    expect(screen.queryByRole('button', { name: 'Resubmit' })).not.toBeInTheDocument()
+  })
+})

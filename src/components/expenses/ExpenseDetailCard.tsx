@@ -1,8 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ReceiptIcon } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeftIcon, Loader2Icon, ReceiptIcon } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge, STATUS_VARIANTS } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,7 +19,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { expenseSchema, type ExpenseFormValues } from '@/schemas/expense'
 import users from '@/mocks/users.json'
-import { EXPENSE_TYPES, type Expense, type Role } from '@/types'
+import { EXPENSE_TYPES, roleHome, type Expense, type Role } from '@/types'
 
 interface ExpenseDetailCardProps {
   expense: Expense
@@ -32,6 +35,16 @@ interface ExpenseDetailCardProps {
    * is the behaviour for finance viewers and for approved expenses.
    */
   isEditable?: boolean
+  /**
+   * Called with the updated expense (current form values + the expense's id)
+   * when the user resubmits a valid form. The returned promise drives the
+   * submission feedback: a loading state on the button while pending, an
+   * inline error on rejection, and an inline success message (auto-dismissed
+   * after 3 seconds) plus a "Back to Expenses" link on fulfilment. The
+   * "Resubmit" button is only rendered when both `isEditable` and `onResubmit`
+   * are provided.
+   */
+  onResubmit?: (updatedExpense: Expense) => Promise<void>
 }
 
 function getSubmitterName(submitterId: string): string {
@@ -57,7 +70,12 @@ function formatDate(dateStr: string): string {
  * as fields become invalid. Workflow-managed fields (status, submission date,
  * submitter, internal notes, receipt) are plain display elements.
  */
-export default function ExpenseDetailCard({ expense, isEditable = false }: ExpenseDetailCardProps) {
+export default function ExpenseDetailCard({
+  expense,
+  isEditable = false,
+  onResubmit,
+}: ExpenseDetailCardProps) {
+  const navigate = useNavigate()
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
     mode: 'onBlur',
@@ -65,6 +83,9 @@ export default function ExpenseDetailCard({ expense, isEditable = false }: Expen
   })
 
   const errors = form.formState.errors
+  const isSubmitting = form.formState.isSubmitting
+  const [message, setMessage] = useState<'success' | 'error' | null>(null)
+  const [resubmitted, setResubmitted] = useState(false)
 
   // Keep the form in sync if the expense is replaced (e.g. after a status
   // update re-renders the card). When not editable all fields are disabled, so
@@ -72,6 +93,35 @@ export default function ExpenseDetailCard({ expense, isEditable = false }: Expen
   useEffect(() => {
     form.reset(expense)
   }, [expense, form])
+
+  // Clear the submission feedback when a different expense is shown, but not
+  // when the same expense is updated in place (e.g. after a successful
+  // resubmit, which must keep the success message and the back link).
+  useEffect(() => {
+    setMessage(null)
+    setResubmitted(false)
+  }, [expense.id])
+
+  // The success message is transient; the "Back to Expenses" link persists.
+  useEffect(() => {
+    if (message !== 'success') return
+    const timer = setTimeout(() => setMessage(null), 3000)
+    return () => clearTimeout(timer)
+  }, [message])
+
+  const canResubmit = isEditable && onResubmit !== undefined
+
+  async function handleResubmit(values: ExpenseFormValues) {
+    if (!onResubmit) return
+    setMessage(null)
+    try {
+      await onResubmit({ ...values, id: expense.id })
+      setResubmitted(true)
+      setMessage('success')
+    } catch {
+      setMessage('error')
+    }
+  }
 
   const hasNotes = expense.internalNotes !== null && expense.internalNotes !== ''
 
@@ -81,7 +131,7 @@ export default function ExpenseDetailCard({ expense, isEditable = false }: Expen
         <CardTitle>Expense Details</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-6">
+        <form onSubmit={form.handleSubmit(handleResubmit)} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
             <div className="flex flex-col gap-2">
               <Label htmlFor="expense-amount">Amount</Label>
@@ -96,7 +146,11 @@ export default function ExpenseDetailCard({ expense, isEditable = false }: Expen
                     disabled={!isEditable}
                     aria-invalid={!!errors.amount}
                     value={field.value}
-                    onChange={field.onChange}
+                    // A number input reports strings; convert so the form value
+                    // stays a number (an emptied field is '' until revalidated).
+                    onChange={(event) =>
+                      field.onChange(event.target.value === '' ? '' : event.target.valueAsNumber)
+                    }
                     onBlur={field.onBlur}
                     ref={field.ref}
                   />
@@ -288,6 +342,43 @@ export default function ExpenseDetailCard({ expense, isEditable = false }: Expen
               <p className="text-sm">Receipt not yet uploaded</p>
             </div>
           </div>
+
+          {message === 'success' && (
+            <Alert>
+              <AlertDescription>Expense resubmitted successfully.</AlertDescription>
+            </Alert>
+          )}
+
+          {message === 'error' && (
+            <Alert variant="destructive">
+              <AlertDescription>Failed to resubmit the expense. Please try again.</AlertDescription>
+            </Alert>
+          )}
+
+          {canResubmit && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2Icon className="animate-spin" />
+                    Resubmitting…
+                  </>
+                ) : (
+                  'Resubmit'
+                )}
+              </Button>
+              {resubmitted && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(roleHome('consultant'))}
+                >
+                  <ChevronLeftIcon />
+                  Back to Expenses
+                </Button>
+              )}
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>
