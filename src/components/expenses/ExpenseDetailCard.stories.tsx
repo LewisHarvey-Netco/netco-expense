@@ -36,7 +36,44 @@ export const Default: Story = {
     docs: {
       description: {
         story:
-          'Read-only expense detail card. Every editable field (amount, currency, type, receipt date, region, project, description) is a disabled form field, ready to be enabled for inline editing in a later phase. Status, submitter, submission date and the receipt placeholder are plain display elements.',
+          'Read-only expense detail card (isEditable defaults to false). Every editable field (amount, currency, type, receipt date, region, project, description) is a disabled form field. Status, submitter, submission date and the receipt placeholder are plain display elements.',
+      },
+    },
+  },
+}
+
+export const Editable: Story = {
+  args: {
+    expense: { ...baseExpense, status: 'Submitted' },
+    role: 'consultant',
+    isEditable: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consultant editing their own expense while it awaits review (isEditable=true). All form fields are enabled; validation errors appear inline when a field becomes invalid (e.g. clear the currency and type a non-ISO code, then blur).',
+      },
+    },
+  },
+}
+
+export const EditableChangesRequested: Story = {
+  args: {
+    expense: {
+      ...baseExpense,
+      status: 'Changes Requested',
+      internalNotes:
+        'Amount per person exceeds the policy limit. Please provide a business justification.',
+    },
+    role: 'consultant',
+    isEditable: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A consultant addressing finance feedback: the form is editable and the internal notes are shown in full.',
       },
     },
   },

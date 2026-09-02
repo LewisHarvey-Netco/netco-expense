@@ -22,11 +22,16 @@ interface ExpenseDetailCardProps {
   expense: Expense
   /**
    * The role of the user viewing the card. Accepted so the card's API matches
-   * the role-aware detail page; in phase 1 the card renders identically for
-   * every role (internal notes are shown for all roles, with a placeholder when
-   * there are none).
+   * the role-aware detail page; the card renders identically for every role
+   * (internal notes are shown for all roles, with a placeholder when there are
+   * none).
    */
   role?: Role
+  /**
+   * Enables the form fields for editing. Defaults to false (read-only), which
+   * is the behaviour for finance viewers and for approved expenses.
+   */
+  isEditable?: boolean
 }
 
 function getSubmitterName(submitterId: string): string {
@@ -43,24 +48,27 @@ function formatDate(dateStr: string): string {
 }
 
 /**
- * Read-only expense detail card.
+ * Expense detail card.
  *
- * Renders every expense field. The editable-in-phase-2 fields (amount, currency,
- * type, receipt date, region, project, description) are disabled react-hook-form
- * fields validated by the Zod schema in `src/schemas/expense.ts`, so enabling
- * editing later is a matter of un-disabling them and wiring a submit handler.
- * Workflow-managed fields (status, submission date, submitter, internal notes,
- * receipt) are plain display elements.
+ * Renders every expense field. The editable fields (amount, currency, type,
+ * receipt date, region, project, description) are react-hook-form fields
+ * validated by the Zod schema in `src/schemas/expense.ts`. They are disabled
+ * (read-only) unless `isEditable` is true; validation errors are shown inline
+ * as fields become invalid. Workflow-managed fields (status, submission date,
+ * submitter, internal notes, receipt) are plain display elements.
  */
-export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
+export default function ExpenseDetailCard({ expense, isEditable = false }: ExpenseDetailCardProps) {
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
+    mode: 'onBlur',
     defaultValues: expense,
   })
 
+  const errors = form.formState.errors
+
   // Keep the form in sync if the expense is replaced (e.g. after a status
-  // update re-renders the card). All fields are disabled, so no user input is
-  // lost on reset.
+  // update re-renders the card). When not editable all fields are disabled, so
+  // no user input is lost on reset.
   useEffect(() => {
     form.reset(expense)
   }, [expense, form])
@@ -85,7 +93,8 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                     id="expense-amount"
                     type="number"
                     step="0.01"
-                    disabled
+                    disabled={!isEditable}
+                    aria-invalid={!!errors.amount}
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
@@ -93,6 +102,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   />
                 )}
               />
+              {errors.amount && (
+                <p className="text-xs text-destructive">{errors.amount.message}</p>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="expense-currency">Currency</Label>
@@ -102,7 +114,8 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                 render={({ field }) => (
                   <Input
                     id="expense-currency"
-                    disabled
+                    disabled={!isEditable}
+                    aria-invalid={!!errors.currency}
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
@@ -110,6 +123,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   />
                 )}
               />
+              {errors.currency && (
+                <p className="text-xs text-destructive">{errors.currency.message}</p>
+              )}
             </div>
           </div>
 
@@ -123,9 +139,13 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   <Select
                     value={field.value}
                     onValueChange={(value) => field.onChange(value)}
-                    disabled
+                    disabled={!isEditable}
                   >
-                    <SelectTrigger id="expense-type" className="w-full">
+                    <SelectTrigger
+                      id="expense-type"
+                      className="w-full"
+                      aria-invalid={!!errors.type}
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -138,6 +158,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   </Select>
                 )}
               />
+              {errors.type && (
+                <p className="text-xs text-destructive">{errors.type.message}</p>
+              )}
             </div>
 
             <div>
@@ -156,7 +179,8 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   <Input
                     id="expense-receipt-date"
                     type="date"
-                    disabled
+                    disabled={!isEditable}
+                    aria-invalid={!!errors.receiptDate}
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
@@ -164,6 +188,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   />
                 )}
               />
+              {errors.receiptDate && (
+                <p className="text-xs text-destructive">{errors.receiptDate.message}</p>
+              )}
             </div>
 
             <div>
@@ -179,7 +206,8 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                 render={({ field }) => (
                   <Input
                     id="expense-region"
-                    disabled
+                    disabled={!isEditable}
+                    aria-invalid={!!errors.region}
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
@@ -187,6 +215,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   />
                 )}
               />
+              {errors.region && (
+                <p className="text-xs text-destructive">{errors.region.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -197,7 +228,8 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                 render={({ field }) => (
                   <Input
                     id="expense-project"
-                    disabled
+                    disabled={!isEditable}
+                    aria-invalid={!!errors.project}
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
@@ -205,6 +237,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   />
                 )}
               />
+              {errors.project && (
+                <p className="text-xs text-destructive">{errors.project.message}</p>
+              )}
             </div>
 
             <div>
@@ -220,7 +255,8 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                 render={({ field }) => (
                   <Textarea
                     id="expense-description"
-                    disabled
+                    disabled={!isEditable}
+                    aria-invalid={!!errors.description}
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
@@ -228,6 +264,9 @@ export default function ExpenseDetailCard({ expense }: ExpenseDetailCardProps) {
                   />
                 )}
               />
+              {errors.description && (
+                <p className="text-xs text-destructive">{errors.description.message}</p>
+              )}
             </div>
 
             <div className="sm:col-span-2">

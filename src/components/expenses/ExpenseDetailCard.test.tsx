@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import { userEvent } from '@testing-library/user-event'
 import { describe, it, expect } from 'vitest'
 import ExpenseDetailCard from '@/components/expenses/ExpenseDetailCard'
 import type { Expense } from '@/types'
@@ -97,7 +98,7 @@ describe('ExpenseDetailCard', () => {
     })
   })
 
-  describe('all form fields are disabled (read-only)', () => {
+  describe('all form fields are disabled by default (read-only)', () => {
     it('disables the amount, currency, receipt date, region, project and description fields', () => {
       render(<ExpenseDetailCard expense={makeExpense()} />)
       expect(screen.getByLabelText('Amount')).toBeDisabled()
@@ -111,6 +112,67 @@ describe('ExpenseDetailCard', () => {
     it('disables the type field', () => {
       render(<ExpenseDetailCard expense={makeExpense()} />)
       expect(screen.getByLabelText('Type')).toBeDisabled()
+    })
+  })
+
+  describe('isEditable prop', () => {
+    it('enables all form fields when isEditable is true', () => {
+      render(<ExpenseDetailCard expense={makeExpense()} isEditable />)
+      expect(screen.getByLabelText('Amount')).toBeEnabled()
+      expect(screen.getByLabelText('Currency')).toBeEnabled()
+      expect(screen.getByLabelText('Type')).toBeEnabled()
+      expect(screen.getByLabelText('Receipt date')).toBeEnabled()
+      expect(screen.getByLabelText('Region')).toBeEnabled()
+      expect(screen.getByLabelText('Project')).toBeEnabled()
+      expect(screen.getByLabelText('Description')).toBeEnabled()
+    })
+
+    it('keeps all form fields disabled when isEditable is explicitly false', () => {
+      render(<ExpenseDetailCard expense={makeExpense()} isEditable={false} />)
+      expect(screen.getByLabelText('Amount')).toBeDisabled()
+      expect(screen.getByLabelText('Currency')).toBeDisabled()
+      expect(screen.getByLabelText('Type')).toBeDisabled()
+      expect(screen.getByLabelText('Receipt date')).toBeDisabled()
+      expect(screen.getByLabelText('Region')).toBeDisabled()
+      expect(screen.getByLabelText('Project')).toBeDisabled()
+      expect(screen.getByLabelText('Description')).toBeDisabled()
+    })
+  })
+
+  describe('validation errors', () => {
+    it('shows a validation error when an editable field becomes invalid', async () => {
+      const user = userEvent.setup()
+      render(<ExpenseDetailCard expense={makeExpense()} isEditable />)
+
+      const currency = screen.getByLabelText('Currency')
+      await user.clear(currency)
+      await user.type(currency, 'xx')
+      await user.tab()
+
+      expect(screen.getByText('Currency must be a 3-letter ISO 4217 code')).toBeInTheDocument()
+    })
+
+    it('clears the validation error once the field is valid again', async () => {
+      const user = userEvent.setup()
+      render(<ExpenseDetailCard expense={makeExpense()} isEditable />)
+
+      const currency = screen.getByLabelText('Currency')
+      await user.clear(currency)
+      await user.type(currency, 'xx')
+      await user.tab()
+      expect(screen.getByText('Currency must be a 3-letter ISO 4217 code')).toBeInTheDocument()
+
+      await user.clear(currency)
+      await user.type(currency, 'EUR')
+      await user.tab()
+      expect(
+        screen.queryByText('Currency must be a 3-letter ISO 4217 code'),
+      ).not.toBeInTheDocument()
+    })
+
+    it('shows no validation errors when the form is not editable', () => {
+      render(<ExpenseDetailCard expense={makeExpense()} />)
+      expect(screen.queryByText(/must be/i)).not.toBeInTheDocument()
     })
   })
 

@@ -114,10 +114,12 @@ unmanageable; this is a decision to make deliberately, not by default.
 
 ## Consultant Expense Viewing
 
-Consultants can view their own submitted expenses (read-only) at `/expenses` (list) and
-`/expenses/:id` (detail), reusing the table and detail layouts already built for the finance
-review workflow. Finance behaviour is unchanged: `/review` still lists all expenses and
-`/review/:id` still shows the review decision form.
+Consultants can view their own submitted expenses at `/expenses` (list) and `/expenses/:id`
+(detail), reusing the table and detail layouts already built for the finance review workflow.
+On the detail page the expense form is **editable while the expense is in a non-terminal
+status** (`Submitted`, `Changes Requested`, `Resubmitted`) and read-only once `Approved`
+(see ADR-0013). Finance behaviour is unchanged: `/review` still lists all expenses and
+`/review/:id` still shows the review decision form, and finance always sees a read-only form.
 
 ### Role-aware detail component
 
@@ -125,10 +127,13 @@ review workflow. Finance behaviour is unchanged: `/review` still lists all expen
 and the consultant expense detail (`/expenses/:id`). It reads the current user via `useAuth()` and
 renders conditionally:
 
-- **Finance** — two-column layout: `ExpenseDetailCard` (left) and a "Review Decision" card
-  wrapping `ExpenseReviewSection` (right). The review section's submit handler is wired to
-  `repository.updateExpenseStatus()`.
-- **Consultant** — single-column layout: `ExpenseDetailCard` only (read-only).
+- **Finance** — two-column layout: `ExpenseDetailCard` (left, always read-only) and a
+  "Review Decision" card wrapping `ExpenseReviewSection` (right). The review section's submit
+  handler is wired to `repository.updateExpenseStatus()`.
+- **Consultant** — single-column layout: `ExpenseDetailCard` only, with `isEditable` set to
+  `true` when the expense status is `Submitted`, `Changes Requested`, or `Resubmitted`, and
+  `false` when `Approved`. The page computes `isEditable` from role + status; the card only
+  enables or disables its form fields (see ADR-0013).
 
 **Why a single page, not two.** Both roles render the same `ExpenseDetailCard`, share one load
 path and one set of page state, and differ only in layout and the presence of the review section.
@@ -156,19 +161,23 @@ hides the submitter filter via `showSubmitterFilter={false}`), but the enforceme
 repository so it will carry over to a real backend. See
 `docs/decisions/architecture/0010-mock-repository-pattern.md`.
 
-### Phase 2 vision
+### Consultant editing (phase 2, in progress)
 
-The detail card is built to become editable without a refactor. The fields that will be
-consultant-editable in phase 2 (amount, currency, type, receipt date, region, project,
-description) are already rendered as **disabled** react-hook-form fields validated by the Zod
-schema in `src/schemas/expense.ts`; workflow-managed fields (status, submission date, submitter,
-internal notes, receipt) remain plain display elements. Enabling editing is therefore a matter of
-un-disabling those fields and wiring the form's `onSubmit` to a new
-`repository.updateExpense()`, which will update the fields and transition the status to
-`Resubmitted`. Editing will be locked when the status is `Approved` (terminal). The finance
-review form (`ExpenseReviewSection`) is unaffected. The `Resubmitted` status transition and
-inline editing are out of scope for the current phase — see
-`plans/consultant-expense-viewing/PRD-consultant-expense-viewing.md` (Out of Scope).
+The detail card's consultant-editable fields (amount, currency, type, receipt date, region,
+project, description) are react-hook-form fields validated by the Zod schema in
+`src/schemas/expense.ts`; workflow-managed fields (status, submission date, submitter, internal
+notes, receipt) are plain display elements. The card takes an `isEditable` prop (default
+`false`) that enables or disables those fields, and shows inline validation errors as fields
+become invalid (the form validates on blur). `ExpenseDetailPage` computes `isEditable` from the
+viewer's role and the expense status: consultants get `true` for `Submitted`,
+`Changes Requested`, and `Resubmitted`, and `false` for `Approved`; finance always gets
+`false`. See ADR-0013.
+
+The remaining piece is the resubmit flow: wiring the form's submit to
+`repository.updateExpense()` (which updates the fields and transitions the status to
+`Resubmitted`, and rejects `Approved` expenses) plus the loading/success/error feedback —
+tracked in `plans/consultant-expense-editing/`. The finance review form
+(`ExpenseReviewSection`) is unaffected.
 
 ## State Management
 
@@ -243,19 +252,26 @@ the plan to replace it with real backend auth.
 ## Form / Validation Architecture
 
 Forms use `react-hook-form` for form state/registration and `zod` for schema validation, wired
-together via `@hookform/resolvers/zod`. Currently there is one form (`LoginPage`):
+together via `@hookform/resolvers/zod`. The app has three forms:
 
-- The zod schema defines both field-level constraints and their user-facing error messages.
-- Validation errors are deliberately generic ("Invalid email or password") for both the email
-  and password fields, and for a failed credential match — the schema doesn't reveal whether an
-  email was malformed or simply didn't match, avoiding leaking which part of a login attempt was
-  wrong.
-- Submission calls `AuthContext.login()`; a failure path (bad credentials) is surfaced via a
-  shadcn `Alert`, separate from field-level errors (which come from zod/react-hook-form).
+- **`LoginPage`** — the login form. Its zod schema defines both field-level constraints and their
+  user-facing error messages, which are deliberately generic ("Invalid email or password") for
+  both the email and password fields and for a failed credential match — the schema doesn't
+  reveal whether an email was malformed or simply didn't match, avoiding leaking which part of a
+  login attempt was wrong. Submission calls `AuthContext.login()`; a failure path (bad
+  credentials) is surfaced via a shadcn `Alert`, separate from field-level errors (which come
+  from zod/react-hook-form).
+- **`ReviewDecisionForm`** (hosted by `ExpenseReviewSection`) — the finance decision form
+  (approve / request changes with a comment). See ADR-0008.
+- **`ExpenseDetailCard`** — the expense detail form. Its seven consultant-editable fields are
+  validated by the shared `expenseSchema` (Zod) in `src/schemas/expense.ts`; the form validates
+  on blur and shows inline field errors. The fields are disabled unless the card's `isEditable`
+  prop is true (see ADR-0013). The submit handler (resubmit) is not wired yet — that is the
+  remaining piece of the consultant editing feature.
 
-Any future forms should follow the same pattern: zod schema → `useForm({ resolver: zodResolver(...) })`
-→ shadcn `Input`/`Label` bound via `register()` → submit handler calling into the relevant
-context/service.
+All forms follow the same pattern: zod schema → `useForm({ resolver: zodResolver(...) })` →
+shadcn `Input`/`Label` bound via `register()` or `Controller` → submit handler calling into the
+relevant context/service.
 
 ## API / Service Boundaries
 
@@ -273,17 +289,20 @@ back; it never edits the underlying data itself.
 The three pieces:
 
 - **Interface:** `src/lib/repositories/ExpenseRepository.ts` — the contract any implementation
-  must fulfil: `getExpense(id)`, `getExpenses()`, `getExpensesBySubmitter(submitterId)`, and
-  `updateExpenseStatus(id, status, comment?)`. All return Promises, so call sites are already
-  shaped like they're talking to a network API. `getExpensesBySubmitter(submitterId)` is the
-  consultant-scoped read: it returns only expenses whose `submitterId` matches, establishing the
-  data-access boundary for consultant queries (it will enforce authorization server-side once a
-  real backend is introduced).
+  must fulfil: `getExpense(id)`, `getExpenses()`, `getExpensesBySubmitter(submitterId)`,
+  `updateExpenseStatus(id, status, comment?)`, and `updateExpense(id, updates)`. All return
+  Promises, so call sites are already shaped like they're talking to a network API.
+  `getExpensesBySubmitter(submitterId)` is the consultant-scoped read: it returns only expenses
+  whose `submitterId` matches, establishing the data-access boundary for consultant queries (it
+  will enforce authorization server-side once a real backend is introduced).
+  `updateExpense(id, updates)` merges partial form updates with the stored expense, validates the
+  merged object against the full schema, transitions the status to `Resubmitted`, and rejects
+  `Approved` expenses (see ADR-0013).
 - **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — keeps a copy of the
   mock expenses in an in-memory `Map`. `getExpenses()` returns all stored expenses (reflecting any
-  prior mutations). `updateExpenseStatus` replaces the stored expense with a **new** object 
-  (the original is never mutated) and returns it. `reset(expenses)` re-seeds the map; tests use it 
-  to start from a clean state.
+  prior mutations). `updateExpenseStatus` and `updateExpense` replace the stored expense with a
+  **new** object (the original is never mutated) and return it. `reset(expenses)` re-seeds the
+  map; tests use it to start from a clean state.
 - **Provider:** `src/context/RepositoryContext.tsx` — makes one repository instance available to
   every component in the app (see below for how).
 

@@ -364,3 +364,58 @@ describe('review decision form integration', () => {
     expect(screen.getByRole('button', { name: 'Submit Decision' })).toBeEnabled()
   })
 })
+
+describe('form editability by role and status', () => {
+  const fieldLabels = ['Amount', 'Currency', 'Type', 'Receipt date', 'Region', 'Project', 'Description']
+
+  function expectFields(enabled: boolean) {
+    for (const label of fieldLabels) {
+      const field = screen.getByLabelText(label)
+      if (enabled) {
+        expect(field).toBeEnabled()
+      } else {
+        expect(field).toBeDisabled()
+      }
+    }
+  }
+
+  describe('consultant (/expenses/:id)', () => {
+    it.each(['Submitted', 'Changes Requested', 'Resubmitted'] as const)(
+      'enables the form fields when the status is %s',
+      async (status) => {
+        seedSession(consultantUser)
+        const initial = makeExpense({ status })
+        const repo = createMockRepository(initial)
+        renderAppAt(`/expenses/${initial.id}`, repo)
+
+        await screen.findByText('Expense Detail')
+        expectFields(true)
+      },
+    )
+
+    it('disables the form fields when the status is Approved', async () => {
+      seedSession(consultantUser)
+      const initial = makeExpense({ status: 'Approved' })
+      const repo = createMockRepository(initial)
+      renderAppAt(`/expenses/${initial.id}`, repo)
+
+      await screen.findByText('Expense Detail')
+      expectFields(false)
+    })
+  })
+
+  describe('finance (/review/:id)', () => {
+    it.each(['Submitted', 'Approved', 'Changes Requested', 'Resubmitted'] as const)(
+      'disables the form fields when the status is %s',
+      async (status) => {
+        seedSession(financeUser)
+        const initial = makeExpense({ status })
+        const repo = createMockRepository(initial)
+        renderAppAt(`/review/${initial.id}`, repo)
+
+        await screen.findByText('Expense Detail')
+        expectFields(false)
+      },
+    )
+  })
+})

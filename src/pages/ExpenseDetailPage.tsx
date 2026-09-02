@@ -14,6 +14,17 @@ import { useRepository } from '@/context/RepositoryContext'
 import NotFoundPage from '@/pages/NotFoundPage'
 import type { Expense, ExpenseStatus } from '@/types'
 
+/**
+ * The statuses in which a consultant may edit their own expense. `Approved`
+ * is terminal and never editable; finance never edits (the review workflow is
+ * unchanged). See ADR-0013.
+ */
+const CONSULTANT_EDITABLE_STATUSES: readonly ExpenseStatus[] = [
+  'Submitted',
+  'Changes Requested',
+  'Resubmitted',
+]
+
 export default function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -98,6 +109,11 @@ export default function ExpenseDetailPage() {
   const backTo = isFinance ? '/review' : '/expenses'
   const backLabel = isFinance ? 'Back to All Expenses' : 'Back to My Expenses'
 
+  // Consultants may edit their own expense while it is in a non-terminal
+  // status; finance always sees a read-only card (review workflow unchanged).
+  const isEditable =
+    user.role === 'consultant' && CONSULTANT_EDITABLE_STATUSES.includes(expense.status)
+
   async function handleDecision(decision: ReviewDecision, comment?: string) {
     if (!id) return
     const status: ExpenseStatus = decision === 'approve' ? 'Approved' : 'Changes Requested'
@@ -129,7 +145,7 @@ export default function ExpenseDetailPage() {
         <PageTitle className="mb-6">Expense Detail</PageTitle>
         {isFinance ? (
           <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-            <ExpenseDetailCard expense={expense} role={user.role} />
+            <ExpenseDetailCard expense={expense} role={user.role} isEditable={isEditable} />
             <Card>
               <CardHeader>
                 <CardTitle>Review Decision</CardTitle>
@@ -149,7 +165,7 @@ export default function ExpenseDetailPage() {
             </Card>
           </div>
         ) : (
-          <ExpenseDetailCard expense={expense} role={user.role} />
+          <ExpenseDetailCard expense={expense} role={user.role} isEditable={isEditable} />
         )}
       </main>
     </div>
