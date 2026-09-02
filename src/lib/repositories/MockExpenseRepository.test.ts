@@ -2,8 +2,19 @@ import { MockExpenseRepository } from './MockExpenseRepository'
 import type { Expense } from '@/types'
 
 function makeExpense(overrides: Partial<Expense> = {}): Expense {
+  // Use valid UUIDs for testing to match schema validation requirements
+  const idMap: Record<string, string> = {
+    e1: '550e8400-e29b-41d4-a716-446655440001',
+    e2: '550e8400-e29b-41d4-a716-446655440002',
+    e3: '550e8400-e29b-41d4-a716-446655440003',
+    e4: '550e8400-e29b-41d4-a716-446655440004',
+  }
+  
+  const shortId = (overrides.id as string) ?? 'e1'
+  const actualId = idMap[shortId] ?? shortId
+  
   return {
-    id: 'e1',
+    id: actualId,
     submitterId: 'u1',
     description: 'Test expense',
     type: 'Lunch',
@@ -16,6 +27,7 @@ function makeExpense(overrides: Partial<Expense> = {}): Expense {
     region: 'EMEA',
     project: 'Test Project',
     ...overrides,
+    id: actualId, // Ensure the ID is always the UUID
   }
 }
 
@@ -199,7 +211,11 @@ describe('MockExpenseRepository', () => {
 
       const expenses = await repo.getExpensesBySubmitter('u1')
 
-      expect(expenses.map((e) => e.id)).toEqual(['e1', 'e2', 'e4'])
+      expect(expenses.map((e) => e.id)).toEqual([
+        '550e8400-e29b-41d4-a716-446655440001',
+        '550e8400-e29b-41d4-a716-446655440002',
+        '550e8400-e29b-41d4-a716-446655440004',
+      ])
     })
 
     it('reflects prior mutations in the returned list', async () => {
@@ -256,6 +272,150 @@ describe('MockExpenseRepository', () => {
 
       expect(await repo.getExpense('e1')).toBeNull()
       expect(await repo.getExpense('e2')).toEqual(other)
+     })
+   })
+
+  describe('updateExpense', () => {
+    it('merges partial updates with existing expense data', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', description: 'Old', amount: 100 })])
+
+      const updated = await repo.updateExpense('e1', { description: 'New' })
+
+      expect(updated.description).toBe('New')
+      expect(updated.amount).toBe(100) // unchanged fields are preserved
+    })
+
+    it('automatically transitions status to Resubmitted on update', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', status: 'Submitted' })])
+
+      const updated = await repo.updateExpense('e1', { description: 'Updated' })
+
+      expect(updated.status).toBe('Resubmitted')
+    })
+
+    it('transitions status to Resubmitted even if currently Changes Requested', async () => {
+      const repo = new MockExpenseRepository([
+        makeExpense({ id: 'e1', status: 'Changes Requested' }),
+      ])
+
+      const updated = await repo.updateExpense('e1', { description: 'Updated' })
+
+      expect(updated.status).toBe('Resubmitted')
+    })
+
+    it('throws when attempting to update an Approved (terminal) expense', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', status: 'Approved' })])
+
+      await expect(repo.updateExpense('e1', { description: 'New' })).rejects.toThrow(
+        'Cannot edit an approved expense'
+      )
+    })
+
+    it('throws when attempting to update a non-existent expense', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1' })])
+
+      await expect(repo.updateExpense('nonexistent', { description: 'New' })).rejects.toThrow(
+        'Expense not found'
+      )
+    })
+
+    it('validates the merged object against the full schema and throws on invalid data', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', amount: 100 })])
+
+      // Negative amount violates schema
+      await expect(
+        repo.updateExpense('e1', { amount: -50 })
+      ).rejects.toThrow()
+    })
+
+    it('returns a new expense object and does not mutate the original', async () => {
+      const original = makeExpense({ id: 'e1', description: 'Original' })
+      const repo = new MockExpenseRepository([original])
+
+      const updated = await repo.updateExpense('e1', { description: 'Updated' })
+
+      expect(updated).not.toBe(original)
+      expect(original.description).toBe('Original')
+      expect(updated.description).toBe('Updated')
+    })
+
+    it('persists the update so subsequent getExpense calls reflect the new state', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', description: 'Old' })])
+
+      await repo.updateExpense('e1', { description: 'New' })
+
+      const fetched = await repo.getExpense('e1')
+      expect(fetched?.description).toBe('New')
+      expect(fetched?.status).toBe('Resubmitted')
+    })
+
+    it('updates multiple fields in a single call', async () => {
+      const repo = new MockExpenseRepository([
+        makeExpense({
+          id: 'e1',
+          description: 'Old',
+          amount: 100,
+          region: 'EMEA',
+        }),
+      ])
+
+      const updated = await repo.updateExpense('e1', {
+        description: 'New',
+        amount: 150,
+        region: 'APAC',
+      })
+
+      expect(updated.description).toBe('New')
+      expect(updated.amount).toBe(150)
+      expect(updated.region).toBe('APAC')
+    })
+
+    it('reflects the update in getExpenses', async () => {
+      const repo = new MockExpenseRepository([
+        makeExpense({ id: 'e1', description: 'Old', status: 'Submitted' }),
+      ])
+
+      await repo.updateExpense('e1', { description: 'New' })
+
+      const expenses = await repo.getExpenses()
+      expect(expenses[0].description).toBe('New')
+      expect(expenses[0].status).toBe('Resubmitted')
+    })
+
+    it('reflects the update in getExpensesBySubmitter', async () => {
+      const repo = new MockExpenseRepository([
+        makeExpense({ id: 'e1', submitterId: 'u1', description: 'Old', status: 'Submitted' }),
+      ])
+
+      await repo.updateExpense('e1', { description: 'New' })
+
+      const expenses = await repo.getExpensesBySubmitter('u1')
+      expect(expenses[0].description).toBe('New')
+      expect(expenses[0].status).toBe('Resubmitted')
+    })
+
+    it('throws validation error if invalid currency format', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', currency: 'EUR' })])
+
+      // Invalid currency format (not 3 letters)
+      await expect(repo.updateExpense('e1', { currency: 'INVALID' })).rejects.toThrow()
+    })
+
+    it('throws validation error if receiptDate format is invalid', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1', receiptDate: '2025-07-15' })])
+
+      // Invalid date format (not YYYY-MM-DD)
+      await expect(repo.updateExpense('e1', { receiptDate: '15-07-2025' })).rejects.toThrow()
+    })
+
+    it('is async and returns a Promise', async () => {
+      const repo = new MockExpenseRepository([makeExpense({ id: 'e1' })])
+
+      const pending = repo.updateExpense('e1', { description: 'New' })
+
+      expect(pending).toBeInstanceOf(Promise)
+      await expect(pending).resolves.toBeDefined()
     })
   })
 })
+

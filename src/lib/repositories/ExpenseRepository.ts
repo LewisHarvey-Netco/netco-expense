@@ -1,4 +1,5 @@
 import type { Expense, ExpenseStatus } from '@/types'
+import type { ExpenseFormValues } from '@/schemas/expense'
 
 /**
  * Data-access boundary for expense reads and mutations (see ADR-0010, extended by ADR-0011).
@@ -15,4 +16,5 @@ export interface ExpenseRepository {
   getExpenses(): Promise<Expense[]>
   getExpensesBySubmitter(submitterId: string): Promise<Expense[]>
   updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense>
+  updateExpense(id: string, updates: Partial<ExpenseFormValues>): Promise<Expense>
 }
