@@ -3,6 +3,7 @@
 ## Blocking Go-Live
 *(Must be done before release)*
 
+- [ ] Remove demo users credentials block from LoginPage (show email, password, and role)
 - [ ] Replace mock data with a real backend: remove `src/mocks/users.json` and `src/mocks/expenses.json`, backing both with real API calls — real user accounts for authentication, and an `ApiRepository` implementing `ExpenseRepository` for expense reads/writes. Server-side persistence replaces in-memory mock, so decisions are repulled from API rather than persisted client-side (see ADR-0011).
 - [ ] Implement token-based sessions: store JWT in sessionStorage instead of the user object, attach to API requests, and handle token expiry and refresh
 
