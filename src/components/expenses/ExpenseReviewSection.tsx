@@ -31,11 +31,13 @@ function decisionMessage(status: ExpenseStatus): string {
 /**
  * Finance-only expense review section.
  *
- * Renders the decision status message when the expense is not decidable
+ * Renders the ReviewDecisionForm and, below it, the decision status message
  * (Approved is terminal; Changes Requested awaits a consultant resubmission —
- * see ADR-0007) and the ReviewDecisionForm. The form is disabled when the
- * expense is not decidable or when `disabled` is set (e.g. while a decision
- * is being submitted).
+ * see ADR-0007). The message is always rendered in a reserved slot and only
+ * made invisible while the expense is decidable, so the layout does not shift
+ * when a decision is recorded. The form is disabled when the expense is not
+ * decidable or when `disabled` is set (e.g. while a decision is being
+ * submitted).
  */
 export default function ExpenseReviewSection({
   expense,
@@ -46,12 +48,10 @@ export default function ExpenseReviewSection({
 
   return (
     <div className="flex flex-col gap-4">
-      {!canDecide && (
-        <Alert>
-          <AlertDescription>{decisionMessage(expense.status)}</AlertDescription>
-        </Alert>
-      )}
       <ReviewDecisionForm disabled={!canDecide || disabled} onSubmit={onSubmit} />
+      <Alert className={canDecide ? 'invisible' : undefined}>
+        <AlertDescription>{decisionMessage(expense.status)}</AlertDescription>
+      </Alert>
     </div>
   )
 }

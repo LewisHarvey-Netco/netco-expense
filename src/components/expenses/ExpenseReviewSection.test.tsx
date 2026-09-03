@@ -61,6 +61,7 @@ describe('ExpenseReviewSection', () => {
       expect(
         screen.getByText('Decision recorded. This expense has been approved.'),
       ).toBeInTheDocument()
+      expect(screen.getByRole('alert')).not.toHaveClass('invisible')
     })
 
     it('shows the awaiting-resubmission message for a changes-requested expense', () => {
@@ -75,24 +76,28 @@ describe('ExpenseReviewSection', () => {
       ).toBeInTheDocument()
     })
 
-    it('does not show a status message for a submitted expense', () => {
+    it('reserves the status message slot (hidden) for a submitted expense', () => {
       render(
         <ExpenseReviewSection
           expense={makeExpense({ status: 'Submitted' })}
           onSubmit={vi.fn()}
         />,
       )
-      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      const alert = screen.getByRole('alert')
+      expect(alert).toBeInTheDocument()
+      expect(alert).toHaveClass('invisible')
     })
 
-    it('does not show a status message for a resubmitted expense', () => {
+    it('reserves the status message slot (hidden) for a resubmitted expense', () => {
       render(
         <ExpenseReviewSection
           expense={makeExpense({ status: 'Resubmitted' })}
           onSubmit={vi.fn()}
         />,
       )
-      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      const alert = screen.getByRole('alert')
+      expect(alert).toBeInTheDocument()
+      expect(alert).toHaveClass('invisible')
     })
   })
 

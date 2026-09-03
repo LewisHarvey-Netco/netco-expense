@@ -41,7 +41,7 @@ export const Decidable: Story = {
     docs: {
       description: {
         story:
-          'A submitted expense is decidable: no status message is shown and the decision form is enabled.',
+          'A submitted expense is decidable: the status message slot is reserved below the form (hidden) and the decision form is enabled.',
       },
     },
   },

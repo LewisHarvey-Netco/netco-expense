@@ -218,11 +218,9 @@ export default function FilterPanel({
                 aria-invalid={!!form.formState.errors.dateTo}
               />
             </div>
-            {(form.formState.errors.dateFrom || form.formState.errors.dateTo) && (
-              <p className="text-xs text-destructive">
-                {form.formState.errors.dateFrom?.message ?? form.formState.errors.dateTo?.message}
-              </p>
-            )}
+            <p className="min-h-4 text-xs text-destructive">
+              {form.formState.errors.dateFrom?.message ?? form.formState.errors.dateTo?.message}
+            </p>
           </div>
 
           <div className="flex gap-2">

@@ -77,9 +77,9 @@ export default function ReviewDecisionForm({ onSubmit, disabled = false }: Revie
             Request Changes
           </Button>
         </div>
-        {form.formState.errors.decision && (
-          <p className="text-xs text-destructive">{form.formState.errors.decision.message}</p>
-        )}
+        <p className="min-h-4 text-xs text-destructive">
+          {form.formState.errors.decision?.message}
+        </p>
       </div>
 
       {decision === 'request-changes' && (
@@ -92,9 +92,9 @@ export default function ReviewDecisionForm({ onSubmit, disabled = false }: Revie
             {...form.register('comment')}
             aria-invalid={!!form.formState.errors.comment}
           />
-          {form.formState.errors.comment && (
-            <p className="text-xs text-destructive">{form.formState.errors.comment.message}</p>
-          )}
+          <p className="min-h-4 text-xs text-destructive">
+            {form.formState.errors.comment?.message}
+          </p>
         </div>
       )}
 
