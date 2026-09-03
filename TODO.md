@@ -11,6 +11,7 @@
 
 - [ ] Add error boundary component to catch unexpected React errors and show a fallback UI instead of crashing the app
 - [ ] Expand expense review notes from a single `internalNotes` string into a full conversation history (multiple timestamped entries), and display the full thread on the expense detail view instead of just the latest single note
+- [ ] Fix Vite `configLoader: 'native'` warning: replace `__dirname` at `vitest.config.ts:8` with `import.meta.dirname` (Vite warns it will become the default in a future major version); also investigate the `No story files found for the specified pattern: src\**\*.mdx` warning from the storybook vitest plugin
 
 ## Nice-to-Have
 *(Low priority, polish)*

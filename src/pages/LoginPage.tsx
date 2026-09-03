@@ -67,9 +67,9 @@ export default function LoginPage() {
                 {...form.register('email')}
                 aria-invalid={!!form.formState.errors.email}
               />
-              {form.formState.errors.email && (
-                <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-              )}
+              <p className="min-h-4 text-xs text-destructive">
+                {form.formState.errors.email?.message}
+              </p>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">Password</Label>
@@ -79,9 +79,9 @@ export default function LoginPage() {
                 {...form.register('password')}
                 aria-invalid={!!form.formState.errors.password}
               />
-              {form.formState.errors.password && (
-                <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
-              )}
+              <p className="min-h-4 text-xs text-destructive">
+                {form.formState.errors.password?.message}
+              </p>
             </div>
             <Button type="submit" className="w-full">
               Sign in

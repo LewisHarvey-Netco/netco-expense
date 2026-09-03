@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Add `getExpensesBySubmitter(submitterId: string): Promise<Expense[]>` method to `ExpenseRepository` interface in `src/lib/repositories/ExpenseRepository.ts`
-- [ ] Implement method in `MockExpenseRepository` to filter in-memory expenses by submitter ID
-- [ ] Add unit tests in `MockExpenseRepository.test.ts` covering: empty result, single consultant's expenses, multiple consultants filtered correctly
-- [ ] Verify method is async (prepared for backend swap)
+- [x] Add `getExpensesBySubmitter(submitterId: string): Promise<Expense[]>` method to `ExpenseRepository` interface in `src/lib/repositories/ExpenseRepository.ts`
+- [x] Implement method in `MockExpenseRepository` to filter in-memory expenses by submitter ID
+- [x] Add unit tests in `MockExpenseRepository.test.ts` covering: empty result, single consultant's expenses, multiple consultants filtered correctly
+- [x] Verify method is async (prepared for backend swap)

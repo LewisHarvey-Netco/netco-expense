@@ -12,5 +12,12 @@
     "email": "bob@netcompany.com",
     "password": "password123",
     "role": "finance"
+  },
+  {
+    "id": "u3",
+    "name": "Tom Jensen",
+    "email": "tom@netcompany.com",
+    "password": "password123",
+    "role": "consultant"
   }
 ]

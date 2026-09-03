@@ -8,8 +8,19 @@ const submitters = [
   { id: 'u2', name: 'Bob Madsen' },
 ]
 
-function renderPanel(onApply = vi.fn(), onClear = vi.fn()) {
-  return { onApply, onClear, ...render(<FilterPanel submitters={submitters} onApply={onApply} onClear={onClear} />) }
+function renderPanel(onApply = vi.fn(), onClear = vi.fn(), showSubmitterFilter?: boolean) {
+  return {
+    onApply,
+    onClear,
+    ...render(
+      <FilterPanel
+        submitters={submitters}
+        onApply={onApply}
+        onClear={onClear}
+        showSubmitterFilter={showSubmitterFilter}
+      />,
+    ),
+  }
 }
 
 describe('FilterPanel', () => {
@@ -122,5 +133,60 @@ describe('FilterPanel', () => {
 
     expect(screen.getByText('From date must be on or before to date')).toBeInTheDocument()
     expect(onApply).not.toHaveBeenCalled()
+  })
+
+  it('shows the submitter filter by default', () => {
+    renderPanel()
+
+    expect(screen.getByText('Submitter')).toBeInTheDocument()
+    expect(screen.getByText('All submitters')).toBeInTheDocument()
+  })
+
+  it('shows the submitter filter when showSubmitterFilter is true', () => {
+    renderPanel(undefined, undefined, true)
+
+    expect(screen.getByText('Submitter')).toBeInTheDocument()
+    expect(screen.getByText('All submitters')).toBeInTheDocument()
+  })
+
+  it('hides the submitter filter when showSubmitterFilter is false', () => {
+    renderPanel(undefined, undefined, false)
+
+    expect(screen.queryByText('Submitter')).not.toBeInTheDocument()
+    expect(screen.queryByText('All submitters')).not.toBeInTheDocument()
+  })
+
+  it('applies the other filters when the submitter filter is hidden', async () => {
+    const user = userEvent.setup()
+    const { onApply } = renderPanel(undefined, undefined, false)
+
+    await user.click(screen.getByRole('checkbox', { name: 'Approved' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Transport' }))
+    fireEvent.change(screen.getByLabelText('From date'), { target: { value: '2025-07-01' } })
+    fireEvent.change(screen.getByLabelText('To date'), { target: { value: '2025-07-31' } })
+
+    await user.click(screen.getByRole('button', { name: 'Apply Filters' }))
+
+    expect(onApply).toHaveBeenCalledWith({
+      status: ['Approved'],
+      type: ['Transport'],
+      dateRange: { from: new Date('2025-07-01'), to: new Date('2025-07-31') },
+    })
+  })
+
+  it('still clears all filters when the submitter filter is hidden', async () => {
+    const user = userEvent.setup()
+    const { onClear } = renderPanel(undefined, undefined, false)
+
+    await user.click(screen.getByRole('checkbox', { name: 'Submitted' }))
+    fireEvent.change(screen.getByLabelText('From date'), { target: { value: '2025-07-01' } })
+    fireEvent.change(screen.getByLabelText('To date'), { target: { value: '2025-07-31' } })
+
+    await user.click(screen.getByRole('button', { name: 'Clear Filters' }))
+
+    expect(onClear).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('checkbox', { name: 'Submitted' })).not.toBeChecked()
+    expect(screen.getByLabelText('From date')).toHaveValue('')
+    expect(screen.getByLabelText('To date')).toHaveValue('')
   })
 })

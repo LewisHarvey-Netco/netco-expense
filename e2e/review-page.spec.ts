@@ -19,10 +19,13 @@ test('clicking a row navigates to the expense detail page', async ({ page }) => 
   await page.getByText('Client lunch meeting at Restaurant Noma').click();
 
   await expect(page).toHaveURL(
-    /\/review\/e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6/,
+    /\/review\/e1a2b3c4-d5e6-4f7a-8b9c-d1e2f3a4b5c6/,
   );
   await expect(page.getByText('Expense Detail', { exact: true })).toBeVisible();
-  await expect(page.getByText('185.50 DKK')).toBeVisible();
+  // Amount and currency render as disabled form fields in the detail card,
+  // so assert their values rather than looking for combined text.
+  await expect(page.getByLabel('Amount')).toHaveValue('185.5');
+  await expect(page.getByLabel('Currency')).toHaveValue('DKK');
   await expect(page.getByText('Alice Nielsen')).toBeVisible();
 });
 

@@ -4,10 +4,10 @@
 
 **Blocked by:** 2
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Create `src/components/expenses/ExpenseReviewSection.tsx` component
-- [ ] Accept `expense`, `disabled`, and `onSubmit` props
-- [ ] Render decision status message when expense is not decidable
-- [ ] Render `ReviewDecisionForm` with submit handler wired to `onSubmit` callback
-- [ ] Add tests in `ExpenseReviewSection.test.tsx` verifying: form and status message render correctly, disabled state works, submit handler is called
+- [x] Create `src/components/expenses/ExpenseReviewSection.tsx` component
+- [x] Accept `expense`, `disabled`, and `onSubmit` props
+- [x] Render decision status message when expense is not decidable
+- [x] Render `ReviewDecisionForm` with submit handler wired to `onSubmit` callback
+- [x] Add tests in `ExpenseReviewSection.test.tsx` verifying: form and status message render correctly, disabled state works, submit handler is called

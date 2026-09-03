@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
@@ -62,7 +62,9 @@ function createMockRepository(initialExpense: Expense) {
   return {
     getExpense: vi.fn().mockResolvedValue(initialExpense),
     getExpenses: vi.fn().mockResolvedValue([initialExpense]),
+    getExpensesBySubmitter: vi.fn().mockResolvedValue([]),
     updateExpenseStatus: vi.fn(),
+    updateExpense: vi.fn(),
   }
 }
 
@@ -89,20 +91,21 @@ beforeEach(() => {
   visitedPaths = []
 })
 
-describe('Expense detail page (/review/:id)', () => {
+describe('Expense detail page (/review/:id, finance)', () => {
   it('displays the full details of an expense', async () => {
     seedSession(financeUser)
     const expense = mockExpenses[0]
     renderAppAt(`/review/${expense.id}`)
 
     expect(await screen.findByText('Expense Detail')).toBeInTheDocument()
-    expect(screen.getByText(expense.description)).toBeInTheDocument()
-    expect(screen.getByText('185.50 DKK')).toBeInTheDocument()
-    expect(screen.getByText('Lunch')).toBeInTheDocument()
-    expect(screen.getByText('15 Jul 2025')).toBeInTheDocument()
+    expect(screen.getByLabelText('Amount')).toHaveValue(185.5)
+    expect(screen.getByLabelText('Currency')).toHaveValue('DKK')
+    expect(screen.getByLabelText('Type')).toHaveTextContent('Lunch')
+    expect(screen.getByLabelText('Receipt date')).toHaveValue('2025-07-15')
+    expect(screen.getByLabelText('Region')).toHaveValue('Nordics')
+    expect(screen.getByLabelText('Project')).toHaveValue('Greenfield ERP')
+    expect(screen.getByLabelText('Description')).toHaveValue(expense.description)
     expect(screen.getByText('Alice Nielsen')).toBeInTheDocument()
-    expect(screen.getByText('Nordics')).toBeInTheDocument()
-    expect(screen.getByText('Greenfield ERP')).toBeInTheDocument()
   })
 
   it('displays the status of the expense', async () => {
@@ -132,14 +135,14 @@ describe('Expense detail page (/review/:id)', () => {
     expect(await screen.findByText('Receipt missing VAT breakdown. Please resubmit.')).toBeInTheDocument()
   })
 
-  it('does not show an internal notes field when there are no notes', async () => {
+  it('shows a "No notes yet" placeholder when there are no notes', async () => {
     seedSession(financeUser)
     const initial = makeExpense({ status: 'Submitted', internalNotes: null })
     const repo = createMockRepository(initial)
     renderAppAt(`/review/${initial.id}`, repo)
 
     expect(await screen.findByText('Expense Detail')).toBeInTheDocument()
-    expect(screen.queryByText('Internal notes')).not.toBeInTheDocument()
+    expect(screen.getByText('No notes yet')).toBeInTheDocument()
   })
 
   it('shows a 404 page for an unknown expense id', async () => {
@@ -156,7 +159,9 @@ describe('Expense detail page (/review/:id)', () => {
     await waitFor(() => {
       expect(visitedPaths).toContain('/expenses')
     })
-    expect(await screen.findByText('Expenses')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'My Expenses' }),
+    ).toBeInTheDocument()
   })
 
   it('redirects an unauthenticated user to /login', async () => {
@@ -177,6 +182,80 @@ describe('Expense detail page (/review/:id)', () => {
     await waitFor(() => {
       expect(visitedPaths).toContain('/review')
     })
+  })
+})
+
+describe('Expense detail page (/expenses/:id, consultant)', () => {
+  it('displays the full details of the consultant\'s own expense', async () => {
+    seedSession(consultantUser)
+    const expense = mockExpenses[0]
+    renderAppAt(`/expenses/${expense.id}`)
+
+    const main = await screen.findByRole('main')
+    expect(within(main).getByText('Expense Detail')).toBeInTheDocument()
+    expect(within(main).getByLabelText('Amount')).toHaveValue(185.5)
+    expect(within(main).getByLabelText('Currency')).toHaveValue('DKK')
+    expect(within(main).getByLabelText('Type')).toHaveTextContent('Lunch')
+    expect(within(main).getByLabelText('Receipt date')).toHaveValue('2025-07-15')
+    expect(within(main).getByLabelText('Region')).toHaveValue('Nordics')
+    expect(within(main).getByLabelText('Project')).toHaveValue('Greenfield ERP')
+    expect(within(main).getByLabelText('Description')).toHaveValue(expense.description)
+    // "Alice Nielsen" also appears in the header (logged-in user), so scope to main.
+    expect(within(main).getByText('Alice Nielsen')).toBeInTheDocument()
+  })
+
+  it('does not show the review decision section', async () => {
+    seedSession(consultantUser)
+    renderAppAt(`/expenses/${mockExpenses[0].id}`)
+
+    await screen.findByText('Expense Detail')
+    expect(screen.queryByText('Review Decision')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Request Changes' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Submit Decision' })).not.toBeInTheDocument()
+  })
+
+  it('shows a 404 page when a consultant views another consultant\'s expense', async () => {
+    seedSession(consultantUser)
+    const otherExpense = mockExpenses.find((e) => e.submitterId !== consultantUser.id)!
+    renderAppAt(`/expenses/${otherExpense.id}`)
+
+    expect(await screen.findByText('Page not found')).toBeInTheDocument()
+    expect(screen.queryByText(otherExpense.description)).not.toBeInTheDocument()
+  })
+
+  it('navigates back to the consultant expense list', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    renderAppAt(`/expenses/${mockExpenses[0].id}`)
+
+    await user.click(await screen.findByText('Back to My Expenses'))
+
+    await waitFor(() => {
+      expect(visitedPaths).toContain('/expenses')
+    })
+  })
+})
+
+describe('loading and error states', () => {
+  it('shows a loading state while the expense is being fetched', () => {
+    seedSession(financeUser)
+    const repo = createMockRepository(makeExpense())
+    repo.getExpense.mockImplementation(() => new Promise<Expense | null>(() => {}))
+    renderAppAt(`/review/${mockExpenses[0].id}`, repo)
+
+    expect(screen.getByText('Loading expense…')).toBeInTheDocument()
+  })
+
+  it('shows an error state when the expense fails to load', async () => {
+    seedSession(financeUser)
+    const repo = createMockRepository(makeExpense())
+    repo.getExpense.mockRejectedValue(new Error('Network error'))
+    renderAppAt(`/review/${mockExpenses[0].id}`, repo)
+
+    expect(
+      await screen.findByText('Failed to load the expense. Please try again.'),
+    ).toBeInTheDocument()
   })
 })
 
@@ -283,5 +362,160 @@ describe('review decision form integration', () => {
       await screen.findByText('Failed to record the decision. Please try again.'),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Submit Decision' })).toBeEnabled()
+  })
+})
+
+describe('form editability by role and status', () => {
+  const fieldLabels = ['Amount', 'Currency', 'Type', 'Receipt date', 'Region', 'Project', 'Description']
+
+  function expectFields(enabled: boolean) {
+    for (const label of fieldLabels) {
+      const field = screen.getByLabelText(label)
+      if (enabled) {
+        expect(field).toBeEnabled()
+      } else {
+        expect(field).toBeDisabled()
+      }
+    }
+  }
+
+  describe('consultant (/expenses/:id)', () => {
+    it.each(['Submitted', 'Changes Requested', 'Resubmitted'] as const)(
+      'enables the form fields when the status is %s',
+      async (status) => {
+        seedSession(consultantUser)
+        const initial = makeExpense({ status })
+        const repo = createMockRepository(initial)
+        renderAppAt(`/expenses/${initial.id}`, repo)
+
+        await screen.findByText('Expense Detail')
+        expectFields(true)
+      },
+    )
+
+    it('disables the form fields when the status is Approved', async () => {
+      seedSession(consultantUser)
+      const initial = makeExpense({ status: 'Approved' })
+      const repo = createMockRepository(initial)
+      renderAppAt(`/expenses/${initial.id}`, repo)
+
+      await screen.findByText('Expense Detail')
+      expectFields(false)
+    })
+  })
+
+  describe('finance (/review/:id)', () => {
+    it.each(['Submitted', 'Approved', 'Changes Requested', 'Resubmitted'] as const)(
+      'disables the form fields when the status is %s',
+      async (status) => {
+        seedSession(financeUser)
+        const initial = makeExpense({ status })
+        const repo = createMockRepository(initial)
+        renderAppAt(`/review/${initial.id}`, repo)
+
+        await screen.findByText('Expense Detail')
+        expectFields(false)
+      },
+    )
+  })
+})
+
+describe('consultant resubmit integration', () => {
+  // The card validates the whole form (including the expense id) against the
+  // Zod schema, which requires a strict RFC 4122 UUID. The default makeExpense
+  // id is not a valid UUID, so these tests use a real one.
+  const resubmitId = 'e1a2b3c4-d5e6-4f7a-8b9c-d1e2f3a4b5c6'
+
+  it.each(['Submitted', 'Changes Requested', 'Resubmitted'] as const)(
+    'resubmitting a %s expense calls updateExpense and updates the displayed status to Resubmitted',
+    async (status) => {
+      const user = userEvent.setup()
+      seedSession(consultantUser)
+      const initial = makeExpense({ id: resubmitId, status })
+      const repo = createMockRepository(initial)
+      repo.updateExpense.mockResolvedValue({ ...initial, status: 'Resubmitted' })
+      renderAppAt(`/expenses/${resubmitId}`, repo)
+
+      await user.click(await screen.findByRole('button', { name: 'Resubmit' }))
+
+      await waitFor(() =>
+        expect(repo.updateExpense).toHaveBeenCalledWith(
+          resubmitId,
+          expect.objectContaining({ description: initial.description, amount: 100 }),
+        ),
+      )
+      expect(await screen.findByText('Resubmitted')).toBeInTheDocument()
+    },
+  )
+
+  it('passes the edited amount to updateExpense', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    repo.updateExpense.mockResolvedValue({ ...initial, status: 'Resubmitted', amount: 250 })
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    const amount = await screen.findByLabelText('Amount')
+    await user.clear(amount)
+    await user.type(amount, '250')
+    await user.click(screen.getByRole('button', { name: 'Resubmit' }))
+
+    await waitFor(() =>
+      expect(repo.updateExpense).toHaveBeenCalledWith(
+        resubmitId,
+        expect.objectContaining({ amount: 250 }),
+      ),
+    )
+  })
+
+  it('shows a success message and a Back to Expenses link after a successful resubmit', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    repo.updateExpense.mockResolvedValue({ ...initial, status: 'Resubmitted' })
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    await user.click(await screen.findByRole('button', { name: 'Resubmit' }))
+
+    expect(await screen.findByText('Expense resubmitted successfully.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back to Expenses' })).toBeInTheDocument()
+  })
+
+  it('shows an error and keeps the Resubmit button enabled when the update fails', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    repo.updateExpense.mockRejectedValue(new Error('Network error'))
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    await user.click(await screen.findByRole('button', { name: 'Resubmit' }))
+
+    expect(
+      await screen.findByText('Failed to resubmit the expense. Please try again.'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Resubmit' })).toBeEnabled()
+  })
+
+  it('does not show a Resubmit button for a finance viewer', async () => {
+    seedSession(financeUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Submitted' })
+    const repo = createMockRepository(initial)
+    renderAppAt(`/review/${resubmitId}`, repo)
+
+    await screen.findByText('Expense Detail')
+    expect(screen.queryByRole('button', { name: 'Resubmit' })).not.toBeInTheDocument()
+  })
+
+  it('does not show a Resubmit button for an approved expense', async () => {
+    seedSession(consultantUser)
+    const initial = makeExpense({ id: resubmitId, status: 'Approved' })
+    const repo = createMockRepository(initial)
+    renderAppAt(`/expenses/${resubmitId}`, repo)
+
+    await screen.findByText('Expense Detail')
+    expect(screen.queryByRole('button', { name: 'Resubmit' })).not.toBeInTheDocument()
   })
 })

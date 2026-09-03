@@ -4,11 +4,11 @@
 
 **Blocked by:** 1
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Create `src/components/expenses/ExpenseDetailCard.tsx` component
-- [ ] Use React Hook Form internally with Zod schema from `src/schemas/expense.ts`
-- [ ] Render all expense fields (amount, type, status, dates, submitter, region, project, description, internal notes, receipt placeholder)
-- [ ] Set all form fields to disabled (read-only)
-- [ ] Accept optional `role` prop (`'consultant' | 'finance' | undefined`) to control internal notes visibility
-- [ ] Add tests in `ExpenseDetailCard.test.tsx` verifying: all fields render with correct data, fields are disabled, role-based note visibility
+- [x] Create `src/components/expenses/ExpenseDetailCard.tsx` component
+- [x] Use React Hook Form internally with Zod schema from `src/schemas/expense.ts`
+- [x] Render all expense fields (amount, type, status, dates, submitter, region, project, description, internal notes, receipt placeholder)
+- [x] Set all form fields to disabled (read-only)
+- [x] Accept optional `role` prop (`'consultant' | 'finance' | undefined`) to control internal notes visibility
+- [x] Add tests in `ExpenseDetailCard.test.tsx` verifying: all fields render with correct data, fields are disabled, role-based note visibility

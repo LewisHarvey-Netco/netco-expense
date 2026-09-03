@@ -32,3 +32,20 @@ export const Default: Story = {
     },
   },
 }
+
+export const WithoutSubmitterFilter: Story = {
+  args: {
+    submitters,
+    showSubmitterFilter: false,
+    onApply: (criteria: FilterCriteria) => alert(`Applied filters: ${JSON.stringify(criteria)}`),
+    onClear: () => alert('Filters cleared'),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Filter form without the submitter dropdown (showSubmitterFilter={false}), for single-user views such as a consultant\'s own expenses. All other filters are unaffected.',
+      },
+    },
+  },
+}

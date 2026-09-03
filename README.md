@@ -14,11 +14,13 @@ This repository serves as a playground for exploring and demonstrating what Feni
 - npm
 - oxlint (linter)
 - React Router v7 (classic JSX API)
-- Tailwind v4 + shadcn/ui (New York style, lucide-react icons) — shadcn is a copy-paste CLI, not a traditional library. Components live in `src/components/ui/` so you own the source and can modify it freely.
+- Tailwind v4 + shadcn/ui (New York style, lucide-react icons) — shadcn is a copy-paste CLI, not a traditional library. Components live in `src/components/ui/` so you own the source and can modify it freely. Built on Base UI (`@base-ui/react`) headless primitives with cva (`class-variance-authority`) variant configs.
 - clsx + tailwind-merge — `cn()` utility in `src/lib/utils.ts` for safely merging Tailwind classes, used by all shadcn components
-- react-hook-form + zod (form handling & validation)
-- Vitest + React Testing Library (unit/component testing)
+- react-hook-form + zod + @hookform/resolvers (form handling & validation)
+- ajv — JSON Schema (Draft 2020-12) validation of the Expense data model against `src/schemas/expense.schema.json` (`src/lib/expense-validation.ts`)
+- Vitest + React Testing Library (unit/component testing) + @vitest/coverage-v8 (coverage) + @vitest/browser-playwright (browser mode)
 - @vitest/ui — browser dashboard for test results and DOM snapshots, run with `npm run test:ui`
+- Storybook 10 — visual component development & testing; stories colocated as `.stories.tsx`, run with `npm run storybook`
 - Playwright (E2E browser testing)
 
 ## Architecture
@@ -59,9 +61,11 @@ npm install
 npm run dev
 ```
 
-Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run test:ui`, `npm run test:e2e`, `npm run test:e2e:headed`, `npm run preview`.
+Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run test:ui`, `npm run storybook`, `npm run test:e2e`, `npm run test:e2e:headed`, `npm run preview`.
 
 For visual debugging, slow down E2E actions with `PLAYWRIGHT_SLOW_MO=<ms>`, e.g. (PowerShell) `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`.
+
+When an E2E test fails, Playwright writes a screenshot of the page at the moment of failure plus an `error-context.md` snapshot of the page state to `test-results/<test-name>-chromium/` (configured via `screenshot: 'only-on-failure'` in `playwright.config.ts`) — open those to see what the app looked like when the test broke.
 
 ## Project Structure
 

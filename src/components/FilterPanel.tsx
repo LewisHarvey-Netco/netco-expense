@@ -70,9 +70,15 @@ interface FilterPanelProps {
   submitters: { id: string; name: string }[]
   onApply: (criteria: FilterCriteria) => void
   onClear: () => void
+  showSubmitterFilter?: boolean
 }
 
-export default function FilterPanel({ submitters, onApply, onClear }: FilterPanelProps) {
+export default function FilterPanel({
+  submitters,
+  onApply,
+  onClear,
+  showSubmitterFilter = true,
+}: FilterPanelProps) {
   const form = useForm<FilterFormValues>({
     resolver: zodResolver(filterFormSchema),
     defaultValues: {
@@ -151,26 +157,28 @@ export default function FilterPanel({ submitters, onApply, onClear }: FilterPane
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Submitter</Label>
-            <Select
-              items={submitterItems}
-              value={submitterId}
-              onValueChange={(value) => form.setValue('submitterId', String(value))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL_SUBMITTERS}>{ALL_SUBMITTERS_LABEL}</SelectItem>
-                {submitters.map((submitter) => (
-                  <SelectItem key={submitter.id} value={submitter.id}>
-                    {submitter.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {showSubmitterFilter && (
+            <div className="flex flex-col gap-2">
+              <Label>Submitter</Label>
+              <Select
+                items={submitterItems}
+                value={submitterId}
+                onValueChange={(value) => form.setValue('submitterId', String(value))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_SUBMITTERS}>{ALL_SUBMITTERS_LABEL}</SelectItem>
+                  {submitters.map((submitter) => (
+                    <SelectItem key={submitter.id} value={submitter.id}>
+                      {submitter.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <Label>Type</Label>
@@ -210,11 +218,9 @@ export default function FilterPanel({ submitters, onApply, onClear }: FilterPane
                 aria-invalid={!!form.formState.errors.dateTo}
               />
             </div>
-            {(form.formState.errors.dateFrom || form.formState.errors.dateTo) && (
-              <p className="text-xs text-destructive">
-                {form.formState.errors.dateFrom?.message ?? form.formState.errors.dateTo?.message}
-              </p>
-            )}
+            <p className="min-h-4 text-xs text-destructive">
+              {form.formState.errors.dateFrom?.message ?? form.formState.errors.dateTo?.message}
+            </p>
           </div>
 
           <div className="flex gap-2">

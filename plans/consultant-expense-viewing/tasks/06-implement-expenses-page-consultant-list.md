@@ -4,15 +4,15 @@
 
 **Blocked by:** 1, 4, 5
 
-**Status:** ready-for-agent
+**Status:** done (2026-09-02)
 
-- [ ] Replace placeholder content in `ExpensesPage` with functional implementation
-- [ ] Use `useAuth()` to get current user ID
-- [ ] Fetch consultant expenses via `repository.getExpensesBySubmitter(user.id)`
-- [ ] Render `FilterPanel` with `showSubmitterFilter={false}`
-- [ ] Apply filters to expense list using existing `filterExpenses()` utility
-- [ ] Render `ExpenseTable` with filtered results and `onRowClick` handler navigating to `/expenses/:id`
-- [ ] Display loading state while fetching
-- [ ] Display error state if fetch fails
-- [ ] Display empty state if consultant has no expenses
-- [ ] Add tests in `ExpensesPage.test.tsx` verifying: consultant expenses loaded and displayed, filters apply correctly, submitter filter hidden, row click navigates, loading/error/empty states
+- [x] Replace placeholder content in `ExpensesPage` with functional implementation
+- [x] Use `useAuth()` to get current user ID
+- [x] Fetch consultant expenses via `repository.getExpensesBySubmitter(user.id)`
+- [x] Render `FilterPanel` with `showSubmitterFilter={false}`
+- [x] Apply filters to expense list using existing `filterExpenses()` utility
+- [x] Render `ExpenseTable` with filtered results and `onRowClick` handler navigating to `/expenses/:id`
+- [x] Display loading state while fetching
+- [x] Display error state if fetch fails
+- [x] Display empty state if consultant has no expenses
+- [x] Add tests in `ExpensesPage.test.tsx` verifying: consultant expenses loaded and displayed, filters apply correctly, submitter filter hidden, row click navigates, loading/error/empty states
