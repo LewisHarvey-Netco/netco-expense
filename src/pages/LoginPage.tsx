@@ -87,6 +87,27 @@ export default function LoginPage() {
               Sign in
             </Button>
           </form>
+
+          <div className="mt-6 border-t pt-4">
+            <p className="mb-3 text-xs font-semibold text-foreground/70">Demo Users</p>
+            <div className="space-y-2">
+              <div className="rounded bg-foreground/5 p-2 text-xs">
+                <p className="font-mono">alice@netcompany.com</p>
+                <p className="text-foreground/60">Password: password123</p>
+                <p className="text-foreground/60">Role: Consultant</p>
+              </div>
+              <div className="rounded bg-foreground/5 p-2 text-xs">
+                <p className="font-mono">bob@netcompany.com</p>
+                <p className="text-foreground/60">Password: password123</p>
+                <p className="text-foreground/60">Role: Finance</p>
+              </div>
+              <div className="rounded bg-foreground/5 p-2 text-xs">
+                <p className="font-mono">tom@netcompany.com</p>
+                <p className="text-foreground/60">Password: password123</p>
+                <p className="text-foreground/60">Role: Consultant</p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
