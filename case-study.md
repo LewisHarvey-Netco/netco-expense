@@ -213,6 +213,18 @@ Vertical slices kept scope tight and demoable. TDD was effective because the tes
 
 The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that required human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
 
+## Keeping Agents Current: Tooling-Specific Instructions
+
+During development, the agent generated E2E tests using Playwright's deprecated `toHaveTextContent()` matcher. The test framework had removed this matcher in version 1.62+, but the agent's training data still referenced the old API. Each time a new test was written, the same mistake recurred—a test would fail at runtime with `TypeError: expect(...).toHaveTextContent is not a function`, requiring manual correction to use `toHaveText()` or `toContainText()` instead.
+
+This revealed an important pattern: **agents trained on public documentation will use outdated library APIs when libraries deprecate features without loud warnings**. The solution was not to wait for the agent to learn, but to document the project-specific guidance directly in `AGENTS.md`, the file the agent reads before each session.
+
+A single-line note was added to the Playwright section:
+
+> **Note:** `toHaveTextContent` matcher was removed in Playwright 1.62+. Use `toHaveText()` (exact match) or `toContainText()` (substring match) instead.
+
+After this change, the agent no longer made the mistake. This demonstrates a broader principle: **project and tooling-specific instruction files are a low-effort, high-impact way to keep agents fast and accurate**. Rather than repeatedly correcting the same error (which slows development), a one-time investment in documenting known gotchas, version-specific quirks, or deprecated APIs prevents the agent from going down the same wrong path. For teams using AI agents over months or years, maintaining a curated list of such instructions—library versions, recently deprecated features, project-specific patterns—directly translates to faster, more reliable AI-assisted development.
+
 ## Choosing the Right Model
 
 Throughout the project, both Claude 3.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally.
