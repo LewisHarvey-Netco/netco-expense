@@ -17,8 +17,7 @@ Problems are divided into two categories:
 
 1. **Developer Workflow Adjustments** — issues that the developer can address by adjusting their workflow, configuration, or setup practices. These do not require changes to Feniks AI itself.
 
-2. **Feniks AI / Tooling Fixes Needed** — issues that require changes to Feniks AI, opencode configuration, or upstream tooling (shadcn, Playwright, etc.). These cannot be resolved by the developer alone and need fixes from the Feniks AI team or tool maintainers.
-
+2. **Feniks AI / Tooling Fixes Needed** — issues that require changes to Feniks AI, opencode configuration, or upstream tooling (shadcn, Playwright, etc.). These cannot be resolved by the developer alone and need fixes from the Feniks AI team or
 ---
 
 # Developer Workflow Adjustments
@@ -56,10 +55,6 @@ than relying on `.gitignore`:
 **Developer action:** Ensure AGENTS.md clearly documents which files/directories
 the agent should never read or modify, and reference these rules in agent
 instructions and skills.
-
-## 2026-08-18 — No good way to reference small code snippets without overloading context
-
-**Status:** Not a real problem — removed. The two-step Grep + Read workflow works fine.
 
 ## 2026-08-18 — Get-ChildItem with -LiteralPath fails consistently in bash tool
 
@@ -223,6 +218,8 @@ the actual project tooling and dependencies live. This creates a mismatch.
 **Root cause:** OpenCode for Feniks currently ships as a Windows-only application and
 cannot be installed or run inside WSL.
 
+**Discussion:** [Viva Engage thread](https://teams.microsoft.com/l/entity/683f3525-d193-4a67-8d91-22093beab1ca/?context=%7B%22internalId%22%3A%2219%3AeyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNTQ3MDYzMTExNjgifQ%40EngageCommunity%22%2C%22contextType%22%3A%22engageCommunity%22%2C%22subEntityId%22%3A%22%7B%5C%22deepLinkType%5C%22%3A%5C%22crossapp%5C%22%2C%5C%22path%5C%22%3A%5C%22%2Fthreads%2FeyJfdHlwZSI6IlRocmVhZCIsImlkIjoiMzk4NDM3MTk4MTc4NzEzNiJ9%5C%22%7D%22%7D)
+
 **Status:** Open.
 
 **Impact:** Any project that relies on WSL for its toolchain requires the Windows environment
@@ -245,6 +242,8 @@ patterns like password fields, storage keys, or mock credentials (e.g. `src/mock
 `AuthContext.tsx`). However, the error message provides zero visibility into what triggered it.
 
 **Status:** Open. Worked around by having the user run commands manually.
+
+**Discussion:** [Teams thread](https://teams.microsoft.com/l/entity/683f3525-d193-4a67-8d91-22093beab1ca/?context=%7B%22internalId%22%3A%2219%3AeyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNTQ3MDYzMTExNjgifQ%40EngageCommunity%22%2C%22contextType%22%3A%22engageCommunity%22%2C%22subEntityId%22%3A%22%7B%5C%22deepLinkType%5C%22%3A%5C%22crossapp%5C%22%2C%5C%22path%5C%22%3A%5C%22%2Fthreads%2FeyJfdHlwZSI6IlRocmVhZCIsImlkIjoiMzk4NDM3MTk4MTc4NzEzNiJ9%5C%22%7D%22%7D)
 
 **Impact:** When a command is blocked, the developer cannot diagnose why or fix it. The lack
 of diagnostics creates a bad incentive structure: the obvious solution is to disable the
@@ -493,3 +492,15 @@ After this, the full suite passes: 15/15 test files, 87 tests (63 jsdom +
 **Note:** If a new CJS-only dep is later pulled in by the Storybook setup or
 a test file, the same "does not provide an export named X" error will recur
 in the storybook project — add that package to `optimizeDeps.include` too.
+le for
+the match/confirmation check, or stale in-memory file state when edits are made in quick
+succession on the same file.
+
+**Status:** Worked around.
+
+**Developer action:** After every `edit` call (especially on a file just edited), verify the
+change by re-reading the affected region or grepping for the expected text. Do not trust
+the tool's success/failure message at face value — confirm the on-disk state before proceeding.
+
+**Requires fix:** The edit tool should re-read the file from disk immediately before reporting
+success/failure, ensuring the reported status always matches the on-disk state.
