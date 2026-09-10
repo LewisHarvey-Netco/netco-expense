@@ -27,7 +27,9 @@ Keep this documentation up to date: when a change introduces, removes, or alters
 - **Testing:** Multi-layer strategy:
   - **Vitest + React Testing Library** — component/unit tests, colocated `.test.tsx` files. Run `npm run test`.
   - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser). For debugging, use `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed` (PowerShell) to slow down operations (in milliseconds).
+    - **Note:** `toHaveTextContent` matcher was removed in Playwright 1.62+. Use `toHaveText()` (exact match) or `toContainText()` (substring match) instead.
   - **Storybook** — Visual component development & testing. Run `npm run storybook`. Stories live in `.stories.tsx` files alongside components.
+    - **Note on vitest + Storybook:** When adding new stories that import previously-unused modules, you may see "Failed to fetch dynamically imported module" errors on first run. This is a Vite dependency optimization race condition. Workaround: re-run the tests. If the error persists, clear `node_modules/.cache/storybook` and re-run. See `problems.md` for full details on CJS/ESM pre-bundling requirements (`optimizeDeps.include` in `vitest.config.ts`).
 - **Linting:** oxlint (Vite's default). Run `npm run lint`.
 - **Commands:**
   - `npm install` — install dependencies

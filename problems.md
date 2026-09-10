@@ -13,11 +13,14 @@ resolved).
 
 ## Organization
 
-Problems are divided into two categories:
+Problems are divided into three categories:
 
 1. **Developer Workflow Adjustments** — issues that the developer can address by adjusting their workflow, configuration, or setup practices. These do not require changes to Feniks AI itself.
 
-2. **Feniks AI / Tooling Fixes Needed** — issues that require changes to Feniks AI, opencode configuration, or upstream tooling (shadcn, Playwright, etc.). These cannot be resolved by the developer alone and need fixes from the Feniks AI team or
+2. **Feniks AI / Tooling Fixes Needed** — issues that require changes to Feniks AI or opencode configuration. These cannot be resolved by the developer alone and need fixes from the Feniks AI team.
+
+3. **Non-AI Related Problems** — upstream tool issues (shadcn, Playwright, etc.) or generic programming problems that would occur regardless of whether an AI agent is involved. These are included for completeness but require fixes from tool maintainers or represent general best practices.
+
 ---
 
 # Developer Workflow Adjustments
@@ -79,61 +82,6 @@ file pattern matching, which are the recommended approach anyway per the tool us
 directory inspection over bash commands. Use `node -e` for bundle inspection or other
 complex queries instead of multi-statement PowerShell pipelines.
 
-## 2026-08-24 — shadcn CLI doesn't resolve `@` alias on Windows
-
-**What was attempted:** `npx shadcn@latest add select checkbox` to add shadcn/ui components
-using the `@` path alias defined in `components.json`.
-
-**What went wrong:** The CLI created files at a literal `@/components/ui/` directory in the
-project root instead of resolving the `@` alias to `src/components/ui/`. The CLI output showed
-the broken path: `@\components\ui\select.tsx`.
-
-**Root cause:** The shadcn CLI on Windows doesn't resolve the `@` alias from `components.json`
-against the Vite alias config—it treats `@` as a literal directory name.
-
-**Status:** Resolved (workaround applied).
-
-**Solution:** In `components.json`, use an explicit relative path instead of the `@` alias:
-
-```json
-{
-  "componentsDir": "./src/components/ui"
-}
-```
-
-instead of:
-
-```json
-{
-  "componentsDir": "@/components/ui"
-}
-```
-
-This ensures the shadcn CLI writes components to the correct location on all platforms.
-
-## 2026-09-02 — Playwright 1.62 removed `toHaveTextContent` matcher
-
-**What was attempted:** Writing a new Playwright E2E test using
-`expect(locator).toHaveTextContent('Lunch')` — the matcher used in countless
-Playwright examples and docs.
-
-**What went wrong:** The test failed with `TypeError: expect(...).toHaveTextContent is not a function`.
-No deprecation warning, no hint about the replacement — just a runtime TypeError.
-The installed `@playwright/test@1.62.1` type definitions expose only `toHaveText`
-(exact match) and `toContainText` (substring match); `toHaveTextContent` no longer exists.
-
-**Root cause:** Playwright removed the long-deprecated `toHaveTextContent` matcher in a recent
-release. Code written against older Playwright docs/examples breaks silently at runtime.
-
-**Status:** Resolved.
-
-**Solution:** Use `toContainText` (substring match) or `toHaveText` (exact match) instead:
-- `expect(locator).toHaveText('exact string')` — exact match
-- `expect(locator).toContainText('substring')` — substring match
-
-Pin `@playwright/test` in `package.json` so matcher availability is predictable.
-On 1.62+, the text matchers are `toHaveText` / `toContainText`.
-
 ## 2026-09-02 — Piping an allowed command breaks the bash permission match
 
 **What was attempted:** Running
@@ -181,7 +129,7 @@ success/failure, ensuring the reported status always matches the on-disk state.
 
 # Feniks AI / Tooling Fixes Needed
 
-Issues that require changes to Feniks AI, opencode, or upstream tool fixes.
+Issues that require changes to Feniks AI or opencode configuration.
 
 ## 2026-08-17 — Plan mode's bash permissions too restrictive for read-only inspection
 
@@ -384,34 +332,6 @@ and lint output. The review should verify:
 **Requires fix:** Either add a `/code-review` skill to the environment or update
 the `implement` skill to describe the manual review fallback.
 
-## 2026-09-01 — shadcn CLI creates literal `@` directory on Windows; cleanup blocked by permissions
-
-**What was attempted:** Adding the shadcn `textarea` component via
-`npx shadcn@latest add textarea` (ticket 08, ReviewDecisionForm needs a
-comment text area; AGENTS.md mandates CLI-added shadcn components over
-hand-written ones).
-
-**What went wrong:** The CLI reported "Created 1 file: `@\components\ui\textarea.tsx`"
-— it wrote the component to a literal `@` directory at the project root instead of
-resolving the `@/` path alias from `components.json` to `src/`. The now-stray `@\components\ui\`
-tree at the repo root cannot be removed by the agent: `rm`, `rmdir`, and `Remove-Item`
-are all denied by the bash permission rules.
-
-**Root cause:** (1) shadcn CLI v4.19.1 does not resolve the `@/` alias on Windows
-(path separator / alias handling bug). (2) The bash permission allowlist blocks
-file-removal commands.
-
-**Status:** Worked around.
-
-**Developer action:** After running `npx shadcn@latest add <name>` on Windows:
-1. Verify files landed in `src/components/ui/` (not a literal `@/` folder)
-2. If a stray `@` directory exists at the repo root, delete it manually with:
-   `Remove-Item -Recurse .\@` (in PowerShell)
-3. Never commit the stray `@/` directory (it's not tracked by git, but add `@/` to
-   `.gitignore` to be safe)
-
-**Requires fix:** shadcn CLI team needs to fix Windows path alias resolution.
-
 ## 2026-09-01 — Storybook vitest project: transient "Failed to fetch dynamically imported module" on first run after adding a story
 
 **What was attempted:** Running the full test suite (`npm run test`) after
@@ -439,6 +359,46 @@ the story itself.
 "Failed to fetch dynamically imported module" under `node_modules/.cache/
 storybook/.../sb-vitest/deps/`, re-run before debugging the story; if it
 persists, clear `node_modules/.cache/storybook` and re-run.
+
+---
+
+# Non-AI Related Problems
+
+Upstream tool issues or generic programming problems that would occur regardless of whether an AI agent is involved.
+
+## 2026-08-24 — shadcn CLI doesn't resolve `@` alias on Windows
+
+**What was attempted:** `npx shadcn@latest add select checkbox` to add shadcn/ui components
+using the `@` path alias defined in `components.json`.
+
+**What went wrong:** The CLI created files at a literal `@/components/ui/` directory in the
+project root instead of resolving the `@` alias to `src/components/ui/`. The CLI output showed
+the broken path: `@\components\ui\select.tsx`.
+
+**Root cause:** The shadcn CLI on Windows doesn't resolve the `@` alias from `components.json`
+against the Vite alias config—it treats `@` as a literal directory name.
+
+**Status:** Resolved (workaround applied).
+
+**Solution:** In `components.json`, use an explicit relative path instead of the `@` alias:
+
+```json
+{
+  "componentsDir": "./src/components/ui"
+}
+```
+
+instead of:
+
+```json
+{
+  "componentsDir": "@/components/ui"
+}
+```
+
+This ensures the shadcn CLI writes components to the correct location on all platforms.
+
+**Requires fix:** shadcn CLI team needs to fix Windows path alias resolution.
 
 ## 2026-08-24 — Storybook vitest project fails on aria-query `elementRoles` import (pre-existing)
 
@@ -492,15 +452,5 @@ After this, the full suite passes: 15/15 test files, 87 tests (63 jsdom +
 **Note:** If a new CJS-only dep is later pulled in by the Storybook setup or
 a test file, the same "does not provide an export named X" error will recur
 in the storybook project — add that package to `optimizeDeps.include` too.
-le for
-the match/confirmation check, or stale in-memory file state when edits are made in quick
-succession on the same file.
 
-**Status:** Worked around.
-
-**Developer action:** After every `edit` call (especially on a file just edited), verify the
-change by re-reading the affected region or grepping for the expected text. Do not trust
-the tool's success/failure message at face value — confirm the on-disk state before proceeding.
-
-**Requires fix:** The edit tool should re-read the file from disk immediately before reporting
-success/failure, ensuring the reported status always matches the on-disk state.
+**Requires fix:** This is a Vite + Storybook integration issue; may require updates to dep scanning logic or documentation.
