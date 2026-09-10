@@ -203,6 +203,23 @@ Another example: ticket 05 (filter logic). Feniks initially implemented filter s
 
 These decisions (extracting column definitions, lifting state) were the kinds of choices that determined whether a codebase remained maintainable as it grew. An AI operating at full speed without human gatekeeping might not make these choices. The developer's involvement slowed down the raw code-generation speed but ensured the decisions were deliberate and the architecture scaled.
 
+### Configuring Workflows to Keep Developers in the Loop
+
+During implementation, the agent occasionally made large-scale architectural decisions (e.g., moving `<BrowserRouter>` initialization from one file to another, restructuring test file organization) without consulting the developer. While the fixes were technically correct, the developer had no voice in whether those refactors were appropriate.
+
+The solution was not a one-time correction but a **workflow adjustment embedded in the skill itself**. The `implement` skill was updated to enforce a gate:
+
+> **Before making any refactoring, architectural change, or structural modification:**
+> Summarize why the change is needed, what will be refactored, and the impact on existing code.
+> Present this to the user and wait for approval before proceeding. Do not apply large-scale
+> changes without consent.
+
+This keeps developers in the loop on significant decisions while still allowing the agent to implement straightforward ticket work autonomously. The gate distinguishes between:
+- **Tactical work** (implementing ticket requirements, adding tests, fixing bugs) → agent proceeds freely
+- **Strategic work** (refactoring, architectural changes, restructuring) → agent proposes, developer approves
+
+This approach scales: as the project grows and more developers join, the workflow ensures that structural decisions remain intentional and deliberate rather than emerging from ad-hoc agent fixes. The skill acts as a guardrail, encoding the principle that large-scale changes require human judgment.
+
 ## Codebase Maintainability
 
 This human-guided approach resulted in a codebase that was not just functional but intentionally well-structured. The project included comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verified key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that caught type errors at compile time. Every component was documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions were recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers could understand not just what the code does but why those decisions were made. The repo had clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions lived in `src/types.ts` and were referenced throughout, ensuring consistency.

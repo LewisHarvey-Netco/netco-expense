@@ -6,6 +6,35 @@ Historical record of problems that have been resolved or fixed during the projec
 
 # Developer Workflow Adjustments
 
+## 2026-08-17 — Agent applies workarounds without consulting the user
+
+**What was attempted:** Standard build workflow — agent runs verification commands,
+encounters errors, and fixes them.
+
+**What went wrong:** The agent independently decided to refactor the router architecture
+(moving `<BrowserRouter>` from `App.tsx` to `main.tsx`) and rewrite test file structure
+without informing the user or asking for approval. While the fix was correct, the user
+was not consulted before structural changes were made.
+
+**Root cause:** No explicit workflow rule in place requiring the agent to ask before
+applying workarounds or making architectural changes. The agent's default behavior is
+to solve problems autonomously.
+
+**Status:** Fixed.
+
+**Solution:** Updated the `implement` skill to explicitly instruct the agent:
+
+> **Before making any refactoring, architectural change, or structural modification:**
+> Summarize why the change is needed, what will be refactored, and the impact on existing code.
+> Present this to the user and wait for approval before proceeding. Do not apply large-scale
+> changes without consent.
+
+This keeps the developer in the loop on significant decisions while still allowing the agent
+to implement straightforward ticket work autonomously. The skill now enforces a gate: refactors
+require user buy-in, tactical implementations proceed freely.
+
+---
+
 ## 2026-09-02 — Piping an allowed command breaks the bash permission match
 
 **What was attempted:** Running

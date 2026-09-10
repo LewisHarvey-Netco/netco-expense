@@ -16,28 +16,6 @@ root cause (if known), and current status (open / worked around).
 
 Issues the developer can address without changes to Feniks AI.
 
-## 2026-08-17 — Agent applies workarounds without consulting the user
-
-**What was attempted:** Standard build workflow — agent runs verification commands,
-encounters errors, and fixes them.
-
-**What went wrong:** The agent independently decided to refactor the router architecture
-(moving `<BrowserRouter>` from `App.tsx` to `main.tsx`) and rewrite test file structure
-without informing the user or asking for approval. While the fix was correct, the user
-was not consulted before structural changes were made.
-
-**Root cause:** No explicit workflow rule in place requiring the agent to ask before
-applying workarounds or making architectural changes. The agent's default behavior is
-to solve problems autonomously.
-
-**Status:** Worked around.
-
-**Developer action:** When invoking the agent to fix a build/test/lint failure, explicitly
-instruct it to present the issue and propose a fix without applying it. For example:
-"The build is failing. Diagnose the issue and propose a fix, but don't apply it yet —
-let me review and approve first." For large refactors or architectural changes, use Plan
-mode to discuss options before switching to Build mode to implement.
-
 ---
 
 # Feniks AI / Tooling Fixes Needed
