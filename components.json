@@ -12,6 +12,7 @@
   },
   "iconLibrary": "lucide",
   "rtl": false,
+  "componentsDir": "./src/components/ui",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
