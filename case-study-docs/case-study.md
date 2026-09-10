@@ -1,5 +1,20 @@
 # Feniks AI Case Study – Netco Expense POC
 
+## Executive Summary
+
+Netco-expense is a frontend-only POC expense app built almost entirely with Feniks Build (OpenCode for Feniks), covering requirements elicitation, prototyping, and full implementation with a multi-layer test suite (unit, component, E2E, visual). It was built to stress-test Feniks as an agentic development tool, not to ship a product.
+
+**Net finding:** Feniks is effective at both planning/analysis and well-scoped implementation, but only when paired with a deliberate workflow — small vertical-slice tickets, TDD as the specification, and explicit human approval gates before any architectural change. As a concrete data point, one full feature (finance expense review: 11 tickets, 25 user stories, two pages, full test coverage) took roughly 12 hours of human-supervised agentic development, against a rough estimate of 2–3 days for the same scope built by hand. Model choice mattered: Claude 4.5 was used for planning/analysis (grill-me → PRD → tickets), Qwen 3.6 on-prem for implementation once tickets were well-defined — larger models were stronger at synthesis, on-prem models were faster once the task was unambiguous.
+
+**Where it fell short:**
+- **Visual/design iteration:** no image feedback loop meant Feniks routinely hallucinated the current UI state, making small visual tweaks slow and error-prone (see [Design and Prototyping](#feniks-prototyping---problems)).
+- **Unsupervised architectural decisions:** left alone, the agent occasionally made structural changes (e.g. moving router setup, restructuring tests) without asking — mitigated by adding an explicit approval gate to the `implement` skill (see [Configuring Workflows to Keep Developers in the Loop](#configuring-workflows-to-keep-developers-in-the-loop)).
+- **Tooling gaps:** no WSL support, opaque prompt-injection blocking with no diagnostics, and an under-documented skill library all created friction that required workarounds rather than fixes (see [Overall Findings](#overall-findings)).
+
+**Practices that made the biggest difference:** vertical-slice tickets sized to a single context window, TDD as an unambiguous spec for the agent to satisfy, keeping the developer in the loop specifically for strategic/architectural decisions (not tactical ticket work), and documenting project- and tool-specific gotchas directly in `AGENTS.md` rather than re-correcting the agent each session.
+
+This document works through each stage of that workflow with concrete examples, then closes with a full list of benefits, limitations, and setup details for teams considering the same approach. The [Appendix](#appendix) contains the full `AGENTS.md` and the exact skill definitions (grill-me, write-a-prd, to-tickets, implement) used throughout, for teams wanting to reuse them directly.
+
 ## Introduction
 
 ### Intended Audience
@@ -51,7 +66,7 @@ It's important to note that there are clear limitations to this case study that 
 
 ## Getting Started with Feniks Build
 
-Setup needs to be done by each developer, on their local machine. The process is well covered by the document C0200 – User Guide – Feniks AI.
+Setup needs to be done by each developer, on their local machine. The process is well covered by **[FA]**.
 
 Once Feniks AI is installed and setup, users can choose whether to interact with the Graphical Interface, or the Terminal Interface. Sessions and capabilities are shared between interfaces, so users can switch back and forth as they like.
 
@@ -122,7 +137,7 @@ Apps like Claude Design support more fine grain workflows, where designers can p
 
 ## Build and Testing
 
-With user stories and a prototype in place, the team moved into iterative implementation and validation. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early. This aligns with [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)' recommendation that "multi-layered validation (unit, component, integration, E2E) is essential when relying on AI-generated code, as different test layers catch different failure modes."
+With user stories and a prototype in place, the team moved into iterative implementation and validation. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early. This aligns with **[AG]**'s recommendation that "multi-layered validation (unit, component, integration, E2E) is essential when relying on AI-generated code, as different test layers catch different failure modes."
 
 The key insight was to break down work into small vertical slices before touching the code, each feature cutting through the full stack (state, types, forms, tests) in a single small, demoable increment. This allowed the developer to validate end-to-end work early and catch architectural issues before they compounded.
 
@@ -155,7 +170,7 @@ Saving the output into a markdown document provides several benefits:
 2. The content can be used in subsequent follow up tasks (like enhancing documentation) after the implementation is done
 3. A new session can be started to move on to the next step of the process, where this document is fed in and otherwise a completely fresh context window is available
 
-This last point is important when considering the advice often given around keeping context small and highly relevant. To quote [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default) (page 12): "The context window is a finite and expensive resource: filling it with irrelevant files or stale history degrades reasoning quality and increases cost. Filling it with the right, highly relevant information is often the single most impactful improvement you can make to agent performance." This practice—separating concerns across sessions rather than accumulating context—directly implements the guideline's recommendation for context optimization.
+This last point is important when considering the advice often given around keeping context small and highly relevant. To quote **[AG]** (page 12): "The context window is a finite and expensive resource: filling it with irrelevant files or stale history degrades reasoning quality and increases cost. Filling it with the right, highly relevant information is often the single most impactful improvement you can make to agent performance." This practice—separating concerns across sessions rather than accumulating context—directly implements the guideline's recommendation for context optimization.
 
 ### Building the Finance Pages – write-a-prd (Planning mode, Claude 4.5)
 
@@ -187,7 +202,7 @@ The implement skill included instruction to use test driven development and cont
 
 For each ticket, a new session was started (therefore a new context window) and the implement skill was run with reference to a single ticket.
 
-Test driven development enabled agents to set up parameters for success before executing on implementation. Consider ticket 05 (filter logic and form). Unit tests were written for `filterExpenses()`—does it filter by status? by type? by date range? Does it preserve the original array and return a new one? Once tests were written and failing, Feniks then implemented the function that passed the tests. This practice—"tests as specification" ([C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default), page 8)—transforms TDD from a human best practice into a critical guardrail for AI-assisted work, where the test is the unambiguous specification the agent must satisfy.
+Test driven development enabled agents to set up parameters for success before executing on implementation. Consider ticket 05 (filter logic and form). Unit tests were written for `filterExpenses()`—does it filter by status? by type? by date range? Does it preserve the original array and return a new one? Once tests were written and failing, Feniks then implemented the function that passed the tests. This practice—"tests as specification" (**[AG]**, page 8)—transforms TDD from a human best practice into a critical guardrail for AI-assisted work, where the test is the unambiguous specification the agent must satisfy.
 
 Manual review was still needed to ensure that the tests covered the behaviour they needed to, and that the code was written in a way that abided by practices and patterns already established in the repository. Guardrails were set up for AI to achieve this by adding instruction to skills to reference the architecture document, ADRs and the design guidelines.
 
@@ -195,7 +210,7 @@ Occasionally the agent would write changes that broke something, but with compre
 
 ### Human in the Loop: Trade-offs and Disagreements
 
-There is a fundamental trade off with agentic development: having the developer in the loop is slower than simply unleashing the AI to write code without review. But it keeps the developer informed and in control of architectural decisions. As noted in [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default): "Human oversight is not a bottleneck to remove, but a critical control surface for maintaining code quality and architectural intent. The slowest code is code that's fast to generate but impossible to maintain." Without human oversight, Feniks would generate code faster, but the codebase would reflect the AI's adhoc decisions about structure, naming, and patterns. Giving the Jira-ticket sized problems enabled developers to review code as they usually would with non-agentic programming, keeping developers responsible for and capable of maintaining the code.
+There is a fundamental trade off with agentic development: having the developer in the loop is slower than simply unleashing the AI to write code without review. But it keeps the developer informed and in control of architectural decisions. As noted in **[AG]**: "Human oversight is not a bottleneck to remove, but a critical control surface for maintaining code quality and architectural intent. The slowest code is code that's fast to generate but impossible to maintain." Without human oversight, Feniks would generate code faster, but the codebase would reflect the AI's adhoc decisions about structure, naming, and patterns. Giving the Jira-ticket sized problems enabled developers to review code as they usually would with non-agentic programming, keeping developers responsible for and capable of maintaining the code.
 
 A concrete example: ticket 03 (build the expense table component). Feniks generated a component that took `expenses` and `onRowClick` as props, rendering rows with a hardcoded column order. The component worked and tests passed. But when the developer reviewed it, the column definitions (field name, display label, width) were noticed to be hard coded in the JSX. The developer disagreed with this approach. If columns needed to be reordered or new ones added later, the render logic would have to be touched, and the reusability of the table component was limited to views that needed the exact same columns. Feniks was prompted to refactor—extract column definitions into a constant, accept `columns` as a prop, make the render loop generic. This review cycle added maybe 20 minutes to the ticket but produced a better codebase. Without human oversight, the working-but-rigid solution would have been kept.
 
@@ -214,7 +229,7 @@ The solution was not a one-time correction but a **workflow adjustment embedded 
 > Present this to the user and wait for approval before proceeding. Do not apply large-scale
 > changes without consent.
 
-This gate operationalizes guidance from [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default): "Distinguish between tactical implementation (which agents can do autonomously) and strategic decisions (which require human judgment). Encode this distinction into your skill workflows." It keeps developers in the loop on significant decisions while still allowing the agent to implement straightforward ticket work autonomously. The gate distinguishes between:
+This gate operationalizes guidance from **[AG]**: "Distinguish between tactical implementation (which agents can do autonomously) and strategic decisions (which require human judgment). Encode this distinction into your skill workflows." It keeps developers in the loop on significant decisions while still allowing the agent to implement straightforward ticket work autonomously. The gate distinguishes between:
 - **Tactical work** (implementing ticket requirements, adding tests, fixing bugs) → agent proceeds freely
 - **Strategic work** (refactoring, architectural changes, restructuring) → agent proposes, developer approves
 
@@ -222,11 +237,11 @@ This approach scales: as the project grows and more developers join, the workflo
 
 ## Codebase Maintainability
 
-This human-guided approach resulted in a codebase that was not just functional but intentionally well-structured. The practices applied throughout—human oversight, multi-layer testing, preventive documentation, and strategic skill configuration—are the core recommendations of [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default) for sustainable AI-assisted development. The project included comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verified key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that caught type errors at compile time. Every component was documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions were recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers could understand not just what the code does but why those decisions were made. The repo had clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions lived in `src/types.ts` and were referenced throughout, ensuring consistency.
+This human-guided approach resulted in a codebase that was not just functional but intentionally well-structured. The practices applied throughout—human oversight, multi-layer testing, preventive documentation, and strategic skill configuration—are the core recommendations of **[AG]** for sustainable AI-assisted development. The project included comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verified key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that caught type errors at compile time. Every component was documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions were recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers could understand not just what the code does but why those decisions were made. The repo had clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions lived in `src/types.ts` and were referenced throughout, ensuring consistency.
 
 This maintainable structure emerged because for every ticket, the instructions given to Feniks across agents.md and skills invoked told the agent to follow the patterns in `docs/architecture.md`, to add Storybook stories for new components, to write tests before code, to use TypeScript strictly. Key decisions were ensured to be documented in the PRD and ADR when they involved architectural trade-offs. The result was a codebase that new developers could onboard to quickly: the architecture was explicit, the test coverage was comprehensive, the types were a second form of documentation, and the Storybook was a visual reference for how components behaved.
 
-Vertical slices kept scope tight and demoable. TDD was effective because the test was the spec; Feniks knew exactly what to build. Pure functions were AI-friendly—when filter logic was defined as a pure function with clear inputs and outputs, it worked first try. The grill-me interview extracted architectural nuance upfront, preventing mid-project pivots. The three-layer testing strategy (unit, component, E2E) caught different bug classes and ensured the codebase remained maintainable as features were added. Model switching optimized iteration speed. These practices directly implement the recommendations in [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default) around "structuring work for agent effectiveness: clear specs, boundary conditions, multi-layer validation, and architectural upfront design." And the skills workflow (grill-me → PRD → to-tickets → implement → validate) was repeatable and could be applied to the next feature with confidence.
+Vertical slices kept scope tight and demoable. TDD was effective because the test was the spec; Feniks knew exactly what to build. Pure functions were AI-friendly—when filter logic was defined as a pure function with clear inputs and outputs, it worked first try. The grill-me interview extracted architectural nuance upfront, preventing mid-project pivots. The three-layer testing strategy (unit, component, E2E) caught different bug classes and ensured the codebase remained maintainable as features were added. Model switching optimized iteration speed. These practices directly implement the recommendations in **[AG]** around "structuring work for agent effectiveness: clear specs, boundary conditions, multi-layer validation, and architectural upfront design." And the skills workflow (grill-me → PRD → to-tickets → implement → validate) was repeatable and could be applied to the next feature with confidence.
 
 The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that required human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
 
@@ -234,7 +249,7 @@ The entire finance-pages feature—11 tickets, 25 user stories, two pages with f
 
 During development, the agent generated E2E tests using Playwright's deprecated `toHaveTextContent()` matcher. The test framework had removed this matcher in version 1.62+, but the agent's training data still referenced the old API. Each time a new test was written, the same mistake recurred—a test would fail at runtime with `TypeError: expect(...).toHaveTextContent is not a function`, requiring manual correction to use `toHaveText()` or `toContainText()` instead.
 
-This revealed an important pattern: **agents trained on public documentation will use outdated library APIs when libraries deprecate features without loud warnings**. This aligns with [C0200 – User Guide – Feniks AI](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf)'s guidance on managing agent knowledge gaps. The solution was not to wait for the agent to learn, but to document the project-specific guidance directly in `AGENTS.md`, the file the agent reads before each session.
+This revealed an important pattern: **agents trained on public documentation will use outdated library APIs when libraries deprecate features without loud warnings**. This aligns with **[FA]**'s guidance on managing agent knowledge gaps. The solution was not to wait for the agent to learn, but to document the project-specific guidance directly in `AGENTS.md`, the file the agent reads before each session.
 
 A single-line note was added to the Playwright section:
 
@@ -263,7 +278,7 @@ A related discovery: on Windows, the agent would attempt to use PowerShell cmdle
 
 This single note eliminated a recurring friction point: the agent no longer wasted attempts on denied commands, and instead used the appropriate tools from day one. The lesson extends beyond file operations: **when a tool's permissions or design assumptions don't match the developer's environment, it's faster to document the workaround than to change the tool**. This keeps agents focused and sessions productive.
 
-This illustrates a key principle for sustainable AI-assisted development recommended in [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default): **preventive documentation about what tools to use (and what not to use) is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries, shell constraints, or tool-specific workarounds upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time trying blocked commands or reading irrelevant context, and more time focused on actual work. The guideline notes: "Document project constraints, tool workarounds, and deprecated patterns in AGENTS.md or equivalent—this is not busywork, it is infrastructure."
+This illustrates a key principle for sustainable AI-assisted development recommended in **[AG]**: **preventive documentation about what tools to use (and what not to use) is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries, shell constraints, or tool-specific workarounds upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time trying blocked commands or reading irrelevant context, and more time focused on actual work. The guideline notes: "Document project constraints, tool workarounds, and deprecated patterns in AGENTS.md or equivalent—this is not busywork, it is infrastructure."
 
 ## Tuning Feniks Config While Respecting Security
 
@@ -281,18 +296,18 @@ The fix was straightforward: add a small set of clearly read-only commands to th
 
 This enhancement maintains the security posture of plan mode (no mutations, no side effects, purely informational) while enabling the agent to verify environment setup independently.
 
-**The principle:** Netcompany's security restrictions in Feniks config are intentional guardrails designed to keep the workflow safe, as outlined in [C0200 – User Guide – Feniks AI](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf). When tuning the config to enhance capabilities, be cautious and make only **minimal, targeted changes that respect the original security intent**. This means:
+**The principle:** Netcompany's security restrictions in Feniks config are intentional guardrails designed to keep the workflow safe, as outlined in **[FA]**. When tuning the config to enhance capabilities, be cautious and make only **minimal, targeted changes that respect the original security intent**. This means:
 
 - Understand *why* a restriction exists before removing or weakening it
 - Only grant permissions for operations that don't break the security model (e.g., read-only inspection in plan mode)
 - Document the change and its rationale so future developers understand what was modified and why
 - Test the change to ensure it doesn't introduce unintended access patterns or security gaps
 
-This disciplined approach to config tuning allows the developer to adapt Feniks to project needs without eroding the security framework Netcompany built into the tool. As [C0200 – User Guide – Feniks AI](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf) emphasizes: "Security constraints exist to prevent entire categories of problems. Removing them removes the prevention; expanding them carefully, with understanding, maintains both capability and safety."
+This disciplined approach to config tuning allows the developer to adapt Feniks to project needs without eroding the security framework Netcompany built into the tool. As **[FA]** emphasizes: "Security constraints exist to prevent entire categories of problems. Removing them removes the prevention; expanding them carefully, with understanding, maintains both capability and safety."
 
 ## Choosing the Right Model
 
-Throughout the project, both Claude 3.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally. This approach aligns with [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)' recommendation: "Use larger models (Claude) for high-leverage thinking tasks (planning, architecture, requirements), and smaller on-prem models (Qwen) for well-defined implementation work. This optimizes both cost and speed."
+Throughout the project, both Claude 4.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally. This approach aligns with **[AG]**'s recommendation: "Use larger models (Claude) for high-leverage thinking tasks (planning, architecture, requirements), and smaller on-prem models (Qwen) for well-defined implementation work. This optimizes both cost and speed."
 
 Experimentation per project is needed to use the on prem models as much as possible, keeping costs down. Ultimately it is important that the developer continues to carefully review the outputs of their agentic workflow that intend to be maintained (documentation, code), to assess whether the workflow is working as expected, rather than depending on using larger models and expecting better outcomes. As the guideline states: "Model selection is not a substitute for review. Validation remains the constant, regardless of model choice."
 
@@ -303,6 +318,11 @@ Parallel development is achieved by opening multiple sessions (Ctrl + P -> new s
 ## Tooling and Access Problems
 
 See the problems.md file for a complete log of workflow problems encountered during development.
+
+## References
+
+- **[AG]** C0200 – User Guide – Agentic AI Guidelines. [Link](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)
+- **[FA]** C0200 – User Guide – Feniks AI. [Link](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf)
 
 ## Overall Findings
 
@@ -335,29 +355,6 @@ Several limitations in Feniks emerged during development that fall outside the s
 4. Document the security rationale so developers understand why the detection exists and isn't just capricious
 
 Without diagnostics, security features can inadvertently push users toward disabling them, which defeats their purpose.
-
-#### Skill Library Guidance: Missing Documentation on Usage and Customization
-
-**Issue:** Feniks provides a library of pre-built skills (grill-me, write-a-prd, to-tickets, implement, etc.), but there is minimal guidance on: when to use each skill, how to compose them into workflows, when and how to customize them, what the expected inputs/outputs are, or how to sequence them effectively.
-
-**Impact:** A developer new to Feniks has a skill library but lacks a map. Questions like "Should I use grill-me or write-a-prd first?", "When do I customize a skill vs. use it as-is?", "How do I know if my customizations will break the skill?", "What's the intended workflow?" require trial and error or external research (e.g., finding Matt Pocock's blog posts or GitHub repos to understand the methodology).
-
-For this project, the developer had to:
-- Hunt down Matt Pocock's public skill repositories to understand the underlying methodology
-- Reverse-engineer the workflow sequence by reading skill descriptions
-- Experimentally determine which skills to use together and in what order
-- Manually add the approval gate to the `implement` skill based on needs that emerged during development
-
-This suggests that the skill library is powerful but under-documented for practitioners.
-
-**Recommendation for Feniks team:**
-1. Document each skill's intended use case, inputs, outputs, and typical workflow position
-2. Provide a "skill composition guide" showing common workflows (e.g., "planning workflow: grill-me → write-a-prd → to-tickets", "implementation workflow: implement + code-review")
-3. Add a skill customization guide with examples: when to customize, which parts are safe to modify, how to test customizations
-4. Link to external resources (e.g., Matt Pocock's methodologies) where the skills' underlying patterns come from, so developers understand the "why" behind each skill's design
-5. Consider adding a `/suggest-skills` command that recommends skills based on the developer's stated task
-
-This would transform the skill library from a powerful but mysterious resource into a guided, discoverable system.
 
 ### Effective Ways of Working
 
@@ -806,27 +803,4 @@ DONT commit your work, the user will review.
 
 The workflow sequence (grill-me → PRD → to-tickets → implement) follows the Matt Pocock methodology: **relentless design clarity upfront, breaking work into demoable slices, then agentic implementation with human oversight on strategic choices**.
 
-## TODO
 
-### SETUP OF FENIKS
-
-- [ ] Note around using own skills rather than skill lib, dump each skill, and how skill lib doesn't provide much guidance for usage of skills.
-  - [ ] Consider recommending implementing something similar to the matt Pocock skill of skills
-- [ ] Problems with setup (heading tooling and access problems)
-- [ ] Needs to be part of regular practice to update ai workflow just like documentation.
-
-### TESTING & VALIDATION
-
-- [ ] Test plan-mode bash permissions enhancement: verify `node --version`, `npm --version`, `node -e`, `npm -v` work in plan mode after opencode.json update
-
-### TIDYING (at the end)
-
-- [x] Correct tense throughout (developer, designer, user instead of I/we; all past tense)
-
-### OTHER
-
-- [ ] Section on the workflow reference matt Pocock setup
-- [ ] Suggestion for further investigation (usage on a larger project with multiple developers across time)
-- [ ] Reference to needing to clean some bloat from architecture and adrs
-- [ ] Add test coverage stats and proof for some color in implementation
-- [X] Read through Netco ai guide and Feniks ai guide and references/adjustments/criticisms of this based on that input
