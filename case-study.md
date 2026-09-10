@@ -310,9 +310,31 @@ See the problems.md file for a complete log of workflow problems encountered dur
 
 What did Feniks make easier, faster or better?
 
-### Limitations
+### Limitations: Feniks Build Issues Requiring Development Team Action
 
-Where did Feniks struggle, introduce risk or require additional effort? What problems does the program experience that are attributed to using agentic AI?
+Several limitations in Feniks emerged during development that fall outside the scope of agent configuration or workflow adjustment. These are **fundamental gaps in the tool itself that require fixes by the Feniks development team** to resolve.
+
+#### Platform Limitations: WSL Support
+
+**Issue:** OpenCode for Feniks is not available for Windows Subsystem for Linux (WSL). On a Windows machine, Feniks can only run in the Windows environment (PowerShell), not in the WSL environment where many Linux-based projects' toolchains actually live. This creates a mismatch: the agent cannot execute commands against the project's real environment.
+
+**Impact:** Any project relying on WSL (common for cross-platform development) requires duplicate tooling installation on both Windows and WSL, or the agent becomes ineffective. This adds setup friction and risks version drift between environments.
+
+**Recommendation for Feniks team:** Either provide an OpenCode for Feniks build for WSL or improve the Windows build to detect and work directly with WSL environments.
+
+#### Security Diagnostics: Prompt Injection Detection
+
+**Issue:** The LLM bridge's prompt injection detection occasionally blocks legitimate build commands (e.g., `npm run build`, `npm run test`) with the message `[BLOCKED: prompt injection detected]`, but provides zero diagnostic information: no file path, no pattern that triggered the block, no explanation.
+
+**Impact:** When a command is blocked, the developer cannot diagnose why or fix it. This creates a **dangerous incentive structure**: the obvious solution is to disable injection detection entirely, which removes a critical security feature rather than tuning it. The lack of diagnostics makes the blocker feel like a bug rather than intentional security, eroding trust in the tool's safety mechanisms.
+
+**Recommendation for Feniks team:**
+1. When a command is blocked, output which file or content pattern triggered it
+2. Provide a way to view and adjust injection detection rules
+3. Consider scoping detection to external/untrusted content (fetched URLs, user messages) rather than the project's own source files
+4. Document the security rationale so developers understand why the detection exists and isn't just capricious
+
+Without diagnostics, security features can inadvertently push users toward disabling them, which defeats their purpose.
 
 ### Effective Ways of Working
 
@@ -322,16 +344,24 @@ Focus on lessons supported by examples from the project.
 
 ## Overview of Feniks Setup
 
-- List of Skills used and details of custom skills
-- Agents.md content
-- In code documentation that supports feniks (style guides, architecture etc).
-- Agents (and custom agents)
-  - Include changes to permissions
-- Instructions
-- MCPs
-- .opencode changes
-- C:\Users\<user>\.config\opencode\ changes
-- Configurations on LLM bridge
+### Configuration and Customization
+
+- **Skills used and details:** grill-me, mattpocock-skills-write-a-prd, to-tickets, implement (all from skill library); no custom skills created during this project
+- **AGENTS.md content:** Project-specific guidance for file exclusions, tool constraints (Windows shell note, bash piping limitations, Grep tool usage), deprecated library APIs (Playwright matchers), and Storybook/Vite dependencies
+- **In-code documentation:** DESIGN-GUIDELINES.md (Netcompany brand palette, typography, layout rules), docs/architecture.md (routing, auth, state management, forms, testing boundaries), docs/decisions/ (ADRs for significant architectural choices)
+- **Agents and permissions:** Plan mode enhanced with read-only version commands (node/npm), build mode left unrestricted; custom gate in implement skill requiring approval before refactors
+- **Instructions:** Security rules from ~/.config/opencode/rules/security.md
+- **MCPs:** Gateway MCP for SharePoint integration (not used in this project but available)
+- **.opencode configuration:** Plan agent model set to large-reasoning-01, build agent to qwen3-6-coder-gefion; enhanced plan mode bash permissions for environment inspection
+- **Global Feniks config (~/.config/opencode/opencode.json):** Plan and build agents configured with custom permissions; security restrictions respected while enabling targeted enhancements
+
+### Known Startup Issues
+
+**Docker container error on startup:** Feniks occasionally fails to start with an error about Docker containers not being found. This appears to be a stale Docker context or orphaned process state that Feniks doesn't clean up on normal exit. 
+
+**Workaround:** Force-close Feniks from the taskbar (full process kill) rather than normal close, then relaunch. This reliably clears the stale state.
+
+**Recommendation for Feniks team:** Implement automatic cleanup of stale Docker state on startup or graceful fallback when containers are missing.
 
 ## Appendix
 
