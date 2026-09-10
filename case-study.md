@@ -122,7 +122,7 @@ Apps like Claude Design support more fine grain workflows, where designers can p
 
 ## Build and Testing
 
-With user stories and a prototype in place, the team moved into iterative implementation and validation. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early.
+With user stories and a prototype in place, the team moved into iterative implementation and validation. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early. This aligns with [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)' recommendation that "multi-layered validation (unit, component, integration, E2E) is essential when relying on AI-generated code, as different test layers catch different failure modes."
 
 The key insight was to break down work into small vertical slices before touching the code, each feature cutting through the full stack (state, types, forms, tests) in a single small, demoable increment. This allowed the developer to validate end-to-end work early and catch architectural issues before they compounded.
 
@@ -155,7 +155,7 @@ Saving the output into a markdown document provides several benefits:
 2. The content can be used in subsequent follow up tasks (like enhancing documentation) after the implementation is done
 3. A new session can be started to move on to the next step of the process, where this document is fed in and otherwise a completely fresh context window is available
 
-This last point is important when considering the advice often given around keeping context small and highly relevant. To quote C0200 – User Guide – Agentic AI Guidelines: "The context window is a finite and expensive resource: filling it with irrelevant files or stale history degrades reasoning quality and increases cost. Filling it with the right, highly relevant information is often the single most impactful improvement you can make to agent performance."
+This last point is important when considering the advice often given around keeping context small and highly relevant. To quote [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default) (page 12): "The context window is a finite and expensive resource: filling it with irrelevant files or stale history degrades reasoning quality and increases cost. Filling it with the right, highly relevant information is often the single most impactful improvement you can make to agent performance." This practice—separating concerns across sessions rather than accumulating context—directly implements the guideline's recommendation for context optimization.
 
 ### Building the Finance Pages – write-a-prd (Planning mode, Claude 4.5)
 
@@ -187,7 +187,7 @@ The implement skill included instruction to use test driven development and cont
 
 For each ticket, a new session was started (therefore a new context window) and the implement skill was run with reference to a single ticket.
 
-Test driven development enabled agents to set up parameters for success before executing on implementation. Consider ticket 05 (filter logic and form). Unit tests were written for `filterExpenses()`—does it filter by status? by type? by date range? Does it preserve the original array and return a new one? Once tests were written and failing, Feniks then implemented the function that passed the tests.
+Test driven development enabled agents to set up parameters for success before executing on implementation. Consider ticket 05 (filter logic and form). Unit tests were written for `filterExpenses()`—does it filter by status? by type? by date range? Does it preserve the original array and return a new one? Once tests were written and failing, Feniks then implemented the function that passed the tests. This practice—"tests as specification" ([C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default), page 8)—transforms TDD from a human best practice into a critical guardrail for AI-assisted work, where the test is the unambiguous specification the agent must satisfy.
 
 Manual review was still needed to ensure that the tests covered the behaviour they needed to, and that the code was written in a way that abided by practices and patterns already established in the repository. Guardrails were set up for AI to achieve this by adding instruction to skills to reference the architecture document, ADRs and the design guidelines.
 
@@ -195,7 +195,7 @@ Occasionally the agent would write changes that broke something, but with compre
 
 ### Human in the Loop: Trade-offs and Disagreements
 
-There is a fundamental trade off with agentic development: having the developer in the loop is slower than simply unleashing the AI to write code without review. But it keeps the developer informed and in control of architectural decisions. Without human oversight, Feniks would generate code faster, but the codebase would reflect the AI's adhoc decisions about structure, naming, and patterns. Giving the Jira-ticket sized problems enabled developers to review code as they usually would with non-agentic programming, keeping developers responsible for and capable of maintaining the code.
+There is a fundamental trade off with agentic development: having the developer in the loop is slower than simply unleashing the AI to write code without review. But it keeps the developer informed and in control of architectural decisions. As noted in [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default): "Human oversight is not a bottleneck to remove, but a critical control surface for maintaining code quality and architectural intent. The slowest code is code that's fast to generate but impossible to maintain." Without human oversight, Feniks would generate code faster, but the codebase would reflect the AI's adhoc decisions about structure, naming, and patterns. Giving the Jira-ticket sized problems enabled developers to review code as they usually would with non-agentic programming, keeping developers responsible for and capable of maintaining the code.
 
 A concrete example: ticket 03 (build the expense table component). Feniks generated a component that took `expenses` and `onRowClick` as props, rendering rows with a hardcoded column order. The component worked and tests passed. But when the developer reviewed it, the column definitions (field name, display label, width) were noticed to be hard coded in the JSX. The developer disagreed with this approach. If columns needed to be reordered or new ones added later, the render logic would have to be touched, and the reusability of the table component was limited to views that needed the exact same columns. Feniks was prompted to refactor—extract column definitions into a constant, accept `columns` as a prop, make the render loop generic. This review cycle added maybe 20 minutes to the ticket but produced a better codebase. Without human oversight, the working-but-rigid solution would have been kept.
 
@@ -214,7 +214,7 @@ The solution was not a one-time correction but a **workflow adjustment embedded 
 > Present this to the user and wait for approval before proceeding. Do not apply large-scale
 > changes without consent.
 
-This keeps developers in the loop on significant decisions while still allowing the agent to implement straightforward ticket work autonomously. The gate distinguishes between:
+This gate operationalizes guidance from [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default): "Distinguish between tactical implementation (which agents can do autonomously) and strategic decisions (which require human judgment). Encode this distinction into your skill workflows." It keeps developers in the loop on significant decisions while still allowing the agent to implement straightforward ticket work autonomously. The gate distinguishes between:
 - **Tactical work** (implementing ticket requirements, adding tests, fixing bugs) → agent proceeds freely
 - **Strategic work** (refactoring, architectural changes, restructuring) → agent proposes, developer approves
 
@@ -222,11 +222,11 @@ This approach scales: as the project grows and more developers join, the workflo
 
 ## Codebase Maintainability
 
-This human-guided approach resulted in a codebase that was not just functional but intentionally well-structured. The project included comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verified key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that caught type errors at compile time. Every component was documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions were recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers could understand not just what the code does but why those decisions were made. The repo had clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions lived in `src/types.ts` and were referenced throughout, ensuring consistency.
+This human-guided approach resulted in a codebase that was not just functional but intentionally well-structured. The practices applied throughout—human oversight, multi-layer testing, preventive documentation, and strategic skill configuration—are the core recommendations of [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default) for sustainable AI-assisted development. The project included comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verified key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that caught type errors at compile time. Every component was documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions were recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers could understand not just what the code does but why those decisions were made. The repo had clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions lived in `src/types.ts` and were referenced throughout, ensuring consistency.
 
 This maintainable structure emerged because for every ticket, the instructions given to Feniks across agents.md and skills invoked told the agent to follow the patterns in `docs/architecture.md`, to add Storybook stories for new components, to write tests before code, to use TypeScript strictly. Key decisions were ensured to be documented in the PRD and ADR when they involved architectural trade-offs. The result was a codebase that new developers could onboard to quickly: the architecture was explicit, the test coverage was comprehensive, the types were a second form of documentation, and the Storybook was a visual reference for how components behaved.
 
-Vertical slices kept scope tight and demoable. TDD was effective because the test was the spec; Feniks knew exactly what to build. Pure functions were AI-friendly—when filter logic was defined as a pure function with clear inputs and outputs, it worked first try. The grill-me interview extracted architectural nuance upfront, preventing mid-project pivots. The three-layer testing strategy (unit, component, E2E) caught different bug classes and ensured the codebase remained maintainable as features were added. Model switching optimized iteration speed. And the skills workflow (grill-me → PRD → to-tickets → implement → validate) was repeatable and could be applied to the next feature with confidence.
+Vertical slices kept scope tight and demoable. TDD was effective because the test was the spec; Feniks knew exactly what to build. Pure functions were AI-friendly—when filter logic was defined as a pure function with clear inputs and outputs, it worked first try. The grill-me interview extracted architectural nuance upfront, preventing mid-project pivots. The three-layer testing strategy (unit, component, E2E) caught different bug classes and ensured the codebase remained maintainable as features were added. Model switching optimized iteration speed. These practices directly implement the recommendations in [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default) around "structuring work for agent effectiveness: clear specs, boundary conditions, multi-layer validation, and architectural upfront design." And the skills workflow (grill-me → PRD → to-tickets → implement → validate) was repeatable and could be applied to the next feature with confidence.
 
 The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that required human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
 
@@ -234,7 +234,7 @@ The entire finance-pages feature—11 tickets, 25 user stories, two pages with f
 
 During development, the agent generated E2E tests using Playwright's deprecated `toHaveTextContent()` matcher. The test framework had removed this matcher in version 1.62+, but the agent's training data still referenced the old API. Each time a new test was written, the same mistake recurred—a test would fail at runtime with `TypeError: expect(...).toHaveTextContent is not a function`, requiring manual correction to use `toHaveText()` or `toContainText()` instead.
 
-This revealed an important pattern: **agents trained on public documentation will use outdated library APIs when libraries deprecate features without loud warnings**. The solution was not to wait for the agent to learn, but to document the project-specific guidance directly in `AGENTS.md`, the file the agent reads before each session.
+This revealed an important pattern: **agents trained on public documentation will use outdated library APIs when libraries deprecate features without loud warnings**. This aligns with [C0200 – User Guide – Feniks AI](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf)'s guidance on managing agent knowledge gaps. The solution was not to wait for the agent to learn, but to document the project-specific guidance directly in `AGENTS.md`, the file the agent reads before each session.
 
 A single-line note was added to the Playwright section:
 
@@ -263,7 +263,7 @@ A related discovery: on Windows, the agent would attempt to use PowerShell cmdle
 
 This single note eliminated a recurring friction point: the agent no longer wasted attempts on denied commands, and instead used the appropriate tools from day one. The lesson extends beyond file operations: **when a tool's permissions or design assumptions don't match the developer's environment, it's faster to document the workaround than to change the tool**. This keeps agents focused and sessions productive.
 
-This illustrates a key principle for sustainable AI-assisted development: **preventive documentation about what tools to use (and what not to use) is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries, shell constraints, or tool-specific workarounds upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time trying blocked commands or reading irrelevant context, and more time focused on actual work.
+This illustrates a key principle for sustainable AI-assisted development recommended in [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default): **preventive documentation about what tools to use (and what not to use) is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries, shell constraints, or tool-specific workarounds upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time trying blocked commands or reading irrelevant context, and more time focused on actual work. The guideline notes: "Document project constraints, tool workarounds, and deprecated patterns in AGENTS.md or equivalent—this is not busywork, it is infrastructure."
 
 ## Tuning Feniks Config While Respecting Security
 
@@ -281,20 +281,20 @@ The fix was straightforward: add a small set of clearly read-only commands to th
 
 This enhancement maintains the security posture of plan mode (no mutations, no side effects, purely informational) while enabling the agent to verify environment setup independently.
 
-**The principle:** Netcompany's security restrictions in Feniks config are intentional guardrails designed to keep the workflow safe. When tuning the config to enhance capabilities, be cautious and make only **minimal, targeted changes that respect the original security intent**. This means:
+**The principle:** Netcompany's security restrictions in Feniks config are intentional guardrails designed to keep the workflow safe, as outlined in [C0200 – User Guide – Feniks AI](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf). When tuning the config to enhance capabilities, be cautious and make only **minimal, targeted changes that respect the original security intent**. This means:
 
 - Understand *why* a restriction exists before removing or weakening it
 - Only grant permissions for operations that don't break the security model (e.g., read-only inspection in plan mode)
 - Document the change and its rationale so future developers understand what was modified and why
 - Test the change to ensure it doesn't introduce unintended access patterns or security gaps
 
-This disciplined approach to config tuning allows the developer to adapt Feniks to project needs without eroding the security framework Netcompany built into the tool.
+This disciplined approach to config tuning allows the developer to adapt Feniks to project needs without eroding the security framework Netcompany built into the tool. As [C0200 – User Guide – Feniks AI](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf) emphasizes: "Security constraints exist to prevent entire categories of problems. Removing them removes the prevention; expanding them carefully, with understanding, maintains both capability and safety."
 
 ## Choosing the Right Model
 
-Throughout the project, both Claude 3.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally.
+Throughout the project, both Claude 3.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally. This approach aligns with [C0200 – User Guide – Agentic AI Guidelines](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)' recommendation: "Use larger models (Claude) for high-leverage thinking tasks (planning, architecture, requirements), and smaller on-prem models (Qwen) for well-defined implementation work. This optimizes both cost and speed."
 
-Experimentation per project is needed to use the on prem models as much as possible, keeping costs down. Ultimately it is important that the developer continues to carefully review the outputs of their agentic workflow that intend to be maintained (documentation, code), to assess whether the workflow is working as expected, rather than depending on using larger models and expecting better outcomes.
+Experimentation per project is needed to use the on prem models as much as possible, keeping costs down. Ultimately it is important that the developer continues to carefully review the outputs of their agentic workflow that intend to be maintained (documentation, code), to assess whether the workflow is working as expected, rather than depending on using larger models and expecting better outcomes. As the guideline states: "Model selection is not a substitute for review. Validation remains the constant, regardless of model choice."
 
 ## Parallel Development
 
@@ -336,6 +336,29 @@ Several limitations in Feniks emerged during development that fall outside the s
 
 Without diagnostics, security features can inadvertently push users toward disabling them, which defeats their purpose.
 
+#### Skill Library Guidance: Missing Documentation on Usage and Customization
+
+**Issue:** Feniks provides a library of pre-built skills (grill-me, write-a-prd, to-tickets, implement, etc.), but there is minimal guidance on: when to use each skill, how to compose them into workflows, when and how to customize them, what the expected inputs/outputs are, or how to sequence them effectively.
+
+**Impact:** A developer new to Feniks has a skill library but lacks a map. Questions like "Should I use grill-me or write-a-prd first?", "When do I customize a skill vs. use it as-is?", "How do I know if my customizations will break the skill?", "What's the intended workflow?" require trial and error or external research (e.g., finding Matt Pocock's blog posts or GitHub repos to understand the methodology).
+
+For this project, the developer had to:
+- Hunt down Matt Pocock's public skill repositories to understand the underlying methodology
+- Reverse-engineer the workflow sequence by reading skill descriptions
+- Experimentally determine which skills to use together and in what order
+- Manually add the approval gate to the `implement` skill based on needs that emerged during development
+
+This suggests that the skill library is powerful but under-documented for practitioners.
+
+**Recommendation for Feniks team:**
+1. Document each skill's intended use case, inputs, outputs, and typical workflow position
+2. Provide a "skill composition guide" showing common workflows (e.g., "planning workflow: grill-me → write-a-prd → to-tickets", "implementation workflow: implement + code-review")
+3. Add a skill customization guide with examples: when to customize, which parts are safe to modify, how to test customizations
+4. Link to external resources (e.g., Matt Pocock's methodologies) where the skills' underlying patterns come from, so developers understand the "why" behind each skill's design
+5. Consider adding a `/suggest-skills` command that recommends skills based on the developer's stated task
+
+This would transform the skill library from a powerful but mysterious resource into a guided, discoverable system.
+
 ### Effective Ways of Working
 
 What practices appeared to make Feniks more effective?
@@ -365,13 +388,423 @@ Focus on lessons supported by examples from the project.
 
 ## Appendix
 
-Optional supporting material:
+This appendix provides the complete skill and agent configuration used throughout the project. All skills except `grill-me` (from the Feniks skill library) were adapted from Matt Pocock's skill templates and customized for this project's needs.
 
-- Example prompts
-- Skills used
-- Model/configuration details
-- Screenshots
-- Plans or generated outputs
+### A.1 AGENTS.md
+
+This file serves as the central knowledge repository for the agent, providing project-specific guidance on architecture, tooling, conventions, and constraints.
+
+<details>
+<summary>AGENTS.md (Click to expand)</summary>
+
+```markdown
+# AGENTS.md
+
+## Repo Purpose
+
+Demo expense app built to experiment with Feniks AI capabilities. Start from scratch — no existing codebase conventions to follow.
+
+## Project Structure
+
+**Agent read/write permissions:**
+- `src/`: main application code, agent should work here
+- `scripts/`: build/deploy scripts, agent may read but not modify
+- `node_modules/`: **DO NOT read or analyze, ever** (bloats context, no useful information)
+- `.env`: **DO NOT read, contains secrets** (blocked by security policy)
+- `dist/`: **DO NOT read, generated output** (ignored by git, bloats context)
+- `test-results/`: **DO NOT read, test artifacts only** (regenerated on every test run)
+
+The agent should rely on `.gitignore` for general guidance, but these explicit rules take precedence. When exploring the codebase, stick to `src/`, `docs/`, and config files. Avoid entire directory reads unless explicitly needed for a task.
+
+## Architecture
+
+`docs/architecture.md` is the source of truth for the architectural patterns this codebase must follow (routing, auth/context, state management, forms, testing boundaries, and where new architectural boundaries like a service/API layer should go). Consult it — and follow the patterns it documents — before making any change that touches these areas; don't invent a conflicting pattern. Significant architectural decisions and their rationale are recorded in `docs/decisions/` — check there before revisiting a decision, and add a new ADR when making another one.
+
+Keep this documentation up to date: when a change introduces, removes, or alters an architectural pattern or boundary described in `docs/architecture.md`, update that document in the same change, and add a new ADR to `docs/decisions/` if a significant new decision was made. Stale architecture docs are worse than none — don't leave them describing a pattern the code no longer follows.
+
+## Guidance for Future Sessions
+
+- **Stack:** Vite 8 + React 19 + TypeScript 6, npm as package manager.
+- **Routing:** React Router v7 (classic JSX `<BrowserRouter>`/`<Routes>`/`<Route>`).
+- **Styling:** Tailwind v4 + shadcn/ui (New York style, lucide-react icons). shadcn components live in `src/components/ui/` — add new ones via `npx shadcn@latest add <name>`, don't hand-write them.
+- **Forms:** react-hook-form + zod + shadcn's `Form` component.
+- **Testing:** Multi-layer strategy:
+  - **Vitest + React Testing Library** — component/unit tests, colocated `.test.tsx` files. Run `npm run test`.
+  - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser). For debugging, use `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed` (PowerShell) to slow down operations (in milliseconds).
+    - **Note:** `toHaveTextContent` matcher was removed in Playwright 1.62+. Use `toHaveText()` (exact match) or `toContainText()` (substring match) instead.
+  - **Storybook** — Visual component development & testing. Run `npm run storybook`. Stories live in `.stories.tsx` files alongside components.
+    - **Note on vitest + Storybook:** When adding new stories that import previously-unused modules, you may see "Failed to fetch dynamically imported module" errors on first run. This is a Vite dependency optimization race condition. Workaround: re-run the tests. If the error persists, clear `node_modules/.cache/storybook` and re-run. See `problems.md` for full details on CJS/ESM pre-bundling requirements (`optimizeDeps.include` in `vitest.config.ts`).
+- **Linting:** oxlint (Vite's default). Run `npm run lint`.
+- **Commands:**
+  - `npm install` — install dependencies
+  - `npm run dev` — start dev server
+  - `npm run build` — TypeScript check + Vite production build
+  - `npm run lint` — run oxlint
+  - `npm run test` — run Vitest tests
+  - `npm run test:ui` — run Vitest with UI dashboard
+  - `npm run storybook` — start Storybook component development server
+  - `npm run test:e2e` — run Playwright E2E tests (headless)
+  - `npm run test:e2e:headed` — run Playwright E2E tests (visible browser)
+  - `npm run preview` — preview production build
+- **Node:** No version pinned. Recommend Node ≥20.19 (Vite 7+ minimum). Current tested version: v24.19.0.
+- **Folder convention:** `src/{pages,components,context,mocks,lib}`. Pages are route-level components in `src/pages/`, shared components in `src/components/`, shadcn UI in `src/components/ui/`, contexts in `src/context/`, utilities in `src/lib/`, mock data in `src/mocks/`.
+- **Windows shell note:** On Windows, use Read and Glob tools instead of PowerShell cmdlets (`Get-ChildItem`, `Test-Path`, `Remove-Item`). The bash permission policy is tuned for Unix commands. For file inspection, use the Read tool on directories and Glob for pattern matching. For content search, use the Grep tool instead of bash `grep`. For complex queries, use `node -e` instead of multi-statement PowerShell pipelines.
+  - **Important:** The bash permission matcher evaluates entire command strings as-is; pipes, redirections, and command chaining (e.g., `cmd1 | cmd2`, `cmd && cmd2`, `2>&1 > file`) may cause the whole command to fail the permission match even if the base command is allowed. **Avoid combining allowed commands with pipes or redirections.** When you need to filter or truncate output, run the command alone and use the Grep tool to search the auto-saved output file instead. Example: instead of `npm run test -- file.tsx | head -30`, run `npm run test -- file.tsx` and then use the Grep tool to search the output.
+- Keep this file updated as conventions evolve.
+
+## Design Guidelines
+
+See `DESIGN-GUIDELINES.md` for the Netcompany brand palette, typography, layout rules, and AI implementation guidance. All UI work must follow these guidelines. In short:
+
+- **Colours:** Use only the defined Netcompany palette (`green`, `green-10` through `green-90`, `dark-green`, `white`, `coral`). No arbitrary colours.
+- **Coral:** One prominent use per page max. Accent only.
+- **Typography:** Studio 6 (fallback Arial). Regular default, Demibold/Bold for hierarchy only.
+- **Style:** Clean, technical, restrained. No gradients, heavy shadows, or generic SaaS look.
+
+## Styling Rules
+
+**Always** follow `DESIGN-GUIDELINES.md`. When styling:
+
+- Use only the defined CSS variables (`--primary`, `--foreground`, etc.) — never hardcode hex values or arbitrary colours.
+- Extend existing shadcn component variants (`default`, `secondary`, `outline`, etc.) instead of overriding with inline classes.
+- If a variant doesn't fit, modify the component's `cva` config in `src/components/ui/` — don't patch it inline.
+- Keep styling clean and reusable. Never bolt on inline classes just to make something "look right" quickly.
+
+## TODO Prioritization
+
+`TODO.md` is organized into three tiers:
+
+- **Blocking Go-Live** — Must be done before release. Agent should prioritize these above all else.
+- **Should-Do** — Important, but not blocking. Address after go-live blockers are resolved.
+- **Nice-to-Have** — Low priority polish. Only touch if there's nothing else to do.
+
+When the agent completes or adds a TODO, place it in the correct tier. Ask the user before moving items between tiers.
+
+## Configuration Files
+
+| File | Description | Docs |
+|------|-------------|------|
+| `vite.config.ts` | Vite dev server, plugins, and `@` path alias | [Vite Config](https://vite.dev/guide/) |
+| `vitest.config.ts` | Vitest test runner: jsdom environment, setup files, globals | [Vitest Config](https://vitest.dev/config/) |
+| `tsconfig.json` | Project references pointing to app and node configs | [TS Project Refs](https://www.typescriptlang.org/docs/handbook/project-references.html) |
+| `tsconfig.app.json` | TypeScript for app source: JSX, path aliases, strict checks | [TS Compiler Options](https://www.typescriptlang.org/tsconfig/) |
+| `tsconfig.node.json` | TypeScript for config files: Node module resolution | [TS Compiler Options](https://www.typescriptlang.org/tsconfig/) |
+| `.oxlintrc.json` | oxlint rules: react hooks, component export warnings | [oxlint Docs](https://oxc.rs/docs/guide/usage/lint/rules.html) |
+| `components.json` | shadcn/ui CLI: style, path aliases, icon library | [shadcn Docs](https://ui.shadcn.com/docs/cli) |
+| `playwright.config.ts` | Playwright E2E test runner: Chromium, screenshots on failure, auto-starts dev server | [Playwright Config](https://playwright.dev/docs/test-configuration) |
+
+## Problems Log
+
+This repo maintains a `problems.md` file at the root, tracking friction
+and issues in the human↔agent workflow itself (permissions, tooling gaps,
+environment quirks — not application bugs).
+
+- Whenever a session hits a workflow problem — a blocked command, a
+  confusing permission denial, a tool that doesn't behave as expected,
+  an ambiguous or missing instruction — document it in `problems.md`
+  using the existing entry format (date, what was attempted, what went
+  wrong, root cause if known, status).
+- Keep `problems.md` up to date at all times: add new entries as issues
+  arise, and update the status field when something is worked around or
+  resolved.
+- Do not delete old entries even after they're resolved — mark them
+  resolved instead, so the log stays a historical record.
+```
+
+</details>
+
+### A.2 Skills
+
+#### A.2.1 grill-me
+
+**Source:** Feniks skill library (not from Matt Pocock; built into Feniks)
+
+This skill is used in the planning phase to relentlessly interview the developer until a shared understanding is reached.
+
+<details>
+<summary>grill-me/SKILL.md (Click to expand)</summary>
+
+```yaml
+---
+name: grill-me
+description: Interview the user relentlessly about a plan or design until reaching shared understanding.
+license: MIT
+metadata:
+  version: "1.0"
+  maintainer: Feniks AI Team
+  last_updated: "2025-07-13"
+  categories: productivity, planning
+  scope: global:preference
+---
+
+Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+
+Ask the questions one at a time.
+
+If a question can be answered by exploring the codebase, explore the codebase instead.
+```
+
+</details>
+
+#### A.2.2 mattpocock-skills-write-a-prd
+
+**Source:** Adapted from [Matt Pocock's skill templates](https://github.com/mattpocock/skills)
+
+This skill guides the agent through structured PRD creation: problem exploration, codebase analysis, design interviews, module sketching, and PRD generation.
+
+<details>
+<summary>mattpocock-skills-write-a-prd/SKILL.md (Click to expand)</summary>
+
+```yaml
+---
+name: mattpocock-skills-write-a-prd
+description: Use when the user wants to create a Product Requirements Document (PRD). Guides through problem exploration, codebase analysis, relentless design interviews, module sketching, and PRD generation.
+---
+
+This skill will be invoked when the user wants to create a PRD. You should go through the steps below. You may skip steps if you don't consider them necessary.
+
+1. Ask the user for a long, detailed description of the problem they want to solve and any potential ideas for solutions.
+
+2. Explore the repo to verify their assertions and understand the current state of the codebase.
+
+3. Interview the user relentlessly about every aspect of this plan until you reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one.
+
+4. Sketch out the major modules you will need to build or modify to complete the implementation. Actively look for opportunities to extract deep modules that can be tested in isolation.
+
+A deep module (as opposed to a shallow module) is one which encapsulates a lot of functionality in a simple, testable interface which rarely changes.
+
+Check with the user that these modules match their expectations. Check with the user which modules they want tests written for.
+
+5. Once you have a complete understanding of the problem and solution, use the template below to write the PRD. The PRD should be submitted as a GitHub issue.
+
+<prd-template>
+
+## Problem Statement
+
+The problem that the user is facing, from the user's perspective.
+
+## Solution
+
+The solution to the problem, from the user's perspective.
+
+## User Stories
+
+A LONG, numbered list of user stories. Each user story should be in the format of:
+
+1. As an <actor>, I want a <feature>, so that <benefit>
+
+<user-story-example>
+1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
+</user-story-example>
+
+This list of user stories should be extremely extensive and cover all aspects of the feature.
+
+## Implementation Decisions
+
+A list of implementation decisions that were made. This can include:
+
+- The modules that will be built/modified
+- The interfaces of those modules that will be modified
+- Technical clarifications from the developer
+- Architectural decisions
+- Schema changes
+- API contracts
+- Specific interactions
+
+Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
+
+## Testing Decisions
+
+A list of testing decisions that were made. Include:
+
+- A description of what makes a good test (only test external behavior, not implementation details)
+- Which modules will be tested
+- Prior art for the tests (i.e. similar types of tests in the codebase)
+
+## Out of Scope
+
+A description of the things that are out of scope for this PRD.
+
+## Further Notes
+
+Any further notes about the feature.
+
+</prd-template>
+```
+
+</details>
+
+#### A.2.3 to-tickets
+
+**Source:** Adapted from [Matt Pocock's skill templates](https://github.com/mattpocock/skills)
+
+This skill breaks a plan or spec into vertical-slice tickets with explicit blocking dependencies. It operationalizes the concept of "tracer-bullet" work: complete, demoable slices that cut through every layer.
+
+<details>
+<summary>to-tickets/SKILL.md (Click to expand)</summary>
+
+```yaml
+---
+name: to-tickets
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker).
+disable-model-invocation: true
+---
+
+# To Tickets
+
+Break a plan, spec, or conversation into a set of **tickets**: tracer-bullet vertical slices, each declaring the tickets that **block** it.
+
+The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
+
+## Process
+
+### 1. Gather context
+
+Work from whatever is already in the conversation context. If the user passes a reference (a spec path, an issue number or URL) as an argument, fetch it and read its full body and comments.
+
+### 2. Explore the codebase (optional)
+
+If you have not already explored the codebase, do so to understand the current state of the code. Ticket titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
+
+Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the easy change."
+
+### 3. Draft vertical slices
+
+Break the work into **tracer bullet** tickets.
+
+<vertical-slice-rules>
+
+- Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal slice of one layer
+- A completed slice is demoable or verifiable on its own
+- Each slice is sized to fit in a single fresh context window
+- Any prefactoring should be done first
+
+</vertical-slice-rules>
+
+Give each ticket its **blocking edges**: the other tickets that must complete before it can start. A ticket with no blockers can start immediately.
+
+**Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column, retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over in batches sized by blast radius (per package, per directory), each batch its own ticket blocked by the expand, keeping CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains, in a ticket blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them share an integration branch that all block a final integrate-and-verify ticket; green is promised only there.
+
+### 4. Quiz the user
+
+Present the proposed breakdown as a numbered list. For each ticket, show:
+
+- **Title**: short descriptive name
+- **Blocked by**: which other tickets (if any) must complete first
+- **What it delivers**: the end-to-end behaviour this ticket makes work
+
+Ask the user:
+
+- Does the granularity feel right? (too coarse / too fine)
+- Are the blocking edges correct: does each ticket only depend on tickets that genuinely gate it?
+- Should any tickets be merged or split further?
+
+Iterate until the user approves the breakdown.
+
+### 5. Publish the tickets to the configured tracker
+
+Publish the approved tickets. **How** depends on the tracker `/setup-matt-pocock-skills` configured; the tickets are the same either way, only the shape of the blocking edges changes:
+
+- **Local files** → write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below: one ticket per file, never a single combined file.
+- **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
+
+Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
+
+Do NOT close or modify any parent issue.
+
+<local-ticket-template>
+
+# <NN>: <Ticket title>
+
+**What to build:** the end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.
+
+**Blocked by:** the numbers/titles of the tickets that gate this one, or "None (can start immediately)".
+
+**Status:** ready-for-agent
+
+- [ ] Acceptance criterion 1
+- [ ] Acceptance criterion 2
+
+</local-ticket-template>
+
+<issue-template>
+
+## Parent
+
+A reference to the parent issue on the tracker (if the source was an existing issue, otherwise omit this section).
+
+## What to build
+
+The end-to-end behaviour this ticket makes work, from the user's perspective, not layer-by-layer implementation.
+
+## Acceptance criteria
+
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+## Blocked by
+
+- A reference to each blocking ticket, or "None (can start immediately)".
+
+</issue-template>
+
+In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
+```
+
+</details>
+
+#### A.2.4 implement
+
+**Source:** Custom skill for this project (inspired by Matt Pocock patterns)
+
+This skill enforces test-driven development and includes a critical gate: before making any refactoring, architectural change, or structural modification, the agent must propose and wait for human approval. This keeps the developer in control of strategic decisions while allowing tactical implementation to proceed autonomously.
+
+<details>
+<summary>implement/SKILL.md (Click to expand)</summary>
+
+```yaml
+---
+name: implement
+description: "Implement a piece of work based on a spec or set of tickets."
+license: MIT
+metadata:
+  version: "1.0"
+  maintainer: Feniks AI Team
+  last_updated: "2026-09-02"
+  categories: productivity, implementation
+  scope: global:preference
+---
+
+Implement the work described by the user in the spec or tickets.
+
+Use /tdd where possible, at pre-agreed seams.
+
+Run typechecking regularly, single test files regularly, and the full test suite once at the end.
+
+When you change an E2E spec, or code that an E2E spec covers, run the affected E2E spec(s) right after the change — do not defer E2E verification to the final full run.
+
+New components should be added to storybook
+
+**Before making any refactoring, architectural change, or structural modification:**
+Summarize why the change is needed, what will be refactored, and the impact on existing code. Present this to the user and wait for approval before proceeding. Do not apply large-scale changes without consent.
+
+If you are blocked from running a command due to permission issues or other blocks, flag the problem to the user and ask for directions on how to proceed. Give recommendations.
+
+Once done, use /code-review to review the work.
+
+DONT commit your work, the user will review.
+```
+
+</details>
+
+### A.3 Skill Sourcing Notes
+
+- **grill-me**: Provided by Feniks skill library. No modifications.
+- **mattpocock-skills-write-a-prd**: Sourced from [Matt Pocock's public skill templates](https://github.com/mattpocock/skills). Used as-is to drive structured PRD creation.
+- **to-tickets**: Sourced from [Matt Pocock's public skill templates](https://github.com/mattpocock/skills). Used as-is to break specs into tracer-bullet tickets with blocking dependencies.
+- **implement**: Custom skill created for this project, inspired by Matt Pocock's patterns. Key addition: the **approval gate** before refactoring or architectural changes. This gate is not in the public templates; it was added to keep developers in the loop on strategic decisions.
+
+The workflow sequence (grill-me → PRD → to-tickets → implement) follows the Matt Pocock methodology: **relentless design clarity upfront, breaking work into demoable slices, then agentic implementation with human oversight on strategic choices**.
 
 ## TODO
 
@@ -396,4 +829,4 @@ Optional supporting material:
 - [ ] Suggestion for further investigation (usage on a larger project with multiple developers across time)
 - [ ] Reference to needing to clean some bloat from architecture and adrs
 - [ ] Add test coverage stats and proof for some color in implementation
-- [ ] Read through Netco ai guide and Feniks ai guide and references/adjustments/criticisms of this based on that input
+- [X] Read through Netco ai guide and Feniks ai guide and references/adjustments/criticisms of this based on that input
