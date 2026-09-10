@@ -239,19 +239,23 @@ variables are also denied even when constituent commands are allowed.
 
 **Root cause:** The bash permission allowlist in `opencode.json` lists Unix command names;
 on Windows/PowerShell the equivalent cmdlets are not covered. The permission matcher evaluates
-the entire command string as a whole and does not decompose statements before matching.
+the entire command string as a whole and does not decompose statements before matching. This
+reflects OpenCode's Unix-centric heritage—Feniks forked it for Windows but did not fully adapt
+the permission model.
 
-**Status:** Open. Worked around by using the Read and Glob tools instead of shell commands.
+**Status:** Resolved (workflow documented).
 
-**Impact:** Developers on Windows cannot use the agent for file inspection or cleanup tasks
-that would normally require PowerShell cmdlets. File removal is impossible (rm, rmdir,
-Remove-Item all denied), forcing manual cleanup or workarounds.
+**Solution:** Rather than modifying permission rules (which could introduce security gaps),
+added explicit guidance to AGENTS.md:
 
-**Feniks fix needed:** 
-1. Add common PowerShell cmdlets to the bash allowlist (e.g., `Get-ChildItem *`, `Test-Path *`,
-   `Remove-Item *`) or at least document that agents should use Read/Glob tools on Windows
-2. Update the permission matcher to decompose `;`-separated statements and `;`-separated `|`
-   pipelines before matching against allow/deny rules
+> **Windows shell note:** On Windows, use Read and Glob tools instead of PowerShell cmdlets.
+> The bash permission policy is tuned for Unix commands. For file inspection, use the Read
+> tool on directories and Glob for pattern matching. For complex queries, use `node -e`
+> instead of multi-statement PowerShell pipelines.
+
+This eliminates wasted attempts on denied commands and guides the agent to use the correct
+tools from the start. Case study section "Guarding Against Context Bloat" documents the
+principle: documenting tool constraints prevents per-session corrections.
 
 ## 2026-08-17 — Agent applies workarounds without consulting the user
 

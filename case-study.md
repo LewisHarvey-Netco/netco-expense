@@ -240,7 +240,13 @@ The fix was straightforward: document explicit "DO NOT READ" rules in `AGENTS.md
 
 By adding these rules with explanations, the agent learned the *why* behind each exclusion, making it more likely to honor the guidance in future sessions. More importantly, the developer avoided the overhead of repeatedly correcting the agent: "don't read that file, it's just build output."
 
-This illustrates a key principle for sustainable AI-assisted development: **context window is expensive and finite. Preventive documentation—"here's what not to look at and why"—is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time reading irrelevant context and more time focused on actual work.
+A related discovery: on Windows, the agent would attempt to use PowerShell cmdlets (`Get-ChildItem`, `Test-Path`, `Remove-Item`) for file inspection and manipulation, but these were consistently denied by the bash permission policy—inherited from OpenCode's Unix-centric design. Rather than modifying the underlying permission rules (which could introduce security risks), the developer added explicit guidance to AGENTS.md:
+
+> **Windows shell note:** On Windows, use Read and Glob tools instead of PowerShell cmdlets. The bash permission policy is tuned for Unix commands. For file inspection, use the Read tool on directories and Glob for pattern matching. For complex queries, use `node -e` instead of multi-statement PowerShell pipelines.
+
+This single note eliminated a recurring friction point: the agent no longer wasted attempts on denied commands, and instead used the appropriate tools from day one. The lesson extends beyond file operations: **when a tool's permissions or design assumptions don't match the developer's environment, it's faster to document the workaround than to change the tool**. This keeps agents focused and sessions productive.
+
+This illustrates a key principle for sustainable AI-assisted development: **preventive documentation about what tools to use (and what not to use) is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries, shell constraints, or tool-specific workarounds upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time trying blocked commands or reading irrelevant context, and more time focused on actual work.
 
 ## Choosing the Right Model
 

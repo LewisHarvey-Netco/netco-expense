@@ -48,6 +48,7 @@ Keep this documentation up to date: when a change introduces, removes, or alters
   - `npm run preview` — preview production build
 - **Node:** No version pinned. Recommend Node ≥20.19 (Vite 7+ minimum). Current tested version: v24.19.0.
 - **Folder convention:** `src/{pages,components,context,mocks,lib}`. Pages are route-level components in `src/pages/`, shared components in `src/components/`, shadcn UI in `src/components/ui/`, contexts in `src/context/`, utilities in `src/lib/`, mock data in `src/mocks/`.
+- **Windows shell note:** On Windows, use Read and Glob tools instead of PowerShell cmdlets (`Get-ChildItem`, `Test-Path`, `Remove-Item`). The bash permission policy is tuned for Unix commands. For file inspection, use the Read tool on directories and Glob for pattern matching. For complex queries, use `node -e` instead of multi-statement PowerShell pipelines.
 - Keep this file updated as conventions evolve.
 
 ## Design Guidelines
