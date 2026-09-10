@@ -4,16 +4,17 @@
 
 Netco-expense is a frontend-only POC expense app built almost entirely with Feniks Build (OpenCode for Feniks), covering requirements elicitation, prototyping, and full implementation with a multi-layer test suite (unit, component, E2E, visual). It was built to stress-test Feniks as an agentic development tool, not to ship a product.
 
-**Net finding:** Feniks is effective at both planning/analysis and well-scoped implementation, but only when paired with a deliberate workflow — small vertical-slice tickets, TDD as the specification, and explicit human approval gates before any architectural change. As a concrete data point, one full feature (finance expense review: 11 tickets, 25 user stories, two pages, full test coverage) took roughly 12 hours of human-supervised agentic development, against a rough estimate of 2–3 days for the same scope built by hand. Model choice mattered: Claude 4.5 was used for planning/analysis (grill-me → PRD → tickets), Qwen 3.6 on-prem for implementation once tickets were well-defined — larger models were stronger at synthesis, on-prem models were faster once the task was unambiguous.
+**Net finding:** Feniks is effective at both planning/analysis and well-scoped implementation, but only when paired with a deliberate workflow — small vertical-slice tickets, TDD as the specification, and explicit human approval gates before any architectural change. As a concrete data point, one full feature (finance expense review: 11 tickets, 25 user stories, two pages, full test coverage) took roughly 12 hours of human-supervised agentic development, against a rough estimate of 2–3 days for the same scope built by hand. Model choice mattered: Claude 4.5 was used for planning/analysis (grill-me → PRD → tickets), Qwen 3.6 on-prem for implementation once tickets were well-defined, larger models were stronger at synthesis, on-prem models were faster once the task was unambiguous.
 
 **Where it fell short:**
+
 - **Visual/design iteration:** no image feedback loop meant Feniks routinely hallucinated the current UI state, making small visual tweaks slow and error-prone (see [Design and Prototyping](#feniks-prototyping---problems)).
 - **Unsupervised architectural decisions:** left alone, the agent occasionally made structural changes (e.g. moving router setup, restructuring tests) without asking — mitigated by adding an explicit approval gate to the `implement` skill (see [Configuring Workflows to Keep Developers in the Loop](#configuring-workflows-to-keep-developers-in-the-loop)).
-- **Tooling gaps:** no WSL support, opaque prompt-injection blocking with no diagnostics, and an under-documented skill library all created friction that required workarounds rather than fixes (see [Overall Findings](#overall-findings)).
+- **Tooling gaps:** no WSL support, opaque prompt-injection blocking with no diagnostics, and a skill library with no guidance on which skill to use when (just a flat, disconnected collection) all created friction that required workarounds rather than fixes — these are gaps in the tool itself, not the workflow, and need a Feniks-team fix (see [Known Tool Limitations](#known-tool-limitations)).
 
 **Practices that made the biggest difference:** vertical-slice tickets sized to a single context window, TDD as an unambiguous spec for the agent to satisfy, keeping the developer in the loop specifically for strategic/architectural decisions (not tactical ticket work), and documenting project- and tool-specific gotchas directly in `AGENTS.md` rather than re-correcting the agent each session.
 
-This document works through each stage of that workflow with concrete examples, then closes with a full list of benefits, limitations, and setup details for teams considering the same approach. The [Appendix](#appendix) contains the full `AGENTS.md` and the exact skill definitions (grill-me, write-a-prd, to-tickets, implement) used throughout, for teams wanting to reuse them directly.
+This document works through each stage of that workflow with concrete examples, then closes with known tool limitations and setup details for teams considering the same approach. The [Appendix](#appendix) contains the full `AGENTS.md` and the exact skill definitions (grill-me, write-a-prd, to-tickets, implement) used throughout, for teams wanting to reuse them directly.
 
 ## Introduction
 
@@ -27,6 +28,13 @@ This document intends to provide a clear example of operational usage of Feniks 
 
 Throughout, this document covers problems and benefits with Feniks AI specifically, as well as to Agent assisted development in general, distinguishing between the two were appropriate.
 
+### How Referencing Works in This Document
+
+Two kinds of links are used throughout:
+
+- **Bracketed citations**, e.g. **[AG]** or **[FA]**, refer to external source documents (Netcompany user guides). The bracket tag is a lookup key: find the full title and link for that source in the [References](#references) section near the end of the document.
+- **Inline `(see ...)` links** point to other headers within this same document (e.g. "(see [Design and Prototyping](#feniks-prototyping---problems))"). These are standard markdown anchor links generated from the target section's heading text — clicking them (or searching the doc for that heading) jumps you to the relevant section.
+
 ## Project Overview
 
 ### What is the project?
@@ -35,19 +43,19 @@ Netco-expense is a proof of concept for a Netcompany expense app (like Continia)
 
 ### Tech Stack
 
-| Name | Usage | Category |
-|------|-------|----------|
-| React 19 | Javascript library for stateful UIs | Functionality |
-| Typescript 6 | Typed Javascript | Functionality |
-| React Router 7 | Page Routing | Functionality |
-| React-hook-form | Form handling and validation | Functionality |
-| Shadcn | Prebuilt copy paste UI components | Functionality/Style |
-| Tailwind 4 | Utility classes for css styling | Style |
-| NPM | Package manager and script running | Build & Test |
-| Oxlint | Linting react issues – hook misuse | Build & Test |
-| React-testing-library | Unit and integration tests | Build & Test |
-| Storybook 10 | Visual component library | Build & Test |
-| Playwright | End to end tests | Build & Test |
+| Name                  | Usage                               | Category            |
+| --------------------- | ----------------------------------- | ------------------- |
+| React 19              | Javascript library for stateful UIs | Functionality       |
+| Typescript 6          | Typed Javascript                    | Functionality       |
+| React Router 7        | Page Routing                        | Functionality       |
+| React-hook-form       | Form handling and validation        | Functionality       |
+| Shadcn                | Prebuilt copy paste UI components   | Functionality/Style |
+| Tailwind 4            | Utility classes for css styling     | Style               |
+| NPM                   | Package manager and script running  | Build & Test        |
+| Oxlint                | Linting react issues – hook misuse  | Build & Test        |
+| React-testing-library | Unit and integration tests          | Build & Test        |
+| Storybook 10          | Visual component library            | Build & Test        |
+| Playwright            | End to end tests                    | Build & Test        |
 
 ## Feniks Build Usage
 
@@ -230,6 +238,7 @@ The solution was not a one-time correction but a **workflow adjustment embedded 
 > changes without consent.
 
 This gate operationalizes guidance from **[AG]**: "Distinguish between tactical implementation (which agents can do autonomously) and strategic decisions (which require human judgment). Encode this distinction into your skill workflows." It keeps developers in the loop on significant decisions while still allowing the agent to implement straightforward ticket work autonomously. The gate distinguishes between:
+
 - **Tactical work** (implementing ticket requirements, adding tests, fixing bugs) → agent proceeds freely
 - **Strategic work** (refactoring, architectural changes, restructuring) → agent proposes, developer approves
 
@@ -243,7 +252,7 @@ This maintainable structure emerged because for every ticket, the instructions g
 
 Vertical slices kept scope tight and demoable. TDD was effective because the test was the spec; Feniks knew exactly what to build. Pure functions were AI-friendly—when filter logic was defined as a pure function with clear inputs and outputs, it worked first try. The grill-me interview extracted architectural nuance upfront, preventing mid-project pivots. The three-layer testing strategy (unit, component, E2E) caught different bug classes and ensured the codebase remained maintainable as features were added. Model switching optimized iteration speed. These practices directly implement the recommendations in **[AG]** around "structuring work for agent effectiveness: clear specs, boundary conditions, multi-layer validation, and architectural upfront design." And the skills workflow (grill-me → PRD → to-tickets → implement → validate) was repeatable and could be applied to the next feature with confidence.
 
-The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that required human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
+The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. That estimate is not derived from a control build—no one built the same feature by hand to compare—it is the developer's own back-of-envelope figure, based on prior experience building comparable CRUD-with-filtering features (data model, two pages, form validation, filter logic, unit/E2E coverage) without AI assistance. It should be read as an informed guess, not a measured baseline. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that required human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
 
 ## Keeping Agents Current: Tooling-Specific Instructions
 
@@ -317,24 +326,13 @@ Parallel development is achieved by opening multiple sessions (Ctrl + P -> new s
 
 ## Tooling and Access Problems
 
-See the problems.md file for a complete log of workflow problems encountered during development.
+See the `problems/` directory (`problems/open-problems.md` and `problems/closed-problems.md`) for a complete log of workflow problems encountered during development.
 
-## References
-
-- **[AG]** C0200 – User Guide – Agentic AI Guidelines. [Link](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)
-- **[FA]** C0200 – User Guide – Feniks AI. [Link](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf)
-
-## Overall Findings
-
-### Benefits
-
-What did Feniks make easier, faster or better?
-
-### Limitations: Feniks Build Issues Requiring Development Team Action
+## Known Tool Limitations
 
 Several limitations in Feniks emerged during development that fall outside the scope of agent configuration or workflow adjustment. These are **fundamental gaps in the tool itself that require fixes by the Feniks development team** to resolve.
 
-#### Platform Limitations: WSL Support
+### Platform Limitations: WSL Support
 
 **Issue:** OpenCode for Feniks is not available for Windows Subsystem for Linux (WSL). On a Windows machine, Feniks can only run in the Windows environment (PowerShell), not in the WSL environment where many Linux-based projects' toolchains actually live. This creates a mismatch: the agent cannot execute commands against the project's real environment.
 
@@ -342,13 +340,14 @@ Several limitations in Feniks emerged during development that fall outside the s
 
 **Recommendation for Feniks team:** Either provide an OpenCode for Feniks build for WSL or improve the Windows build to detect and work directly with WSL environments.
 
-#### Security Diagnostics: Prompt Injection Detection
+### Security Diagnostics: Prompt Injection Detection
 
 **Issue:** The LLM bridge's prompt injection detection occasionally blocks legitimate build commands (e.g., `npm run build`, `npm run test`) with the message `[BLOCKED: prompt injection detected]`, but provides zero diagnostic information: no file path, no pattern that triggered the block, no explanation.
 
 **Impact:** When a command is blocked, the developer cannot diagnose why or fix it. This creates a **dangerous incentive structure**: the obvious solution is to disable injection detection entirely, which removes a critical security feature rather than tuning it. The lack of diagnostics makes the blocker feel like a bug rather than intentional security, eroding trust in the tool's safety mechanisms.
 
 **Recommendation for Feniks team:**
+
 1. When a command is blocked, output which file or content pattern triggered it
 2. Provide a way to view and adjust injection detection rules
 3. Consider scoping detection to external/untrusted content (fetched URLs, user messages) rather than the project's own source files
@@ -356,11 +355,18 @@ Several limitations in Feniks emerged during development that fall outside the s
 
 Without diagnostics, security features can inadvertently push users toward disabling them, which defeats their purpose.
 
-### Effective Ways of Working
+### Discoverability: Skill Library Has No Usage Guidance
 
-What practices appeared to make Feniks more effective?
+**Issue:** Feniks Build ships a skill library — a searchable UI of skills contributed by other Netcompany teams, intended to standardize workflows across projects. In practice it's a flat, disconnected collection: there's no guidance on which skill fits which situation, no categorization by use case, and no indication of which skills are maintained, deprecated, or project-specific versus general-purpose.
 
-Focus on lessons supported by examples from the project.
+**Impact:** Discovering the right skill for a task relies on the developer already knowing it exists and searching for it by name (e.g. this project only used `grill-me` because the developer already knew of it from prior exposure to Matt Pocock's methodology, not because the library surfaced it). Teams without that prior context are unlikely to find applicable skills, undermining the library's stated goal of standardizing practice.
+
+**Recommendation for Feniks team:** Add categorization/tagging by use case (planning, implementation, review, etc.), a maintenance/ownership indicator per skill, and lightweight discovery aids (e.g. "similar projects used" or search-by-outcome) so the library serves as a real recommendation surface rather than an unstructured list.
+
+## References
+
+- **[AG]** C0200 – User Guide – Agentic AI Guidelines. [Link](https://goto.netcompany.com/cases/GTE3228/NCAI/_layouts/15/WopiFrame.aspx?sourcedoc=%7BD3E134A8-B186-42DC-87E9-79F12886838E%7D&file=C0200%20-%20User%20Guide%20-%20Agentic%20AI%20Guidelines.docx&action=default)
+- **[FA]** C0200 – User Guide – Feniks AI. [Link](https://goto.netcompany.com/cases/GTE3338/NCFAI/PublicDocuments/C0200%20-%20User%20Guide%20-%20Feniks%20AI.pdf)
 
 ## Overview of Feniks Setup
 
@@ -430,7 +436,7 @@ Keep this documentation up to date: when a change introduces, removes, or alters
   - **Playwright** — E2E browser tests in `e2e/`. Run `npm run test:e2e` (headless) or `npm run test:e2e:headed` (watch in browser). For debugging, use `$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed` (PowerShell) to slow down operations (in milliseconds).
     - **Note:** `toHaveTextContent` matcher was removed in Playwright 1.62+. Use `toHaveText()` (exact match) or `toContainText()` (substring match) instead.
   - **Storybook** — Visual component development & testing. Run `npm run storybook`. Stories live in `.stories.tsx` files alongside components.
-    - **Note on vitest + Storybook:** When adding new stories that import previously-unused modules, you may see "Failed to fetch dynamically imported module" errors on first run. This is a Vite dependency optimization race condition. Workaround: re-run the tests. If the error persists, clear `node_modules/.cache/storybook` and re-run. See `problems.md` for full details on CJS/ESM pre-bundling requirements (`optimizeDeps.include` in `vitest.config.ts`).
+    - **Note on vitest + Storybook:** When adding new stories that import previously-unused modules, you may see "Failed to fetch dynamically imported module" errors on first run. This is a Vite dependency optimization race condition. Workaround: re-run the tests. If the error persists, clear `node_modules/.cache/storybook` and re-run. See `problems/closed-problems.md` for full details on CJS/ESM pre-bundling requirements (`optimizeDeps.include` in `vitest.config.ts`).
 - **Linting:** oxlint (Vite's default). Run `npm run lint`.
 - **Commands:**
   - `npm install` — install dependencies
@@ -492,18 +498,19 @@ When the agent completes or adds a TODO, place it in the correct tier. Ask the u
 
 ## Problems Log
 
-This repo maintains a `problems.md` file at the root, tracking friction
-and issues in the human↔agent workflow itself (permissions, tooling gaps,
-environment quirks — not application bugs).
+This repo maintains a `problems/` directory (`problems/open-problems.md` and
+`problems/closed-problems.md`, see `problems/README.md` for the split),
+tracking friction and issues in the human↔agent workflow itself
+(permissions, tooling gaps, environment quirks — not application bugs).
 
 - Whenever a session hits a workflow problem — a blocked command, a
   confusing permission denial, a tool that doesn't behave as expected,
-  an ambiguous or missing instruction — document it in `problems.md`
-  using the existing entry format (date, what was attempted, what went
-  wrong, root cause if known, status).
-- Keep `problems.md` up to date at all times: add new entries as issues
-  arise, and update the status field when something is worked around or
-  resolved.
+  an ambiguous or missing instruction — document it in
+  `problems/open-problems.md` using the existing entry format (date, what
+  was attempted, what went wrong, root cause if known, status).
+- Keep the problems log up to date at all times: add new entries to
+  `open-problems.md` as issues arise, and move an entry to
+  `closed-problems.md` once it's worked around or resolved.
 - Do not delete old entries even after they're resolved — mark them
   resolved instead, so the log stays a historical record.
 ```
@@ -802,5 +809,3 @@ DONT commit your work, the user will review.
 - **implement**: Custom skill created for this project, inspired by Matt Pocock's patterns. Key addition: the **approval gate** before refactoring or architectural changes. This gate is not in the public templates; it was added to keep developers in the loop on strategic decisions.
 
 The workflow sequence (grill-me → PRD → to-tickets → implement) follows the Matt Pocock methodology: **relentless design clarity upfront, breaking work into demoable slices, then agentic implementation with human oversight on strategic choices**.
-
-

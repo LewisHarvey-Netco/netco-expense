@@ -95,17 +95,18 @@ When the agent completes or adds a TODO, place it in the correct tier. Ask the u
 
 ## Problems Log
 
-This repo maintains a `problems.md` file at the root, tracking friction
-and issues in the human↔agent workflow itself (permissions, tooling gaps,
-environment quirks — not application bugs).
+This repo maintains a `problems/` directory (`problems/open-problems.md` and
+`problems/closed-problems.md`, see `problems/README.md` for the split),
+tracking friction and issues in the human↔agent workflow itself
+(permissions, tooling gaps, environment quirks — not application bugs).
 
 - Whenever a session hits a workflow problem — a blocked command, a
   confusing permission denial, a tool that doesn't behave as expected,
-  an ambiguous or missing instruction — document it in `problems.md`
-  using the existing entry format (date, what was attempted, what went
-  wrong, root cause if known, status).
-- Keep `problems.md` up to date at all times: add new entries as issues
-  arise, and update the status field when something is worked around or
-  resolved.
+  an ambiguous or missing instruction — document it in
+  `problems/open-problems.md` using the existing entry format (date, what
+  was attempted, what went wrong, root cause if known, status).
+- Keep the problems log up to date at all times: add new entries to
+  `open-problems.md` as issues arise, and move an entry to
+  `closed-problems.md` once it's worked around or resolved.
 - Do not delete old entries even after they're resolved — mark them
   resolved instead, so the log stays a historical record.
