@@ -36,7 +36,7 @@ Netco-expense is a proof of concept for a Netcompany expense app (like Continia)
 
 ## Feniks Build Usage
 
-Feniks Build has been used throughout development (analysis, design, build and test) extensively. This is intentional as the goal was to test the effectiveness of Feniks as an agentic programming tool as much as possible.
+Feniks Build was used extensively throughout development (analysis, design, build and test). This was intentional—the goal was to test the effectiveness of Feniks as an agentic programming tool as much as possible.
 
 Later sections on planning, designing and building cover specifics on Feniks AI usage (skills, agents, models, etc).
 
@@ -69,29 +69,29 @@ During this MVP development the terminal interface was used.
 
 ## Requirements and Planning
 
-To start work on Netco expense, requirements elicitation was conducted to understand the user needs the product aims to meet. As consultants who submit expenses at Netcompany, we acted as proxies for future users, allowing us to simulate the elicitation process. For the finance side, we had to make assumptions about needs (there are likely gaps) but this was sufficient to establish a foundational understanding to kick off development.
+To start work on Netco expense, requirements elicitation was conducted to understand the user needs the product aimed to meet. Consultants who submit expenses at Netcompany acted as proxies for future users, allowing the elicitation process to be simulated. For the finance side, assumptions were made about needs (there are likely gaps) but this was sufficient to establish a foundational understanding to kick off development.
 
-We started by writing free form descriptions of how we use the Continia expense app, and any possible pain point areas we (as users) often experience that could be addressed. These descriptions were enhanced by experimenting with the Continia app, and taking notes as we performed common tasks, to help find more potential improvements.
+Initial work began by writing free form descriptions of how the Continia expense app is used, and any possible pain point areas that users often experience that could be addressed. These descriptions were enhanced by experimenting with the Continia app, and taking notes as common tasks were performed, to help identify more potential improvements.
 
-At this point, we had a decent, unstructured understanding of the actions that the application needs to facilitate, problems with UX to avoid, and key benefits of the existing system. The initial input is found at `docs/init-requirements.md`.
+At this point, a decent, unstructured understanding existed of the actions that the application needs to facilitate, problems with UX to avoid, and key benefits of the existing system. The initial input is found at `docs/init-requirements.md`.
 
 ### Using Feniks to convert notes to user stories
 
-We used Feniks Build to convert our unstructured notes into user stories the app needs to meet.
+Feniks Build was used to convert unstructured notes into user stories the app needed to meet.
 
-This was done using the grill-me skill from the skill library (popularised by Matt Pocock) with the Qwen 3.6 on-prem model. This skill is used to get the AI to relentlessly interview the developer until a shared understanding of the task/subject has been established. We invoked the skill with a prompt that contained all the initial loose requirements, and an explanation of the goal: to create a structured list of user stories.
+This was done using the grill-me skill from the skill library (popularised by Matt Pocock) with the Qwen 3.6 on-prem model. This skill is designed to get the AI to relentlessly interview the developer until a shared understanding of the task/subject has been established. The skill was invoked with a prompt that contained all the initial loose requirements, and an explanation of the goal: to create a structured list of user stories.
 
 The agent asked a series of clarifying questions about the user needs and queried the developer on potential additions. For each question, the developer provided responses one at a time until a shared understanding was established (or the developer requested to finish).
 
-After a shared understanding was established, the agent produced a list of user stories in a mark down document (`/docs/user-stories.md`) which was reviewed by the developers for any inaccuracies/improvements then committed to the repo.
+After a shared understanding was established, the agent produced a list of user stories in a markdown document (`/docs/user-stories.md`) which was reviewed by the developer for any inaccuracies/improvements then committed to the repo.
 
-This engagement with Feniks Build resulted in a clear, well formatted list of user needs to move forward with. Using Feniks allowed us to transform loose notes into structured, referenceable user stories much more quickly than doing it by hand. The workflow used here is loose, and a clearer, systematic approach could have been useful for better results (using a common skill to write user stories for example, enforcing more rigid structure). But in this case, since we were manually reviewing and adjusting the complete list of user stories, we had control and insight into the output of the activity rather than the process, giving us confidence that the work done was of sufficient quality.
+This engagement with Feniks Build resulted in a clear, well formatted list of user needs to move forward with. Using Feniks allowed the developer to transform loose notes into structured, referenceable user stories much more quickly than doing it by hand. The workflow used here was loose, and a clearer, systematic approach could have been useful for better results (using a common skill to write user stories for example, enforcing more rigid structure). But in this case, since the developer was manually reviewing and adjusting the complete list of user stories, the developer had control and insight into the output of the activity rather than the process, giving confidence that the work done was of sufficient quality.
 
-In a real project, these user stories could continue to be kept in mark down, or could be migrated to JIRA for sharing across the project, using the jira-mcp.
+In a real project, these user stories could continue to be kept in markdown, or could be migrated to JIRA for sharing across the project, using the jira-mcp.
 
 ## Design and Prototyping
 
-With the user stories built, prototypes were drawn up to get a view of how the requirements can be met with a solution. The prototyping method used in projects depends on a few key considerations:
+With the user stories developed, prototypes were drawn up to get a view of how the requirements could be met with a solution. The prototyping method used in projects depends on a few key considerations:
 
 - Are the prototypes to be maintained long term?
 - What level of interactivity and fidelity is needed?
@@ -100,21 +100,21 @@ With the user stories built, prototypes were drawn up to get a view of how the r
 
 ### Using Feniks to prototype
 
-I first added `design-guidelines.md`, which takes content from Netcompany Brand Guide V.02.02_2023-11-30.pdf as a baseline style guide. Then I prompted Qwen without a skill, telling it to build a full prototype that met the user requirements and followed the design guidelines. This is a very open request, but this is intentional as the output is for ideation, not a product to be delivered.
+The designer first added `design-guidelines.md`, which takes content from Netcompany Brand Guide V.02.02_2023-11-30.pdf as a baseline style guide. Then Qwen was prompted without a skill, telling it to build a full prototype that met the user requirements and followed the design guidelines. This was a very open request, but this was intentional as the output was for ideation, not a product to be delivered.
 
 The prototype was manually reviewed, and a few follow up prompts were used to refine some features.
 
-This end prototype gave enough design to start building an MVP (source code) (hosted prototype).
+This end prototype provided enough design to start building an MVP (source code) (hosted prototype).
 
 ### Feniks Prototyping - What worked well
 
-Feniks build enabled us to build relatively high fidelity prototypes (with linking between pages etc) in a very small amount of time. Because the prototype is not meant to be maintained at this stage, we can disregard code quality issues and quickly build a version of the product end to end. Iteration on the prototype can be continuously added by Feniks build, allowing high speed iteration with high fidelity.
+Feniks Build enabled the designer to build relatively high fidelity prototypes (with linking between pages etc) in a very small amount of time. Because the prototype was not meant to be maintained at this stage, code quality issues could be disregarded and a version of the product could be built end to end quickly. Iteration on the prototype could be continuously added by Feniks Build, allowing high speed iteration with high fidelity.
 
 ### Feniks Prototyping - Problems
 
 Feniks worked well for ideation and planning, not for design artifact creation. It generated interactive HTML fast enough to walk through user flows and validate architecture decisions.
 
-The lack of image feedback is a real bottleneck. When asked to describe a screenshot of the current prototype, Feniks hallucinated details that weren't there. This means every small visual change requires describing the current state in text, which is slow and error prone. Trying to make small UI tweaks is a long and tedious process, where it often executes changes on a prompt incorrectly, requiring many iterations for changes that would usually only take a few minutes (adding spacing and margin for example).
+The lack of image feedback was a real bottleneck. When asked to describe a screenshot of the current prototype, Feniks hallucinated details that weren't there. This meant every small visual change required describing the current state in text, which was slow and error prone. Trying to make small UI tweaks was a long and tedious process, where it often executed changes on a prompt incorrectly, requiring many iterations for changes that would usually only take a few minutes (adding spacing and margin for example).
 
 To improve this workflow, an agent would need either: (1) the ability to view and iterate on visual output directly, or (2) a constrained component library that limits the scope of possible changes. This would reduce the back-and-forth needed for visual refinement.
 
@@ -122,50 +122,50 @@ Apps like Claude Design support more fine grain workflows, where designers can p
 
 ## Build and Testing
 
-With user stories and a prototype in place, we moved into iterative implementation and validation. The development approach was explicitly agentic: we used Feniks Build to generate code at high speed, paired with multi-layered testing to catch regressions early.
+With user stories and a prototype in place, the team moved into iterative implementation and validation. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early.
 
-The key insight was to break down work into small vertical slices before touching the code, each feature cutting through the full stack (state, types, forms, tests) in a single small, demoable increment. This let the developer validate end-to-end work early and catch architectural issues before they compounded.
+The key insight was to break down work into small vertical slices before touching the code, each feature cutting through the full stack (state, types, forms, tests) in a single small, demoable increment. This allowed the developer to validate end-to-end work early and catch architectural issues before they compounded.
 
-The workflow we followed was:
+The workflow that was followed:
 
 - **grill-me:** the agent interviews the developer to extract requirements and agree on handling edge cases
 - **write-a-prd:** The agent takes the grill-me findings as input and rewrites as a PRD (product requirements document) detailing user stories, components to build etc.
 - **to-tickets:** The agent takes the PRD as input and creates a vertical-slice ticket breakdown with explicit blocking dependencies. The developer reviews and alters the slices before moving on.
-- **implementation with TDD:** at pre-agreed seams write code following practices established in readme.md and architecture.md. validation via unit, component, and E2E tests.
+- **implementation with TDD:** code was written at pre-agreed seams following practices established in readme.md and architecture.md. Validation was performed via unit, component, and E2E tests.
 
-This cycle repeated for each major feature.
+This cycle was repeated for each major feature.
 
-Note that Claude 4.5 was used here for the planning and analysis activities, then Qwen (on prem) was used for actual implementation once the tasks were very clearly defined. Larger models like Claude often do better at pulling together lots of information and conducting analysis, while Qwen can finish tasks more quickly, but needs well-defined tasks to remain useful. It's likely that the on prem models (e.g Qwen) could also perform some of the analysis if it's broken up into small chunks, especially once the repository has a well-defined Agents.md, and well-organized documentation on architectural patterns and principles that can be enforced as part of the skill.
+Claude 4.5 was used for the planning and analysis activities, then Qwen (on prem) was used for actual implementation once the tasks were very clearly defined. Larger models like Claude often performed better at pulling together lots of information and conducting analysis, while Qwen could finish tasks more quickly, but needed well-defined tasks to remain useful. It's likely that the on prem models (e.g Qwen) could also perform some of the analysis if it's broken up into small chunks, especially once the repository has a well-defined Agents.md, and well-organized documentation on architectural patterns and principles that can be enforced as part of the skill.
 
 ### Building the Finance Review Pages – Grill-me (Planning mode, Claude 4.5)
 
-For the grill-me session, we fed in the related user stories, the prototype designs and some guidance on scope with model Claude 4.5 selected. The agent asked several clarifying questions, for example:
+For the grill-me session, the related user stories, the prototype designs and some guidance on scope were fed in with model Claude 4.5 selected. The agent asked several clarifying questions, for example:
 
 - What sections of the prototype are in scope?
 - Do finance staff need to provide a reason for flagging an expense?
 - Should the daily food caps be implemented at this point?
 
-For each question, the developer did manual analysis and gave answers that clarified the task, building a better shared picture of the problem space.
+For each question, the developer performed manual analysis and provided answers that clarified the task, building a better shared picture of the problem space.
 
-The agent walked through 13 distinct architectural and UI decisions (routing structure, status workflow, filter triggers, data model fields, component choices) and recorded each one with rationale. The entire exchange took about 30 minutes and produced a 370-line decision document that locked in our shared understanding, which is saved to the repository as a markdown document.
+The agent walked through 13 distinct architectural and UI decisions (routing structure, status workflow, filter triggers, data model fields, component choices) and recorded each one with rationale. The entire exchange took about 30 minutes and produced a 370-line decision document that locked in the shared understanding, which was saved to the repository as a markdown document.
 
 Saving the output into a markdown document provides several benefits:
 
 1. The content can be referred to later to remember why decisions were made
 2. The content can be used in subsequent follow up tasks (like enhancing documentation) after the implementation is done
-3. A new session can be started to move on to the next step of the process, where we feed this document in and otherwise have a completely fresh context window
+3. A new session can be started to move on to the next step of the process, where this document is fed in and otherwise a completely fresh context window is available
 
-This last point is important when we consider the advice often given around keeping context small and highly relevant. To quote C0200 – User Guide – Agentic AI Guidelines: "The context window is a finite and expensive resource: filling it with irrelevant files or stale history degrades reasoning quality and increases cost. Filling it with the right, highly relevant information is often the single most impactful improvement you can make to agent performance."
+This last point is important when considering the advice often given around keeping context small and highly relevant. To quote C0200 – User Guide – Agentic AI Guidelines: "The context window is a finite and expensive resource: filling it with irrelevant files or stale history degrades reasoning quality and increases cost. Filling it with the right, highly relevant information is often the single most impactful improvement you can make to agent performance."
 
 ### Building the Finance Pages – write-a-prd (Planning mode, Claude 4.5)
 
-Next, we generated a PRD using the write-a-PRD skill, feeding in the document from the grill-me session. The PRD documented the problem (finance reviewers lack a structured way to review and approve expenses), the solution (two pages with filtering and a decision form), tied in 25 user stories covering both finance and consultant perspectives, implementation decisions (which components to use, how filtering works, data model), and testing strategy. This session produced a 330-line spec, ready to break into tickets.
+A PRD was generated next using the write-a-PRD skill, feeding in the document from the grill-me session. The PRD documented the problem (finance reviewers lack a structured way to review and approve expenses), the solution (two pages with filtering and a decision form), tied in 25 user stories covering both finance and consultant perspectives, implementation decisions (which components to use, how filtering works, data model), and testing strategy. This session produced a 330-line spec, ready to break into tickets.
 
 ### Building the Finance Pages – to-tickets (Planning mode, Claude 4.5)
 
 The to-tickets skill broke the PRD into 11 tickets organized in six phases.
 
-Phase 1 established the foundation: define the expense data model as a JSON schema and TypeScript types, with validation tests.
+Phase 1 established the foundation: the expense data model was defined as a JSON schema and TypeScript types, with validation tests.
 
 Phase 2 created mock expense data conforming to that model.
 
@@ -177,47 +177,47 @@ Phase 5 finished the plumbing: connecting the filters to the page and adding the
 
 Phase 6 was end-to-end testing—verifying the full workflow (user navigates to expenses, filters, clicks one, makes a decision, sees the status change).
 
-The structure wasn't arbitrary. It was a dependency graph: tickets that didn't depend on each other could run in parallel (Phase 3 had three independent tickets, Phase 4 had three more). Tickets that did depend on earlier work were sequenced (the detail page and form could be built in parallel, but integrating them together came later). For a solo developer, this clarifies priority; for a team, it enables parallelism.
+The structure was not arbitrary. It was a dependency graph: tickets that didn't depend on each other could run in parallel (Phase 3 had three independent tickets, Phase 4 had three more). Tickets that did depend on earlier work were sequenced (the detail page and form could be built in parallel, but integrating them together came later). For a solo developer, this clarified priority; for a team, it enabled parallelism.
 
-This stage in the workflow is a good point for developers to affirm everything is still on the right track. The tasks created are similar to a typical Jira ticket that a developer would see, and reviewing the tasks gives the developer a clear view of what is going to be built. This is an opportunity for developers to remain in the loop, altering plans as needed and staying in tune with what's going on.
+This stage in the workflow was a good point for developers to affirm everything was still on the right track. The tasks created were similar to a typical Jira ticket that a developer would see, and reviewing the tasks gave the developer a clear view of what was going to be built. This was an opportunity for developers to remain in the loop, altering plans as needed and staying in tune with what was going on.
 
 ### Building the Finance Pages – Implementation (Build mode, Qwen on-prem)
 
-The implement skill includes instruction to use test driven development and continuously run the full test suite after each change. The agent makes a change, runs the tests, fixes regressions, and continues until the ticket specification is met.
+The implement skill included instruction to use test driven development and continuously run the full test suite after each change. The agent made a change, ran the tests, fixed regressions, and continued until the ticket specification was met.
 
-For each ticket, we started a new session (therefore a new context window) and ran the implement skill with reference to a single ticket.
+For each ticket, a new session was started (therefore a new context window) and the implement skill was run with reference to a single ticket.
 
-Test driven development enables agents to set up parameters for success before executing on implementation. Consider ticket 05 (filter logic and form). Unit tests were written for `filterExpenses()`—does it filter by status? by type? by date range? Does it preserve the original array and return a new one? Once tests are written and failing, Feniks then implements the function that passes the tests.
+Test driven development enabled agents to set up parameters for success before executing on implementation. Consider ticket 05 (filter logic and form). Unit tests were written for `filterExpenses()`—does it filter by status? by type? by date range? Does it preserve the original array and return a new one? Once tests were written and failing, Feniks then implemented the function that passed the tests.
 
-Manual review is still needed to ensure that the tests cover the behaviour they need to, and that the code is written in a way that abides by practices and patterns already established in the repository. We set up guardrails for AI to achieve this by adding instruction to skills to reference our architecture document, ADRs and the design guidelines.
+Manual review was still needed to ensure that the tests covered the behaviour they needed to, and that the code was written in a way that abided by practices and patterns already established in the repository. Guardrails were set up for AI to achieve this by adding instruction to skills to reference the architecture document, ADRs and the design guidelines.
 
-Occasionally the agent would write changes that break something, but with comprehensive testing in place it could course correct. When implementing ticket 09 (integrating the decision form into the detail page), all component tests passed. The form worked in isolation. But the E2E test failed: user navigates to an expense detail page, clicks Approve, but after going back to the list view, the status in the table doesn't update. We traced the bug: the form submitted and updated the mock repository, but the detail page wasn't re-fetching the updated expense to display the new status. Unprompted, to fix the bug, the agent added a useEffect hook to re-fetch after form submission. E2E test passed. This is a classic gap in AI-generated code: components work in isolation (unit tests pass) but break in integration (E2E tests catch it). The tests act as a safety net. This feedback loop (test fails, prompt, fix, retest) takes about three minutes per iteration.
+Occasionally the agent would write changes that broke something, but with comprehensive testing in place it could course correct. When implementing ticket 09 (integrating the decision form into the detail page), all component tests passed. The form worked in isolation. But the E2E test failed: user navigates to an expense detail page, clicks Approve, but after going back to the list view, the status in the table doesn't update. The bug was traced: the form submitted and updated the mock repository, but the detail page wasn't re-fetching the updated expense to display the new status. Unprompted, to fix the bug, the agent added a useEffect hook to re-fetch after form submission. E2E test passed. This is a classic gap in AI-generated code: components work in isolation (unit tests pass) but break in integration (E2E tests catch it). The tests act as a safety net. This feedback loop (test fails, prompt, fix, retest) took about three minutes per iteration.
 
 ### Human in the Loop: Trade-offs and Disagreements
 
-There is a fundamental trade off with agentic development: having the developer in the loop is slower than simply unleashing the AI to write code without review. But it keeps the developer informed and in control of architectural decisions. Without human oversight, Feniks would generate code faster, but the codebase would reflect the AI's adhoc decisions about structure, naming, and patterns. Giving the jira-ticket sized problems enables developers to review code as they usually would with non-agentic programming, keeping developers responsible for and capable of maintaining the code.
+There is a fundamental trade off with agentic development: having the developer in the loop is slower than simply unleashing the AI to write code without review. But it keeps the developer informed and in control of architectural decisions. Without human oversight, Feniks would generate code faster, but the codebase would reflect the AI's adhoc decisions about structure, naming, and patterns. Giving the Jira-ticket sized problems enabled developers to review code as they usually would with non-agentic programming, keeping developers responsible for and capable of maintaining the code.
 
-A concrete example: ticket 03 (build the expense table component). Feniks generated a component that took `expenses` and `onRowClick` as props, rendering rows with a hardcoded column order. The component worked and tests passed. But when we reviewed it, we noticed the column definitions (field name, display label, width) were hard coded in the JSX. We disagreed with this approach. If we later needed to reorder columns or add new ones, we'd have to touch the render logic, and the reusability of the table component was limited to views that needed the exact same columns. We prompted Feniks to refactor extract column definitions into a constant, accept `columns` as a prop, make the render loop generic. This review cycle added maybe 20 minutes to the ticket but bought us a better codebase. Without human oversight, we'd have the working-but-rigid solution.
+A concrete example: ticket 03 (build the expense table component). Feniks generated a component that took `expenses` and `onRowClick` as props, rendering rows with a hardcoded column order. The component worked and tests passed. But when the developer reviewed it, the column definitions (field name, display label, width) were noticed to be hard coded in the JSX. The developer disagreed with this approach. If columns needed to be reordered or new ones added later, the render logic would have to be touched, and the reusability of the table component was limited to views that needed the exact same columns. Feniks was prompted to refactor—extract column definitions into a constant, accept `columns` as a prop, make the render loop generic. This review cycle added maybe 20 minutes to the ticket but produced a better codebase. Without human oversight, the working-but-rigid solution would have been kept.
 
-Another example: ticket 05 (filter logic). Feniks initially implemented filter state inside the FilterPanel component—when the user clicked "Apply Filters," the component called `onFiltersChange()` with the new criteria. This worked but meant filter state lived inside a component. We asked it to extract filter state to the parent component (`ReviewPage`) and have FilterPanel be a pure presentation component. This is a better separation of concerns: presentation (FilterPanel) stays dumb, state management and filtering logic (ReviewPage) stays coordinated. The resulting architecture is cleaner and easier to test in isolation.
+Another example: ticket 05 (filter logic). Feniks initially implemented filter state inside the FilterPanel component—when the user clicked "Apply Filters," the component called `onFiltersChange()` with the new criteria. This worked but meant filter state lived inside a component. The developer asked it to extract filter state to the parent component (`ReviewPage`) and have FilterPanel be a pure presentation component. This was a better separation of concerns: presentation (FilterPanel) stayed dumb, state management and filtering logic (ReviewPage) stayed coordinated. The resulting architecture was cleaner and easier to test in isolation.
 
-These decisions (extracting column definitions, lifting state) are the kinds of choices that determine whether a codebase remains maintainable as it grows. An AI operating at full speed without human gatekeeping might not make these choices. The developer's involvement slows down the raw code-generation speed but ensures the decisions are deliberate and the architecture scales.
+These decisions (extracting column definitions, lifting state) were the kinds of choices that determined whether a codebase remained maintainable as it grew. An AI operating at full speed without human gatekeeping might not make these choices. The developer's involvement slowed down the raw code-generation speed but ensured the decisions were deliberate and the architecture scaled.
 
 ## Codebase Maintainability
 
-This human-guided approach has resulted in a codebase that is not just functional but intentionally well-structured. The project includes comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verify key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that catches type errors at compile time. Every component is documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions are recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers understand not just what the code does but why those decisions were made. The repo has clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions live in `src/types.ts` and are referenced throughout, ensuring consistency.
+This human-guided approach resulted in a codebase that was not just functional but intentionally well-structured. The project included comprehensive unit test coverage (filter logic, validation, data transformations all tested), end-to-end tests that verified key user journeys (user submits expense, reviewer approves, status updates), and strict TypeScript that caught type errors at compile time. Every component was documented in Storybook, allowing visual review and regression testing without running the full app. Architectural decisions were recorded in ADRs (Architecture Decision Records) in `docs/decisions/`, so future maintainers could understand not just what the code does but why those decisions were made. The repo had clear separation of concerns: pages in `src/pages/`, shared components in `src/components/`, utilities in `src/lib/`, contexts in `src/context/`, and mock data in `src/mocks/`. Type definitions lived in `src/types.ts` and were referenced throughout, ensuring consistency.
 
-This maintainable structure emerged because for every ticket, the instructions given to Feniks across agents.md and skills invoked told the agent to follow the patterns in `docs/architecture.md`, to add Storybook stories for new components, to write tests before code, to use TypeScript strictly. We ensured that key decisions are documented in the PRD and ADR when they involved architectural trade-offs. The result is a codebase that new developers can onboard to quickly: the architecture is explicit, the test coverage is comprehensive, the types are a second form of documentation, and the Storybook is a visual reference for how components behave.
+This maintainable structure emerged because for every ticket, the instructions given to Feniks across agents.md and skills invoked told the agent to follow the patterns in `docs/architecture.md`, to add Storybook stories for new components, to write tests before code, to use TypeScript strictly. Key decisions were ensured to be documented in the PRD and ADR when they involved architectural trade-offs. The result was a codebase that new developers could onboard to quickly: the architecture was explicit, the test coverage was comprehensive, the types were a second form of documentation, and the Storybook was a visual reference for how components behaved.
 
 Vertical slices kept scope tight and demoable. TDD was effective because the test was the spec; Feniks knew exactly what to build. Pure functions were AI-friendly—when filter logic was defined as a pure function with clear inputs and outputs, it worked first try. The grill-me interview extracted architectural nuance upfront, preventing mid-project pivots. The three-layer testing strategy (unit, component, E2E) caught different bug classes and ensured the codebase remained maintainable as features were added. Model switching optimized iteration speed. And the skills workflow (grill-me → PRD → to-tickets → implement → validate) was repeatable and could be applied to the next feature with confidence.
 
-The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that require human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
+The entire finance-pages feature—11 tickets, 25 user stories, two pages with filtering and stateful forms, full test coverage, Storybook stories, architectural decisions documented—took about 12 hours of agentic-assisted development time from one developer (real time, not time spent running the agent). This included time writing tests, reviewing generated code, prompting Feniks, and debugging integration issues. A solo human developer building this from scratch might have taken 2–3 days. The speed boost came primarily from Feniks generating boilerplate and straightforward logic, freeing the developer to focus on architecture, testing, and integration issues—the parts that required human judgment. More importantly, the human involvement ensured that every significant architectural decision was intentional, that the code was tested comprehensively, and that the codebase remained well-structured and maintainable as it grew.
 
 ## Choosing the Right Model
 
-Throughout the project, we used both Claude 3.5 and Qwen 3.6 on-prem, switching between them intentionally.
+Throughout the project, both Claude 3.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally.
 
-Experimentation per project is needed to try to use the on prem models as much as possible, keeping costs down. Ultimately it's important that the developer continues to carefully review the outputs of their agentic workflow that intend to be maintained (documentation, code), to assess whether the workflow is working as expected, rather than depending on using larger models and expecting better outcomes.
+Experimentation per project is needed to use the on prem models as much as possible, keeping costs down. Ultimately it is important that the developer continues to carefully review the outputs of their agentic workflow that intend to be maintained (documentation, code), to assess whether the workflow is working as expected, rather than depending on using larger models and expecting better outcomes.
 
 ## Parallel Development
 
