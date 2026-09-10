@@ -44,29 +44,6 @@ mode to discuss options before switching to Build mode to implement.
 
 Issues that require changes to Feniks AI or opencode configuration.
 
-## 2026-08-17 — Plan mode's bash permissions too restrictive for read-only inspection
-
-**What was attempted:** During a plan-mode interview, tried to run `node --version` /
-`npm --version` to check the installed Node version before deciding on setup.
-
-**What went wrong:** The command was denied. The plan agent's bash permission override
-is much smaller than the top-level allowlist, restricting commands to only read-only
-git/file inspection (`git status/diff/log`, `cat`, `head`, `tail`, `grep`, `ls`, etc.)
-without allowing clear read-only version/inspection commands like `node --version`.
-
-**Root cause:** The `agent.plan.permission.bash` allowlist is stricter than necessary.
-It restricts planning mode to be read-only (by design) but then blocks even read-only
-queries like `node --version` that don't mutate state.
-
-**Status:** Worked around by asking the user.
-
-**Impact:** Planning mode cannot verify environment details independently, forcing
-reliance on user input for basic setup information.
-
-**Feniks fix needed:** Add a small set of clearly read-only version/inspection commands
-to `agent.plan.permission.bash` (`node --version`, `npm --version`, `node -v`, `npm -v`,
-`node -e`, etc.) so planning sessions can verify environment details independently.
-
 ## 2026-08-17 — OpenCode for Feniks unavailable on WSL for Linux-based projects
 
 **What was attempted:** Using OpenCode for Feniks on a Windows machine to work on
