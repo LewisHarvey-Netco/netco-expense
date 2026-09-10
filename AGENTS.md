@@ -49,6 +49,7 @@ Keep this documentation up to date: when a change introduces, removes, or alters
 - **Node:** No version pinned. Recommend Node ≥20.19 (Vite 7+ minimum). Current tested version: v24.19.0.
 - **Folder convention:** `src/{pages,components,context,mocks,lib}`. Pages are route-level components in `src/pages/`, shared components in `src/components/`, shadcn UI in `src/components/ui/`, contexts in `src/context/`, utilities in `src/lib/`, mock data in `src/mocks/`.
 - **Windows shell note:** On Windows, use Read and Glob tools instead of PowerShell cmdlets (`Get-ChildItem`, `Test-Path`, `Remove-Item`). The bash permission policy is tuned for Unix commands. For file inspection, use the Read tool on directories and Glob for pattern matching. For complex queries, use `node -e` instead of multi-statement PowerShell pipelines.
+  - **Important:** The bash permission matcher evaluates entire command strings as-is; pipes, redirections, and command chaining (e.g., `cmd1 | cmd2`, `cmd && cmd2`, `2>&1 > file`) may cause the whole command to fail the permission match even if the base command is allowed. **Avoid combining allowed commands with pipes or redirections.** When you need to filter or truncate output, run the command alone and use the Grep tool to search the auto-saved output file instead. Example: instead of `npm run test -- file.tsx | head -30`, run `npm run test -- file.tsx` and then use `grep "pattern" output.txt`.
 - Keep this file updated as conventions evolve.
 
 ## Design Guidelines

@@ -16,26 +16,6 @@ root cause (if known), and current status (open / worked around).
 
 Issues the developer can address without changes to Feniks AI.
 
-## 2026-09-02 — Piping an allowed command breaks the bash permission match
-
-**What was attempted:** Running
-`npm run test -- src/pages/ExpenseDetailPage.test.tsx 2>&1 | Select-Object -Last 30`
-to run a single test file with truncated output.
-
-**What went wrong:** Denied. The bare `npm run test -- <file>` matches the
-`npm run *` allow rule, but appending `2>&1 | Select-Object -Last 30` makes
-the whole command string fail to match any rule.
-
-**Root cause:** The bash permission matcher does whole-string pattern
-matching; pipes and redirections change the string so it no longer matches
-the intended allow rule (`npm run *`).
-
-**Status:** Worked around.
-
-**Developer action:** Avoid piping allowed commands or adding redirections. The bash tool
-auto-saves output to a file when it exceeds the limit, so use the Grep tool on the
-saved output file to extract relevant lines instead of piping within the command itself.
-
 ## 2026-09-02 — Edit tool reports "Could not find oldString" but the edit was applied
 
 **What was attempted:** A sequence of `edit` calls on `src/pages/ExpenseDetailPage.test.tsx`

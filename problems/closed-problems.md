@@ -6,6 +6,40 @@ Historical record of problems that have been resolved or fixed during the projec
 
 # Developer Workflow Adjustments
 
+## 2026-09-02 — Piping an allowed command breaks the bash permission match
+
+**What was attempted:** Running
+`npm run test -- src/pages/ExpenseDetailPage.test.tsx 2>&1 | Select-Object -Last 30`
+to run a single test file with truncated output.
+
+**What went wrong:** Denied. The bare `npm run test -- <file>` matches the
+`npm run *` allow rule, but appending `2>&1 | Select-Object -Last 30` makes
+the whole command string fail to match any rule.
+
+**Root cause:** The bash permission matcher does whole-string pattern
+matching; pipes and redirections change the string so it no longer matches
+the intended allow rule (`npm run *`).
+
+**Status:** Resolved.
+
+**Solution:** Avoid piping allowed commands or adding redirections. The bash tool
+auto-saves output to a file when it exceeds the limit, so use the Grep tool on the
+saved output file to extract relevant lines instead of piping within the command itself.
+
+Added guidance to AGENTS.md under "Windows shell note" section:
+
+> **Note on bash commands and piping:** The bash permission matcher evaluates entire command
+> strings; pipes, redirections, and chaining operators (e.g., `cmd1 | cmd2`, `cmd && cmd2`,
+> `cmd > file`) may cause the whole command to fail the permission match even if the base
+> command is allowed. Avoid combining allowed commands with pipes or redirections. When you
+> need to filter output, run the command and use the Grep tool to search the auto-saved output
+> file instead.
+
+This principle applies on all platforms (Unix, Windows, WSL) — the permission system cannot
+decompose composite command strings, so keep commands simple.
+
+---
+
 ## 2026-08-24 — Read tool bypasses .gitignore via absolute path
 
 **What was attempted:** Relying on `.gitignore` to prevent the agent from
