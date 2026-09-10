@@ -55,28 +55,7 @@ Agent read/write permissions:
 - test-results/: DO NOT read, test artifacts only (regenerated on every test run)
 ```
 
-## 2026-08-18 — Get-ChildItem with -LiteralPath fails consistently in bash tool
 
-**What was attempted:** Running `Get-ChildItem -Force -LiteralPath "." | Select-Object Name, Mode`
-to list directory contents in a way that handles paths with spaces and special characters safely.
-
-**What went wrong:** The command fails consistently. The same pattern works when using `ls *`
-(which is on the bash allowlist), but `Get-ChildItem` is not — the `bash` tool's permission
-rules allow `ls *` but do not include `Get-ChildItem` or other PowerShell cmdlets by name.
-Using `tree /f /a` also fails for the same reason.
-
-**Root cause:** The bash permission allowlist in `opencode.json` includes `ls *` and `tree *`
-as allowed patterns, but these are Unix-native commands or external executables, not PowerShell
-cmdlets. On Windows with PowerShell 5.1 as the shell, `ls` works only as an alias for
-`Get-ChildItem`, and the allowlist matching may not resolve aliases. Meanwhile, running
-`Get-ChildItem` directly is not covered by any allowlist pattern.
-
-**Status:** Open. Worked around by using the Read tool on directories and the Glob tool for
-file pattern matching, which are the recommended approach anyway per the tool usage policy.
-
-**Developer action:** When on Windows with PowerShell, prefer the Read and Glob tools for
-directory inspection over bash commands. Use `node -e` for bundle inspection or other
-complex queries instead of multi-statement PowerShell pipelines.
 
 ## 2026-09-02 — Piping an allowed command breaks the bash permission match
 
