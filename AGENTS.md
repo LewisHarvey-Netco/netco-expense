@@ -6,11 +6,15 @@ Demo expense app built to experiment with Feniks AI capabilities. Start from scr
 
 ## Project Structure
 
+**Agent read/write permissions:**
 - `src/`: main application code, agent should work here
 - `scripts/`: build/deploy scripts, agent may read but not modify
-- `node_modules/`: DO NOT read or analyze, ever
-- `.env`: DO NOT read, contains secrets
-- `dist/`: generated output, ignore entirely
+- `node_modules/`: **DO NOT read or analyze, ever** (bloats context, no useful information)
+- `.env`: **DO NOT read, contains secrets** (blocked by security policy)
+- `dist/`: **DO NOT read, generated output** (ignored by git, bloats context)
+- `test-results/`: **DO NOT read, test artifacts only** (regenerated on every test run)
+
+The agent should rely on `.gitignore` for general guidance, but these explicit rules take precedence. When exploring the codebase, stick to `src/`, `docs/`, and config files. Avoid entire directory reads unless explicitly needed for a task.
 
 ## Architecture
 

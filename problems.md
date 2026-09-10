@@ -41,23 +41,19 @@ on the agent's file read permissions.
 file access. The read tool operates on the filesystem directly and does
 not consult `.gitignore`.
 
-**Status:** Worked around.
+**Status:** Fixed.
 
-**Solution:** Define read/write exclusions explicitly in `AGENTS.md` rather
-than relying on `.gitignore`:
+**Solution:** Added explicit read/write exclusions to `AGENTS.md` under Project Structure:
 
 ```
-## Project Structure
+Agent read/write permissions:
 - src/: main application code, agent should work here
 - scripts/: build/deploy scripts, agent may read but not modify
-- node_modules/: DO NOT read or analyze, ever
-- .env: DO NOT read, contains secrets
-- dist/: generated output, ignore entirely
+- node_modules/: DO NOT read or analyze, ever (bloats context, no useful information)
+- .env: DO NOT read, contains secrets (blocked by security policy)
+- dist/: DO NOT read, generated output (ignored by git, bloats context)
+- test-results/: DO NOT read, test artifacts only (regenerated on every test run)
 ```
-
-**Developer action:** Ensure AGENTS.md clearly documents which files/directories
-the agent should never read or modify, and reference these rules in agent
-instructions and skills.
 
 ## 2026-08-18 — Get-ChildItem with -LiteralPath fails consistently in bash tool
 
@@ -166,7 +162,7 @@ the actual project tooling and dependencies live. This creates a mismatch.
 **Root cause:** OpenCode for Feniks currently ships as a Windows-only application and
 cannot be installed or run inside WSL.
 
-**Discussion:** [Viva Engage thread](https://teams.microsoft.com/l/entity/683f3525-d193-4a67-8d91-22093beab1ca/?context=%7B%22internalId%22%3A%2219%3AeyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNTQ3MDYzMTExNjgifQ%40EngageCommunity%22%2C%22contextType%22%3A%22engageCommunity%22%2C%22subEntityId%22%3A%22%7B%5C%22deepLinkType%5C%22%3A%5C%22crossapp%5C%22%2C%5C%22path%5C%22%3A%5C%22%2Fthreads%2FeyJfdHlwZSI6IlRocmVhZCIsImlkIjoiMzk4NDM3MTk4MTc4NzEzNiJ9%5C%22%7D%22%7D)
+**Discussion:** [Viva Engage thread](https://engage.cloud.microsoft/main/org/netcompany.com/threads/eyJfdHlwZSI6IlRocmVhZCIsImlkIjoiNDAwMzI1OTg5NzkyOTcyOCJ9?trk_copy_link=V2)
 
 **Status:** Open.
 

@@ -225,6 +225,23 @@ A single-line note was added to the Playwright section:
 
 After this change, the agent no longer made the mistake. This demonstrates a broader principle: **project and tooling-specific instruction files are a low-effort, high-impact way to keep agents fast and accurate**. Rather than repeatedly correcting the same error (which slows development), a one-time investment in documenting known gotchas, version-specific quirks, or deprecated APIs prevents the agent from going down the same wrong path. For teams using AI agents over months or years, maintaining a curated list of such instructions—library versions, recently deprecated features, project-specific patterns—directly translates to faster, more reliable AI-assisted development.
 
+## Guarding Against Context Bloat: Explicit File Exclusions
+
+Early in development, the agent would occasionally read or analyze files that provided no value but consumed valuable context window: `node_modules/`, the `dist/` build output, or generated test artifacts. The developer's natural instinct was to rely on `.gitignore`, but `.gitignore` controls version control, not tool permissions—the read tool can access any file by absolute path regardless of git tracking status.
+
+The fix was straightforward: document explicit "DO NOT READ" rules in `AGENTS.md` with clear reasons for each:
+
+```
+- node_modules/: DO NOT read or analyze, ever (bloats context, no useful information)
+- .env: DO NOT read, contains secrets
+- dist/: DO NOT read, generated output (ignored by git, bloats context)
+- test-results/: DO NOT read, test artifacts only (regenerated on every test run)
+```
+
+By adding these rules with explanations, the agent learned the *why* behind each exclusion, making it more likely to honor the guidance in future sessions. More importantly, the developer avoided the overhead of repeatedly correcting the agent: "don't read that file, it's just build output."
+
+This illustrates a key principle for sustainable AI-assisted development: **context window is expensive and finite. Preventive documentation—"here's what not to look at and why"—is far more cost-effective than corrective feedback during each session**. A few minutes spent documenting file/directory boundaries upfront translates to faster sessions throughout the project's lifetime, because the agent spends less time reading irrelevant context and more time focused on actual work.
+
 ## Choosing the Right Model
 
 Throughout the project, both Claude 3.5 and Qwen 3.6 on-prem were used, with switching between them done intentionally.
