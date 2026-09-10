@@ -16,28 +16,27 @@ root cause (if known), and current status (open / worked around).
 
 Issues the developer can address without changes to Feniks AI.
 
-## 2026-09-02 — Edit tool reports "Could not find oldString" but the edit was applied
+## 2026-08-17 — Agent applies workarounds without consulting the user
 
-**What was attempted:** A sequence of `edit` calls on `src/pages/ExpenseDetailPage.test.tsx`
-and `src/components/expenses/ExpenseDetailCard.stories.tsx` (adding a new `describe` block,
-then adding a `const` to it; adding a Storybook `decorators` array).
+**What was attempted:** Standard build workflow — agent runs verification commands,
+encounters errors, and fixes them.
 
-**What went wrong:** Several `edit` calls returned `Could not find oldString in the file` even
-though the `oldString` was present in the file (and, on re-reading, the intended change WAS in
-the file).
+**What went wrong:** The agent independently decided to refactor the router architecture
+(moving `<BrowserRouter>` from `App.tsx` to `main.tsx`) and rewrite test file structure
+without informing the user or asking for approval. While the fix was correct, the user
+was not consulted before structural changes were made.
 
-**Root cause:** Unknown. Possibly a race between applying the edit and re-reading the file for
-the match/confirmation check, or stale in-memory file state when edits are made in quick
-succession on the same file.
+**Root cause:** No explicit workflow rule in place requiring the agent to ask before
+applying workarounds or making architectural changes. The agent's default behavior is
+to solve problems autonomously.
 
 **Status:** Worked around.
 
-**Developer action:** After every `edit` call (especially on a file just edited), verify the
-change by re-reading the affected region or grepping for the expected text. Do not trust
-the tool's success/failure message at face value — confirm the on-disk state before proceeding.
-
-**Requires fix:** The edit tool should re-read the file from disk immediately before reporting
-success/failure, ensuring the reported status always matches the on-disk state.
+**Developer action:** When invoking the agent to fix a build/test/lint failure, explicitly
+instruct it to present the issue and propose a fix without applying it. For example:
+"The build is failing. Diagnose the issue and propose a fix, but don't apply it yet —
+let me review and approve first." For large refactors or architectural changes, use Plan
+mode to discuss options before switching to Build mode to implement.
 
 ---
 
@@ -143,29 +142,6 @@ credentials. This severely limits the ability to generate realistic tests.
    or files already tracked by git
 2. Provide a whitelist or disable option for known demo credentials
 3. At minimum, provide diagnostic output showing what was masked so the user can fix it
-
-## 2026-08-17 — Agent applies workarounds without consulting the user
-
-**What was attempted:** Standard build workflow — agent runs verification commands,
-encounters errors, and fixes them.
-
-**What went wrong:** The agent independently decided to refactor the router architecture
-(moving `<BrowserRouter>` from `App.tsx` to `main.tsx`) and rewrite test file structure
-without informing the user or asking for approval. While the fix was correct, the user
-was not consulted before structural changes were made.
-
-**Root cause:** No explicit workflow rule in place requiring the agent to ask before
-applying workarounds or making architectural changes. The agent's default behavior is
-to solve problems autonomously.
-
-**Status:** Open.
-
-**Impact:** The user loses control over architectural decisions and can be surprised
-by major refactors applied without consent.
-
-**Feniks fix needed:** Add a workflow rule: when the agent encounters an error or blocker
-during verification (build, test, lint), it should present the issue to the user and
-propose a fix before applying it. Only apply the fix after the user confirms.
 
 ## 2026-08-20 — Feniks startup fails with Docker container not found, requires full termination
 
