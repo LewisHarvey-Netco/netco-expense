@@ -4,15 +4,15 @@
 
 Netco-expense is a frontend-only POC expense app built almost entirely with Feniks Build (OpenCode for Feniks), covering requirements elicitation, prototyping, and full implementation with a multi-layer test suite (unit, component, E2E, visual). It was built to stress-test Feniks as an agentic development tool, not to ship a product.
 
-**Net finding:** Feniks is effective at both planning/analysis and well-scoped implementation, but only when paired with a deliberate workflow — small vertical-slice tickets, TDD as the specification, and explicit human approval gates before any architectural change. As a concrete data point, one full feature (finance expense review: 11 tickets, 25 user stories, two pages, full test coverage) took roughly 12 hours of human-supervised agentic development, against a rough estimate of 2–3 days for the same scope built by hand. Model choice mattered: Claude 4.5 was used for planning/analysis (grill-me → PRD → tickets), Qwen 3.6 on-prem for implementation once tickets were well-defined, larger models were stronger at synthesis, on-prem models were faster once the task was unambiguous.
+**Net finding:** Feniks is effective at both planning/analysis and well-scoped implementation, when paired with a deliberate workflow, small vertical-slice tickets, TDD as the specification, and explicit human approval gates before any architectural change. As a concrete data point, one full feature (finance expense review: 11 tickets, 25 user stories, two pages, full test coverage) took roughly 12 hours of human-supervised agentic development, against a rough estimate of 3 days for the same scope built by hand. Model choice mattered: Claude 4.5 was used for planning/analysis (grill-me → PRD → tickets), Qwen 3.6 on-prem for implementation once tickets were well-defined, larger models were stronger at synthesis, on-prem models were faster once the task was unambiguous.
 
 **Where it fell short:**
 
 - **Visual/design iteration:** no image feedback loop meant Feniks routinely hallucinated the current UI state, making small visual tweaks slow and error-prone (see [Design and Prototyping](#feniks-prototyping---problems)).
-- **Unsupervised architectural decisions:** left alone, the agent occasionally made structural changes (e.g. moving router setup, restructuring tests) without asking — mitigated by adding an explicit approval gate to the `implement` skill (see [Configuring Workflows to Keep Developers in the Loop](#configuring-workflows-to-keep-developers-in-the-loop)).
+- **Unsupervised architectural decisions:** left alone, the agent occasionally made structural changes (e.g. moving router setup, restructuring tests) without asking. This was mitigated by adding an explicit approval gate to the `implement` skill (see [Configuring Workflows to Keep Developers in the Loop](#configuring-workflows-to-keep-developers-in-the-loop)).
 - **Tooling gaps:** no WSL support, opaque prompt-injection blocking with no diagnostics, and a skill library with no guidance on which skill to use when (just a flat, disconnected collection) all created friction that required workarounds rather than fixes — these are gaps in the tool itself, not the workflow, and need a Feniks-team fix (see [Known Tool Limitations](#known-tool-limitations)).
 
-**Practices that made the biggest difference:** vertical-slice tickets sized to a single context window, TDD as an unambiguous spec for the agent to satisfy, keeping the developer in the loop specifically for strategic/architectural decisions (not tactical ticket work), and documenting project- and tool-specific gotchas directly in `AGENTS.md` rather than re-correcting the agent each session.
+**Practices that made the biggest difference:** vertical-slice tickets sized to a single context window, TDD as an unambiguous spec for the agent to satisfy, keeping the developer in the loop specifically for strategic/architectural decisions (not tactical ticket work), and documenting project and tool-specific gotchas directly in `AGENTS.md` rather than re-correcting the agent each session.
 
 This document works through each stage of that workflow with concrete examples, then closes with known tool limitations and setup details for teams considering the same approach. The [Appendix](#appendix) contains the full `AGENTS.md` and the exact skill definitions (grill-me, write-a-prd, to-tickets, implement) used throughout, for teams wanting to reuse them directly.
 
@@ -59,7 +59,7 @@ Netco-expense is a proof of concept for a Netcompany expense app (like Continia)
 
 ## Feniks Build Usage
 
-Feniks Build was used extensively throughout development (analysis, design, build and test). This was intentional—the goal was to test the effectiveness of Feniks as an agentic programming tool as much as possible.
+Feniks Build was used extensively throughout development (analysis, design, build and test). The goal was to test the effectiveness of Feniks as an agentic programming tool as much as possible.
 
 Later sections on planning, designing and building cover specifics on Feniks AI usage (skills, agents, models, etc).
 
@@ -78,7 +78,7 @@ Setup needs to be done by each developer, on their local machine. The process is
 
 Once Feniks AI is installed and setup, users can choose whether to interact with the Graphical Interface, or the Terminal Interface. Sessions and capabilities are shared between interfaces, so users can switch back and forth as they like.
 
-Once the tool is installed, you can start using Feniks build to assist with development tasks. On the Feniks Build LLM-Bridge tab, you can turn on LLM prompt injection protection and CPR scrubber, which prevents sending prompts that breach rule sets defined within the modules (see user guide). For example, prompts that contain phone numbers are blocked. You can then start adding skills from the skill library, configuring MCPs etc as defined in the User Guide.
+On the Feniks Build LLM-Bridge tab, you can turn on LLM prompt injection protection and CPR scrubber, which prevents sending prompts that breach rule sets defined within the modules (see user guide). For example, prompts that contain phone numbers are blocked. You can then start adding skills from the skill library, configuring MCPs etc as defined in the User Guide **[FA]**.
 
 ### Graphical Interface
 
@@ -137,7 +137,7 @@ Feniks Build enabled the designer to build relatively high fidelity prototypes (
 
 Feniks worked well for ideation and planning, not for design artifact creation. It generated interactive HTML fast enough to walk through user flows and validate architecture decisions.
 
-The lack of image feedback was a real bottleneck. When asked to describe a screenshot of the current prototype, Feniks hallucinated details that weren't there. This meant every small visual change required describing the current state in text, which was slow and error prone. Trying to make small UI tweaks was a long and tedious process, where it often executed changes on a prompt incorrectly, requiring many iterations for changes that would usually only take a few minutes (adding spacing and margin for example).
+The lack of image feedback was a real bottleneck. When asked to describe a screenshot of the current prototype, Feniks hallucinated details that weren't there. This meant every small visual change required describing the current state in text, which was slow and error prone. Trying to make small UI tweaks was a long and tedious process, where it often executed changes on a prompt incorrectly, requiring many iterations for changes that would usually only take a few minutes in a tool like figma (adding spacing and margin for example).
 
 To improve this workflow, an agent would need either: (1) the ability to view and iterate on visual output directly, or (2) a constrained component library that limits the scope of possible changes. This would reduce the back-and-forth needed for visual refinement.
 
@@ -145,9 +145,9 @@ Apps like Claude Design support more fine grain workflows, where designers can p
 
 ## Build and Testing
 
-With user stories and a prototype in place, the team moved into iterative implementation and validation. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early. This aligns with **[AG]**'s recommendation that "multi-layered validation (unit, component, integration, E2E) is essential when relying on AI-generated code, as different test layers catch different failure modes."
+With user stories and a prototype in place, iterative implementation and validation began. The development approach was explicitly agentic: Feniks Build was used to generate code at high speed, paired with multi-layered testing to catch regressions early. This aligns with **[AG]**'s recommendation that "multi-layered validation (unit, component, integration, E2E) is essential when relying on AI-generated code, as different test layers catch different failure modes."
 
-The key insight was to break down work into small vertical slices before touching the code, each feature cutting through the full stack (state, types, forms, tests) in a single small, demoable increment. This allowed the developer to validate end-to-end work early and catch architectural issues before they compounded.
+The key insight was to break down work into small vertical slices before touching the code, each feature cutting through the full stack (state, types, forms, tests) in a single small, demoable increment. This allowed the developer to validate end-to-end work early and catch architectural issues before they compounded. This is similar to none agentic best practice, where teams often endevour to break Jira tickets into vertical slices with a cap on the amount of story points per ticket. 
 
 The workflow that was followed:
 
