@@ -13,27 +13,48 @@ app (`src/mocks/users.json`, `src/mocks/expenses.json`).
 
 ```mermaid
 flowchart TD
-    subgraph Browser
-        BrowserRouter --> AppRoutes[App / Routes]
-        AppRoutes --> AuthContext
-        AuthContext --> SessionStorage[(sessionStorage)]
-        AuthContext --> UsersMock[mocks/users.json]
-        AppRoutes --> LoginPage
-        AppRoutes --> ExpensesPage[ExpensesPage - consultant]
-        AppRoutes --> ReviewPage[ReviewPage - finance]
-        AppRoutes --> ExpenseDetailPage[ExpenseDetailPage - role-aware]
-        LoginPage --> AuthContext
-        ExpensesPage --> AuthContext
-        ReviewPage --> AuthContext
-        ExpenseDetailPage --> AuthContext
-        ReviewPage --> RepositoryContext
-        ExpenseDetailPage --> RepositoryContext
-        RepositoryContext --> MockExpenseRepository
-        MockExpenseRepository --> InMemoryCache[(in-memory cache)]
+    subgraph Browser ["Browser (SPA)"]
+        subgraph Providers ["Provider Layers"]
+            BrowserRouter["BrowserRouter<br/>(React Router v7)"]
+            AuthCtx["AuthContext<br/>(logged-in user)"]
+            RepoCtx["RepositoryContext<br/>(expense data access)"]
+        end
+        
+        subgraph Pages ["Route Pages<br/>(all consume both contexts)"]
+            LoginPage
+            ExpensesPage["ExpensesPage<br/>(consultant)"]
+            ReviewPage["ReviewPage<br/>(finance)"]
+            DetailPage["ExpenseDetailPage<br/>(role-aware)"]
+        end
+        
+        subgraph DataLayer ["Data Layer"]
+            MockRepo["MockExpenseRepository"]
+            Cache["in-memory cache"]
+        end
+        
+        subgraph MockData ["Mock Data Sources"]
+            UsersMock["mocks/users.json"]
+            ExpensesMock["mocks/expenses.json"]
+        end
+        
+        BrowserRouter --> AuthCtx
+        BrowserRouter --> RepoCtx
+        AuthCtx --> SessionStorage[(sessionStorage)]
+        AuthCtx --> UsersMock
+        RepoCtx --> MockRepo
+        MockRepo --> Cache
+        MockRepo --> ExpensesMock
+        
+        AuthCtx -.->|used by| Pages
+        RepoCtx -.->|used by| Pages
     end
 ```
 
-Note: `RepositoryProvider` is mounted at the app root (`src/main.tsx`) and makes the expense data repository available to any component via `useRepository()`. Both `ReviewPage` and `ExpenseDetailPage` read and write through the repository. See "Data Mutations" and "Reads vs. Writes" under "API / Service Boundaries".
+**Provider responsibilities:**
+- **`AuthContext`** — manages login state, persists user to `sessionStorage`, available app-wide via `useAuth()`
+- **`RepositoryContext`** — distributes the expense data repository, available app-wide via `useRepository()`
+
+**All route pages** (LoginPage, ExpensesPage, ReviewPage, ExpenseDetailPage) consume both contexts as needed. See "Routing Architecture" and individual page sections below for specifics.
 
 There is no server tier in this diagram because none exists. If/when a backend is introduced,
 this document should be updated and a new ADR should record the API/service boundary decision.

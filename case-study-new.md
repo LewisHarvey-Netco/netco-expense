@@ -40,7 +40,7 @@ unambiguous.
   in the tool itself, not the workflow, and need a Feniks-team fix, see
   [Known Tool Limitations](#known-tool-limitations)).
 
-**Practices that made the biggest difference:** vertical-slice tickets
+**Practices that made the biggest difference:** small, well-scoped tickets
 sized to a single context window, TDD as an unambiguous spec for the
 agent to satisfy, keeping the developer in the loop specifically for
 strategic/architectural decisions (not tactical ticket work), and
@@ -313,13 +313,14 @@ multi-layer test suite (unit, component, E2E) applies that same
 feedback-loop principle across several layers rather than a single
 check.
 
-The key insight was to break down work into small vertical slices before
-touching the code, each feature cutting through the full stack (state,
-types, forms, tests) in a single small, demoable increment. This allowed
-the developer to validate end-to-end work early and catch architectural
-issues before they compounded. This is similar to none agentic best
-practice, where teams often endevour to break Jira tickets into vertical
-slices with a cap on the amount of story points per ticket.
+The key insight was to break down work into small, well-scoped tickets before
+touching the code, each sized to fit in a single context window. This allowed
+the developer to validate the work as it was generated and catch issues early.
+Tickets were organized as a dependency graph—some could run in parallel
+(independent UI components), while others were sequenced (building components
+before integrating them). This systematic decomposition kept the scope of each
+task manageable and made it easier for the developer to review and validate
+the generated code.
 
 The workflow that was followed:
 
@@ -329,8 +330,8 @@ The workflow that was followed:
   rewrites as a PRD (product requirements document) detailing user
   stories, components to build etc.
 - **to-tickets:** The agent takes the PRD as input and creates a
-  vertical-slice ticket breakdown with explicit blocking dependencies.
-  The developer reviews and alters the slices before moving on.
+   ticket breakdown organized as a dependency graph with explicit blocking
+   dependencies. The developer reviews and alters the breakdown before moving on.
 - **implementation with TDD:** code was written at pre-agreed seams
   following practices established in readme.md and architecture.md.
   Validation was performed via unit, component, and E2E tests.
@@ -519,11 +520,11 @@ cycle added maybe 20 minutes to the ticket but produced a better
 codebase. Without human oversight, the working-but-rigid solution would
 have been kept.
 
-These decisions is an example of the choices that determined whether a
-codebase remained maintainable as it grew. An AI operating at full speed
-without human gatekeeping might not make these choices. The developer's
-involvement slowed down the raw code-generation speed but ensured the
-decisions were deliberate and the architecture scaled.
+These decisions are examples of the choices that determined whether a
+codebase remained maintainable as it grew. The developer's involvement
+slowed down the raw code-generation speed but ensured the decisions were
+deliberate and the architecture stayed coherent rather than emerging from
+ad-hoc agent fixes.
 
 ### Configuring Workflows to Keep Developers in the Loop
 
@@ -596,18 +597,19 @@ architecture was explicit, the test coverage was comprehensive, the
 types were a second form of documentation, and the Storybook was a
 visual reference for how components behaved.
 
-Vertical slices kept scope tight and demoable. TDD was effective because
-the test was the spec; Feniks knew exactly what to build. Pure functions
-were AI-friendly, when filter logic was defined as a pure function with
-clear inputs and outputs, it worked first try. The grill-me interview
-extracted architectural nuance upfront, preventing mid-project pivots.
-The three-layer testing strategy (unit, component, E2E) caught different
-bug classes and ensured the codebase remained maintainable as features
-were added. Model switching optimized iteration speed. These practices
-echo the closing summary of **\[AG\]**'s planning guidance: "better
-preparation produces better results. Time spent in Plan mode, writing
-clear specs, or choosing the right skill is always repaid in fewer
-review cycles and less rework." And the skills workflow (grill-me → PRD
+Small, well-scoped tickets kept work manageable and made it easier for the
+developer to review. TDD was effective because the test was the spec; Feniks
+knew exactly what to build. Pure functions were AI-friendly: when filter logic
+was defined as a pure function with clear inputs and outputs, it worked first
+try. The grill-me interview extracted architectural nuance upfront, preventing
+mid-project pivots. The three-layer testing strategy (unit, component, E2E)
+caught different bug classes and ensured the codebase remained maintainable as
+features were added. Model switching optimized iteration speed: Claude for
+planning and synthesis, Qwen for straightforward implementation once tasks
+were well-defined. These practices echo the closing summary of **\[AG\]**'s
+planning guidance: "better preparation produces better results. Time spent in
+Plan mode, writing clear specs, or choosing the right skill is always repaid
+in fewer review cycles and less rework." The workflow (grill-me → PRD
 → to-tickets → implement → validate) was repeatable and could be applied
 to the next feature with confidence.
 
