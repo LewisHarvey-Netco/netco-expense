@@ -134,77 +134,22 @@ areas like "projects", "approvals", "reporting"), consider introducing a feature
 structure (`src/features/`) before it becomes unmanageable. This is a decision to make
 deliberately — assess actual complexity rather than adopting the pattern by convention.
 
-## Consultant Expense Viewing
-
-Consultants can view their own submitted expenses at `/expenses` (list) and `/expenses/:id`
-(detail), reusing the table and detail layouts already built for the finance review workflow.
-On the detail page the expense form is **editable while the expense is in a non-terminal
-status** (`Submitted`, `Changes Requested`, `Resubmitted`) and read-only once `Approved`
-(see ADR-0013). Finance behaviour is unchanged: `/review` still lists all expenses and
-`/review/:id` still shows the review decision form, and finance always sees a read-only form.
-
-### Role-aware detail component
+## Role-aware Expense Detail Page
 
 `ExpenseDetailPage` is a single page that serves both the finance review detail (`/review/:id`)
-and the consultant expense detail (`/expenses/:id`). It reads the current user via `useAuth()` and
-renders conditionally:
+and the consultant expense detail (`/expenses/:id`). It determines the user's role via `useAuth()`
+and renders conditionally: finance sees the review workflow (approval/rejection form), consultants
+see their own expense detail (with inline edit capability when in non-terminal status). Both roles
+use the same `ExpenseDetailCard` component, sharing one load path and avoiding state duplication
+across separate pages. See `docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
 
-- **Finance** — two-column layout: `ExpenseDetailCard` (left, always read-only) and a
-  "Review Decision" card wrapping `ExpenseReviewSection` (right). The review section's submit
-  handler is wired to `repository.updateExpenseStatus()`.
-- **Consultant** — single-column layout: `ExpenseDetailCard` only, with `isEditable` set to
-  `true` when the expense status is `Submitted`, `Changes Requested`, or `Resubmitted`, and
-  `false` when `Approved`. The page computes `isEditable` from role + status; the card only
-  enables or disables its form fields (see ADR-0013).
-
-**Why a single page, not two.** Both roles render the same `ExpenseDetailCard`, share one load
-path and one set of page state, and differ only in layout and the presence of the review section.
-A single role-aware page keeps that logic centralized (one place to load, validate, and update the
-expense) and avoids duplicating the card and its state across two pages. The role branch lives in
-its natural context: `ProtectedRoute` (with `allowedRoles`) keeps the roles from colliding at the
-entry point, and `useAuth()` inside the page is where the role is already known. See
-`docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
-
-**Ownership check (consultants only).** After loading, the page verifies
-`expense.submitterId === user.id`. On a mismatch it renders the same 404 as an unknown id, so the
-response doesn't reveal that the expense exists. This is a **UX boundary only, not a security
-boundary**: the data-access boundary is the repository (`getExpensesBySubmitter()`), which must
-enforce authorization server-side once a real backend is introduced. Client-side checks alone are
-not sufficient for production. See
-`docs/decisions/architecture/0012-role-aware-expense-detail-page.md`.
-
-### Repository-level filtering
-
-The consultant list is scoped at the data-access layer, not the UI. `ExpensesPage` fetches via
-`repository.getExpensesBySubmitter(user.id)`, which returns only expenses whose `submitterId`
-matches. This is the data-access boundary for consultant queries: the repository, not the
-component, decides what a consultant may read. The UI reinforces it (the consultant `FilterPanel`
-hides the submitter filter via `showSubmitterFilter={false}`), but the enforcement point is the
-repository so it will carry over to a real backend. See
-`docs/decisions/architecture/0010-mock-repository-pattern.md`.
-
-### Consultant editing
-
-The detail card's consultant-editable fields (amount, currency, type, receipt date, region,
-project, description) are react-hook-form fields validated by the Zod schema in
-`src/schemas/expense.ts`; workflow-managed fields (status, submission date, submitter, internal
-notes, receipt) are plain display elements. The card takes an `isEditable` prop (default
-`false`) that enables or disables those fields, and shows inline validation errors as fields
-become invalid (the form validates on blur). `ExpenseDetailPage` computes `isEditable` from the
-viewer's role and the expense status: consultants get `true` for `Submitted`,
-`Changes Requested`, and `Resubmitted`, and `false` for `Approved`; finance always gets
-`false`. See ADR-0013.
-
-**Resubmit.** When `isEditable` is true the card also renders a "Resubmit" button (gated on an
-`onResubmit` callback prop). On a valid submit the card calls `onResubmit` with the form values
-plus the expense's `id` and renders all submission feedback itself — a loading state on the
-button while pending, an inline success message (auto-dismissed after ~3s) plus a "Back to
-Expenses" link on fulfilment, and an inline error with the button left enabled for retry on
-rejection. The page supplies `onResubmit` as a handler that calls
-`repository.updateExpense(id, updatedExpense)` (which updates the fields, transitions the status
-to `Resubmitted`, and rejects `Approved` expenses) and stores the returned expense, re-rendering
-the card with the new status. This extends the ADR-0008 "form dumb / page smart, callback-driven"
-pattern; see ADR-0014. The finance review form (`ExpenseReviewSection`) is unaffected.
+**Consultant data-access boundary.** The consultant list (`ExpensesPage`) and detail page both
+enforce a scoped data boundary: `repository.getExpensesBySubmitter(user.id)` returns only expenses
+where `submitterId === user.id`. This boundary lives at the repository layer (not the UI), so it
+will carry over to a real backend. After loading a detail page, the page verifies the expense
+belongs to the current user; a mismatch returns 404 (same as unknown ID, to avoid leaking existence).
+This is a **UX boundary only** — the true authorization boundary must be enforced server-side once
+a backend exists. See `docs/decisions/architecture/0010-mock-repository-pattern.md`.
 
 ## State Management
 
