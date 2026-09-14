@@ -1,7 +1,7 @@
 import type { Expense, ExpenseStatus } from '@/types'
 import type { ExpenseFormValues } from '@/schemas/expense'
 import type { ExpenseRepository } from './ExpenseRepository'
-import { validateAndParseExpense } from '@/lib/expense-validation'
+import { validateAndParseExpense, isValidExpense } from '@/lib/expense-validation'
 
 /**
  * In-memory implementation of `ExpenseRepository` (see ADR-0010).
@@ -18,16 +18,39 @@ export class MockExpenseRepository implements ExpenseRepository {
     this.reset(initialExpenses)
   }
 
+  /**
+   * Validates an expense and logs a warning if it's invalid.
+   * Invalid expenses are filtered out from read operations to prevent bad data
+   * from propagating through the app (mimicking an API that returns corrupt data).
+   */
+  private validateExpenseOnRead(expense: Expense): boolean {
+    if (!isValidExpense(expense)) {
+      console.warn(
+        `[MockExpenseRepository] Invalid expense pulled from backend: ${(expense as Record<string, unknown>).id}. ` +
+          'Filtering out. In production, this would be sent to analytics.'
+      )
+      return false
+    }
+    return true
+  }
+
   async getExpense(id: string): Promise<Expense | null> {
-    return this.expenses.get(id) ?? null
+    const expense = this.expenses.get(id)
+    if (!expense) return null
+    // Validate before returning; mimic API behavior of potentially returning invalid data
+    return this.validateExpenseOnRead(expense) ? expense : null
   }
 
   async getExpenses(): Promise<Expense[]> {
-    return Array.from(this.expenses.values())
+    // Filter out invalid expenses when returning from "backend"
+    return Array.from(this.expenses.values()).filter((expense) => this.validateExpenseOnRead(expense))
   }
 
   async getExpensesBySubmitter(submitterId: string): Promise<Expense[]> {
-    return Array.from(this.expenses.values()).filter((expense) => expense.submitterId === submitterId)
+    // Filter out invalid expenses when returning from "backend"
+    return Array.from(this.expenses.values())
+      .filter((expense) => this.validateExpenseOnRead(expense))
+      .filter((expense) => expense.submitterId === submitterId)
   }
 
   async updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense> {
