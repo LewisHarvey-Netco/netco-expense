@@ -2,6 +2,7 @@ import type { Expense, ExpenseStatus } from '@/types'
 import type { ExpenseFormValues } from '@/schemas/expense'
 import type { ExpenseRepository } from './ExpenseRepository'
 import { validateAndParseExpense, isValidExpense } from '@/lib/expense-validation'
+import { logWarning } from '@/lib/logger'
 
 /**
  * In-memory implementation of `ExpenseRepository` (see ADR-0010).
@@ -25,10 +26,11 @@ export class MockExpenseRepository implements ExpenseRepository {
    */
   private validateExpenseOnRead(expense: Expense): boolean {
     if (!isValidExpense(expense)) {
-      console.warn(
-        `[MockExpenseRepository] Invalid expense pulled from backend: ${(expense as Record<string, unknown>).id}. ` +
-          'Filtering out. In production, this would be sent to analytics.'
-      )
+      const expenseId = (expense as Record<string, unknown>).id
+      logWarning('Invalid expense pulled from backend', {
+        expenseId,
+        action: 'filtering_out',
+      })
       return false
     }
     return true
