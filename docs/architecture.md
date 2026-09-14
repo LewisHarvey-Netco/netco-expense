@@ -128,10 +128,11 @@ ad-hoc auth checks inside the page component.
   vendored source, not a package dependency — see `AGENTS.md` for the convention of adding new
   ones via the shadcn CLI rather than hand-writing them.
 
-There is currently no intermediate "feature" or "domain" folder layer (e.g. no
-`features/expenses/`) — the app is too small to need one. If the app grows (e.g. a real expense
-list, forms, filters), consider introducing a feature-oriented folder before it becomes
-unmanageable; this is a decision to make deliberately, not by default.
+The app has a `src/components/expenses/` subfolder for expense-domain components
+(`ExpenseDetailCard`, `ExpenseReviewSection`). If the app grows further (e.g., multiple domain
+areas like "projects", "approvals", "reporting"), consider introducing a feature-oriented folder
+structure (`src/features/`) before it becomes unmanageable. This is a decision to make
+deliberately — assess actual complexity rather than adopting the pattern by convention.
 
 ## Consultant Expense Viewing
 
@@ -238,9 +239,15 @@ The expense data model is defined in **JSON Schema Draft 2020-12** in `src/schem
 
 The JSON Schema in `src/schemas/` is the authoritative source of truth.
 
-**Runtime Validation:** All expense data is validated against the JSON Schema via `src/lib/expense-validation.ts` (using `ajv`). This includes mock expenses in `src/mocks/expenses.json`, API responses (when a backend exists), and form submissions. The validation functions are:
-- `validateAndParseExpense(data)` — validates and returns typed `Expense`, or throws with details
-- `isValidExpense(data)` — type guard that checks without throwing
+**Runtime Validation:** Validation happens at **write boundaries**, not at load time. The frontend must be resilient to invalid data from the backend (real or mock), just as it would if a database contained corrupted records or incomplete migrations.
+
+- Mock data is loaded **without validation** from `src/mocks/expenses.json` into the repository's in-memory cache.
+- Read operations may encounter invalid data and must handle it gracefully (e.g., component error boundaries, defensive checks).
+- Write operations (form submissions, mutations) validate data **before persisting** via `src/lib/expense-validation.ts` (using `ajv`). The validation functions are:
+  - `validateAndParseExpense(data)` — validates and returns typed `Expense`, or throws with details (used on write operations)
+  - `isValidExpense(data)` — type guard that checks without throwing (used for read-time defensive checks)
+
+This design ensures the app boots even with invalid mock or backend data, mirrors real-world backend scenarios, and establishes clear validation boundaries.
 
 See `docs/decisions/0004-expense-data-model-json-schema.md` for rationale and consequences.
 

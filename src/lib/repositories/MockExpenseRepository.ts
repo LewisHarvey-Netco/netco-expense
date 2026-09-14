@@ -14,7 +14,7 @@ import { validateAndParseExpense } from '@/lib/expense-validation'
 export class MockExpenseRepository implements ExpenseRepository {
   private expenses = new Map<string, Expense>()
 
-  constructor(initialExpenses: Expense[]) {
+  constructor(initialExpenses: unknown[]) {
     this.reset(initialExpenses)
   }
 
@@ -36,8 +36,10 @@ export class MockExpenseRepository implements ExpenseRepository {
       throw new Error('Expense not found')
     }
     const updated: Expense = { ...expense, status, internalNotes: comment ?? expense.internalNotes }
-    this.expenses.set(id, updated)
-    return updated
+    // Validate before persisting (write boundary)
+    const validated = validateAndParseExpense(updated)
+    this.expenses.set(id, validated)
+    return validated
   }
 
   async updateExpense(id: string, updates: Partial<ExpenseFormValues>): Promise<Expense> {
@@ -67,10 +69,15 @@ export class MockExpenseRepository implements ExpenseRepository {
   }
 
   /** Clears the in-memory state and repopulates it; used by tests for clean state between runs. */
-  reset(initialExpenses: Expense[]): void {
+  reset(initialExpenses: unknown[]): void {
     this.expenses.clear()
     for (const expense of initialExpenses) {
-      this.expenses.set(expense.id, expense)
+      // Store raw data as-is. Validation happens on write operations (mutations).
+      // This allows the app to load and operate even with invalid data from the backend,
+      // matching real-world scenarios where data corruption or incomplete migrations might occur.
+      if (expense && typeof expense === 'object' && 'id' in expense) {
+        this.expenses.set((expense as Record<string, unknown>).id as string, expense as Expense)
+      }
     }
   }
 }
