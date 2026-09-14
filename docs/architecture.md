@@ -88,7 +88,7 @@ data-router/loader API). Route table:
 | `*` (catch-all) | `NotFoundPage` | Public — renders a 404 page with a "Go home" button back to `/` |
 
 `ExpenseDetailPage` is a single **role-aware** page: it serves both `/review/:id` (finance) and
-`/expenses/:id` (consultant). See "Consultant Expense Viewing" below.
+`/expenses/:id` (consultant). See "Role-aware Expense Detail Page" below.
 
 Key principle: **there is no "return to originally requested URL" behavior.** After login, or
 when a route guard rejects access, the user always lands on their role's default home
