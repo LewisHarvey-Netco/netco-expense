@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest'
 import { MockExpenseRepository } from './MockExpenseRepository'
 import type { Expense } from '@/types'
 
@@ -405,6 +406,52 @@ describe('MockExpenseRepository', () => {
 
       expect(pending).toBeInstanceOf(Promise)
       await expect(pending).resolves.toBeDefined()
+    })
+  })
+
+  describe('schema validation on reads', () => {
+    it('filters out invalid expenses and does not return them to users', async () => {
+      const validExpense = makeExpense({ description: 'Valid' })
+      // Invalid expense (negative amount violates schema)
+      const invalidExpense: unknown = {
+        ...makeExpense({ id: '550e8400-e29b-41d4-a716-446655440099', description: 'Invalid' }),
+        amount: -50,
+      }
+      const repo = new MockExpenseRepository([validExpense, invalidExpense])
+
+      const expenses = await repo.getExpenses()
+
+      expect(expenses).toHaveLength(1)
+      expect(expenses[0].description).toBe('Valid')
+    })
+
+    it('logs a warning when an invalid expense is encountered', async () => {
+      const invalidExpense: unknown = {
+        ...makeExpense(),
+        amount: -50,
+      }
+      const repo = new MockExpenseRepository([invalidExpense])
+
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      await repo.getExpenses()
+
+      expect(warnSpy).toHaveBeenCalled()
+      expect(warnSpy.mock.calls[0][0]).toContain('[WARNING]')
+
+      warnSpy.mockRestore()
+    })
+
+    it('returns null from getExpense when the expense fails validation', async () => {
+      const invalidExpense: unknown = {
+        ...makeExpense(),
+        amount: -50,
+      }
+      const repo = new MockExpenseRepository([invalidExpense])
+
+      const expense = await repo.getExpense((invalidExpense as Record<string, unknown>).id as string)
+
+      expect(expense).toBeNull()
     })
   })
 })
