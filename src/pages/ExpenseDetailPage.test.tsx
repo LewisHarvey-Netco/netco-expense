@@ -65,6 +65,7 @@ function createMockRepository(initialExpense: Expense) {
     getExpensesBySubmitter: vi.fn().mockResolvedValue([]),
     updateExpenseStatus: vi.fn(),
     updateExpense: vi.fn(),
+    createExpense: vi.fn(),
   }
 }
 

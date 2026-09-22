@@ -409,6 +409,135 @@ describe('MockExpenseRepository', () => {
     })
   })
 
+  describe('createExpense', () => {
+    it('creates an expense with all fields and returns it', async () => {
+      const repo = new MockExpenseRepository([])
+      const expense = makeExpense({ description: 'New expense' })
+
+      const created = await repo.createExpense(expense)
+
+      expect(created).toEqual(expense)
+    })
+
+    it('persists the expense so getExpense returns it', async () => {
+      const repo = new MockExpenseRepository([])
+      const expense = makeExpense()
+
+      await repo.createExpense(expense)
+
+      const fetched = await repo.getExpense(expense.id)
+      expect(fetched).toEqual(expense)
+    })
+
+    it('reflects the created expense in getExpenses', async () => {
+      const existing = makeExpense({ id: '550e8400-e29b-41d4-a716-446655440002' })
+      const repo = new MockExpenseRepository([existing])
+      const expense = makeExpense()
+
+      await repo.createExpense(expense)
+
+      const expenses = await repo.getExpenses()
+      expect(expenses).toHaveLength(2)
+      expect(expenses).toContainEqual(expense)
+    })
+
+    it('reflects the created expense in getExpensesBySubmitter', async () => {
+      const repo = new MockExpenseRepository([])
+      const expense = makeExpense({ submitterId: 'u1' })
+
+      await repo.createExpense(expense)
+
+      const expenses = await repo.getExpensesBySubmitter('u1')
+      expect(expenses).toEqual([expense])
+    })
+
+    it('throws when an expense with the same ID already exists', async () => {
+      const existing = makeExpense()
+      const repo = new MockExpenseRepository([existing])
+      const duplicate = makeExpense({ description: 'Duplicate' })
+
+      await expect(repo.createExpense(duplicate)).rejects.toThrow()
+    })
+
+    it('does not store the expense when the ID is a duplicate', async () => {
+      const existing = makeExpense()
+      const repo = new MockExpenseRepository([existing])
+      const duplicate = makeExpense({ description: 'Duplicate' })
+
+      await expect(repo.createExpense(duplicate)).rejects.toThrow()
+
+      const expenses = await repo.getExpenses()
+      expect(expenses).toHaveLength(1)
+      expect(expenses[0].description).toBe(existing.description)
+    })
+
+    it('throws on schema validation failure (negative amount)', async () => {
+      const repo = new MockExpenseRepository([])
+      const invalid = { ...makeExpense(), amount: -50 }
+
+      await expect(repo.createExpense(invalid)).rejects.toThrow()
+    })
+
+    it('throws on schema validation failure (invalid currency)', async () => {
+      const repo = new MockExpenseRepository([])
+      const invalid = { ...makeExpense(), currency: 'INVALID' }
+
+      await expect(repo.createExpense(invalid)).rejects.toThrow()
+    })
+
+    it('throws on schema validation failure (invalid date format)', async () => {
+      const repo = new MockExpenseRepository([])
+      const invalid = { ...makeExpense(), receiptDate: '15-07-2025' }
+
+      await expect(repo.createExpense(invalid)).rejects.toThrow()
+    })
+
+    it('does not store the expense when validation fails', async () => {
+      const repo = new MockExpenseRepository([])
+      const invalid = { ...makeExpense(), amount: -50 }
+
+      await expect(repo.createExpense(invalid)).rejects.toThrow()
+
+      expect(await repo.getExpenses()).toEqual([])
+    })
+
+    it('rejects an expense with Approved status (immutable)', async () => {
+      const repo = new MockExpenseRepository([])
+      const approved = makeExpense({ status: 'Approved' })
+
+      await expect(repo.createExpense(approved)).rejects.toThrow()
+    })
+
+    it('does not store the expense when status is Approved', async () => {
+      const repo = new MockExpenseRepository([])
+      const approved = makeExpense({ status: 'Approved' })
+
+      await expect(repo.createExpense(approved)).rejects.toThrow()
+
+      expect(await repo.getExpenses()).toEqual([])
+    })
+
+    it('returns a new object and does not mutate the input', async () => {
+      const repo = new MockExpenseRepository([])
+      const expense = makeExpense({ description: 'Original' })
+
+      const created = await repo.createExpense(expense)
+
+      expect(created).not.toBe(expense)
+      expect(expense.description).toBe('Original')
+    })
+
+    it('is async and returns a Promise', async () => {
+      const repo = new MockExpenseRepository([])
+      const expense = makeExpense()
+
+      const pending = repo.createExpense(expense)
+
+      expect(pending).toBeInstanceOf(Promise)
+      await expect(pending).resolves.toEqual(expense)
+    })
+  })
+
   describe('schema validation on reads', () => {
     it('filters out invalid expenses and does not return them to users', async () => {
       const validExpense = makeExpense({ description: 'Valid' })

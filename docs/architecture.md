@@ -270,8 +270,9 @@ The three pieces:
 
 - **Interface:** `src/lib/repositories/ExpenseRepository.ts` — the contract any implementation
   must fulfil: `getExpense(id)`, `getExpenses()`, `getExpensesBySubmitter(submitterId)`,
-  `updateExpenseStatus(id, status, comment?)`, and `updateExpense(id, updates)`. All return
-  Promises, so call sites are already shaped like they're talking to a network API.
+  `createExpense(expense)`, `updateExpenseStatus(id, status, comment?)`, and
+  `updateExpense(id, updates)`. All return Promises, so call sites are already shaped like
+  they're talking to a network API.
   `getExpensesBySubmitter(submitterId)` is the consultant-scoped read: it returns only expenses
   whose `submitterId` matches, establishing the data-access boundary for consultant queries (it
   will enforce authorization server-side once a real backend is introduced).
@@ -280,7 +281,9 @@ The three pieces:
   `Approved` expenses (see ADR-0013).
 - **Mock implementation:** `src/lib/repositories/MockExpenseRepository.ts` — keeps a copy of the
   mock expenses in an in-memory `Map`. `getExpenses()` returns all stored expenses (reflecting any
-  prior mutations). `updateExpenseStatus` and `updateExpense` replace the stored expense with a
+  prior mutations). `createExpense(expense)` validates a complete expense against the schema,
+  rejects duplicate IDs and `Approved` (terminal) statuses, then stores a **new** object.
+  `updateExpenseStatus` and `updateExpense` replace the stored expense with a
   **new** object (the original is never mutated) and return it. `reset(expenses)` re-seeds the
   map; tests use it to start from a clean state.
 - **Provider:** `src/context/RepositoryContext.tsx` — makes one repository instance available to

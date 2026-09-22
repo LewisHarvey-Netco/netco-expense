@@ -15,6 +15,7 @@ export interface ExpenseRepository {
   getExpense(id: string): Promise<Expense | null>
   getExpenses(): Promise<Expense[]>
   getExpensesBySubmitter(submitterId: string): Promise<Expense[]>
+  createExpense(expense: Expense): Promise<Expense>
   updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense>
   updateExpense(id: string, updates: Partial<ExpenseFormValues>): Promise<Expense>
 }

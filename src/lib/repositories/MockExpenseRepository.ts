@@ -55,6 +55,22 @@ export class MockExpenseRepository implements ExpenseRepository {
       .filter((expense) => expense.submitterId === submitterId)
   }
 
+  async createExpense(expense: Expense): Promise<Expense> {
+    if (this.expenses.has(expense.id)) {
+      throw new Error('Expense already exists')
+    }
+
+    // Approved is a terminal state; a newly created expense must start at Submitted
+    if (expense.status === 'Approved') {
+      throw new Error('Cannot create an approved expense')
+    }
+
+    const validated = validateAndParseExpense(expense)
+    const stored: Expense = { ...validated }
+    this.expenses.set(expense.id, stored)
+    return stored
+  }
+
   async updateExpenseStatus(id: string, status: ExpenseStatus, comment?: string): Promise<Expense> {
     const expense = this.expenses.get(id)
     if (!expense) {
