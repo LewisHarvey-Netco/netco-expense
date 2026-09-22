@@ -64,6 +64,58 @@
 
 ## Consultant Stories
 
+### Expense Creation
+
+61. As a consultant, I want to navigate to a "New Expense" page, so that I can create a new expense claim.
+
+62. As a consultant, I want the form to be pre-populated with today's date for the receipt, so that I don't have to manually enter it.
+
+63. As a consultant, I want the form to pre-fill my user ID as the submitter, so that the system knows who is creating the expense.
+
+64. As a consultant, I want the currency to default to USD, so that I don't have to select it if I don't need a different currency.
+
+65. As a consultant, I want the expense type dropdown to show available options, so that I can select the correct category.
+
+66. As a consultant, I want to fill in all required fields (amount, description, dates, etc.), so that I can provide complete information.
+
+67. As a consultant, I want to see validation errors as I fill out the form, so that I know immediately if something is wrong.
+
+68. As a consultant, I want to click a "Submit" button to create the expense, so that I can submit it for review.
+
+69. As a consultant, I want to see a loading state while the expense is being created, so that I know the submission is in progress.
+
+70. As a consultant, I want to see a success message after creating an expense, so that I know it was created successfully.
+
+71. As a consultant, I want to be redirected to the expense detail page after creation, so that I can see the newly created expense.
+
+72. As a consultant, I want newly created expenses to have a "Submitted" status, so that they are immediately ready for finance review.
+
+73. As a consultant, I want the system to generate a unique ID for the new expense, so that I don't have to worry about conflicts.
+
+74. As a consultant, I want to see a back button on the new expense page, so that I can return to the expense list.
+
+75. As a consultant, I want the page title to clearly indicate I'm creating a new expense, so that I understand what I'm doing.
+
+76. As a consultant, I want error messages to be displayed if creation fails, so that I can understand what went wrong.
+
+77. As a consultant, I want to be able to retry if creation fails, so that I can try again without losing my work.
+
+78. As a consultant with the wrong role, I want to be redirected away from this page, so that only consultants can create expenses.
+
+79. As an unauthenticated user, I want to be redirected to login if I try to access the new expense page, so that the system remains secure.
+
+80. As a consultant, I want the form to be exactly the same as the edit form I'm used to, so that the interaction is consistent.
+
+81. As a consultant, I want optional fields to be optional, so that I can leave them blank if they don't apply.
+
+82. As a consultant, I want the form to use YYYY-MM-DD date format, so that it matches the rest of the application.
+
+83. As a consultant, I want the region and project fields to be available but optional, so that I can provide additional context if needed.
+
+84. As a consultant, I want the internal notes field to be available but optional, so that I can add notes if needed.
+
+85. As a consultant, I want the date fields to be labeled and formatted consistently with existing expense views, so that I understand what each field means.
+
 ### Expense Viewing
 
 27. As a consultant, I want to see a list of all my submitted expenses so that I can track my submissions.
@@ -130,7 +182,7 @@
 
 56. As a consultant, I want to retry a failed resubmission so that I can recover from temporary network issues without losing my edits.
 
-### Consultant Submission Status
+### Submission Workflow & Status
 
 57. As a consultant submitting an expense, I want the status to show "Changes Requested" so that I understand feedback is waiting.
 
