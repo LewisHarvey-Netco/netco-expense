@@ -1,0 +1,15 @@
+# 01: Add `createExpense()` method to `ExpenseRepository`
+
+**What to build:** Repository layer accepts and persists a complete expense object with validation, enabling the creation workflow without backend changes.
+
+**Blocked by:** None (can start immediately).
+
+**Status:** ready-for-agent
+
+## Acceptance Criteria
+
+- [ ] `createExpense(expense: Expense) => Promise<Expense>` is added to `ExpenseRepository` interface in `src/lib/repositories/ExpenseRepository.ts`
+- [ ] `MockExpenseRepository` implements `createExpense()`: validates expense against Zod schema, checks for duplicate ID (throws if found), stores in internal map, returns created expense
+- [ ] Unit tests cover: successful creation with all fields, duplicate ID error, schema validation failure
+- [ ] Method rejects `Approved` expenses (immutable status)
+- [ ] Tests pass without breaking existing repository tests
