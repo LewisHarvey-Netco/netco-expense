@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import PageTitle from '@/components/PageTitle'
 import ExpenseTable from '@/components/ExpenseTable'
 import FilterPanel from '@/components/FilterPanel'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/context/AuthContext'
@@ -83,7 +84,10 @@ export default function ExpensesPage() {
     <div className="min-h-svh bg-background">
       <Header />
       <main className="mx-auto w-full max-w-6xl px-6 py-8">
-        <PageTitle className="mb-6">My Expenses</PageTitle>
+        <div className="mb-6 flex items-center justify-between">
+          <PageTitle>My Expenses</PageTitle>
+          <Button onClick={() => navigate('/expenses/new')}>New Expense</Button>
+        </div>
         <div className="grid gap-6 lg:grid-cols-[280px_1fr] lg:items-start">
           <FilterPanel
             submitters={[]}

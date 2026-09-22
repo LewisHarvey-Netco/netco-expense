@@ -250,9 +250,16 @@ together via `@hookform/resolvers/zod`. The app has three forms:
   a submit button submits the form: the card calls `onResubmit` with the form values plus the
   expense's `id` and renders the loading/success/error feedback itself, while the page performs
   the `repository.updateExpense()` mutation (see ADR-0014). The button label is customizable via
-  the optional `buttonLabel` prop (default `'Resubmit'`; the loading label is derived from it,
-  e.g. `'Submit'` → `'Submitting…'`), so the same card serves both the edit flow
-  (`ExpenseDetailPage`) and the create flow (`ExpenseCreatePage`, `buttonLabel="Submit"`).
+   the optional `buttonLabel` prop (default `'Resubmit'`; the loading label and the
+   success/error feedback messages are derived from it — e.g. `'Submit'` →
+   `'Submitting…'` / "Expense submitted successfully." / "Failed to submit…", while the
+   default `'Resubmit'` → `'Resubmitting…'` / "Expense resubmitted successfully." /
+   "Failed to resubmit…"), so the same card serves both the edit flow
+   (`ExpenseDetailPage`) and the create flow (`ExpenseCreatePage`, `buttonLabel="Submit"`).
+   In the create flow the page's `onResubmit` callback calls `repository.createExpense()`
+   (which preserves the `Submitted` status, unlike `updateExpense`'s `Resubmitted` transition)
+   and then navigates to `/expenses/{id}` after a short delay so the inline success message is
+   visible; on rejection the card keeps the form data intact for retry.
 
 All forms follow the same pattern: zod schema → `useForm({ resolver: zodResolver(...) })` →
 shadcn `Input`/`Label` bound via `register()` or `Controller` → submit handler calling into the

@@ -115,6 +115,19 @@ describe('My Expenses page (/expenses)', () => {
       expect(visitedPaths).toContain(`/expenses/${first.id}`)
     })
   })
+
+  it('shows a New Expense button that navigates to /expenses/new', async () => {
+    const user = userEvent.setup()
+    await renderAsConsultant()
+
+    const button = screen.getByRole('button', { name: 'New Expense' })
+    expect(button).toBeInTheDocument()
+    await user.click(button)
+
+    await waitFor(() => {
+      expect(visitedPaths).toContain('/expenses/new')
+    })
+  })
 })
 
 describe('Loading and error states', () => {

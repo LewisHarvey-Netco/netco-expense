@@ -118,6 +118,12 @@ export default function ExpenseDetailCard({
   const canResubmit = isEditable && onResubmit !== undefined
   // 'Resubmit' → 'Resubmitting…', 'Submit' → 'Submitting…' (append 'ting…').
   const loadingLabel = `${buttonLabel}ting…`
+  // The feedback messages use the verb matching the button label so the create
+  // flow (buttonLabel="Submit") reads "submitted"/"submit" while the edit flow
+  // (default "Resubmit") reads "resubmitted"/"resubmit". The success message
+  // uses the past tense; the error message uses the base form.
+  const verb = buttonLabel === 'Submit' ? 'submit' : 'resubmit'
+  const pastVerb = buttonLabel === 'Submit' ? 'submitted' : 'resubmitted'
 
   async function handleResubmit(values: ExpenseFormValues) {
     if (!onResubmit) return
@@ -353,13 +359,13 @@ export default function ExpenseDetailCard({
 
           {message === 'success' && (
             <Alert>
-              <AlertDescription>Expense resubmitted successfully.</AlertDescription>
+              <AlertDescription>Expense {pastVerb} successfully.</AlertDescription>
             </Alert>
           )}
 
           {message === 'error' && (
             <Alert variant="destructive">
-              <AlertDescription>Failed to resubmit the expense. Please try again.</AlertDescription>
+              <AlertDescription>Failed to {verb} the expense. Please try again.</AlertDescription>
             </Alert>
           )}
 

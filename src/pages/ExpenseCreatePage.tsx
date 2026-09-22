@@ -6,6 +6,7 @@ import PageTitle from '@/components/PageTitle'
 import ExpenseDetailCard from '@/components/expenses/ExpenseDetailCard'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
+import { useRepository } from '@/context/RepositoryContext'
 import NotFoundPage from '@/pages/NotFoundPage'
 import type { Expense } from '@/types'
 
@@ -17,12 +18,15 @@ function todayISO(): string {
  * The "New Expense" page: a consultant creates a new expense from a blank
  * template. The template is initialized once on mount (UUID, current user,
  * today's date, USD, Submitted status) and rendered in the shared
- * `ExpenseDetailCard` with `isEditable` and a "Submit" button label. The
- * submission flow (loading/success/error feedback, navigation on success)
- * is implemented in a follow-up ticket.
+ * `ExpenseDetailCard` with `isEditable` and a "Submit" button label.
+ * Submission calls `repo.createExpense()`; the card owns the loading/
+ * success/error feedback, and the page navigates to the new expense's
+ * detail page after a short delay. On failure the form data is retained
+ * for retry.
  */
 export default function ExpenseCreatePage() {
   const navigate = useNavigate()
+  const repo = useRepository()
   const { user } = useAuth()
 
   // The page is served behind a ProtectedRoute, so a user is expected. The
@@ -49,6 +53,15 @@ export default function ExpenseCreatePage() {
     return <NotFoundPage />
   }
 
+  // Creates the expense via the repository and navigates to the detail page
+  // after a short delay so the success message is visible. Rejections
+  // propagate to the card, which surfaces the inline error and keeps the
+  // form data intact for retry.
+  async function handleCreate(expense: Expense) {
+    const created = await repo.createExpense(expense)
+    setTimeout(() => navigate(`/expenses/${created.id}`), 1500)
+  }
+
   return (
     <div className="min-h-svh bg-background">
       <Header />
@@ -68,6 +81,7 @@ export default function ExpenseCreatePage() {
           role={user.role}
           isEditable
           buttonLabel="Submit"
+          onResubmit={handleCreate}
         />
       </main>
     </div>

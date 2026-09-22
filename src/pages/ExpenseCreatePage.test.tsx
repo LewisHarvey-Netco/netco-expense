@@ -165,3 +165,119 @@ describe('Expense create page (/expenses/new)', () => {
     expect(screen.getByLabelText('Amount')).toHaveValue(320)
   })
 })
+
+describe('submission flow', () => {
+  async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
+    const amount = screen.getByLabelText('Amount')
+    await user.clear(amount)
+    await user.type(amount, '100')
+    await user.type(screen.getByLabelText('Region'), 'DACH')
+    await user.type(screen.getByLabelText('Project'), 'Test Project')
+    await user.type(screen.getByLabelText('Description'), 'Test expense description')
+  }
+
+  it('shows a loading state and disables the Submit button during submission', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const repo = createMockRepository()
+    repo.createExpense = vi.fn(() => new Promise<void>(() => {}))
+    renderAppAt('/expenses/new', repo)
+
+    await screen.findByRole('main')
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+    const button = await screen.findByRole('button', { name: /Submitting/ })
+    expect(button).toBeDisabled()
+  })
+
+  it('navigates to the expense detail page after successful submission', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const createdExpense: Expense = {
+      id: 'new-expense-uuid',
+      submitterId: 'u1',
+      description: 'Test expense description',
+      type: 'Breakfast',
+      amount: 100,
+      currency: 'USD',
+      receiptDate: todayISO(),
+      status: 'Submitted',
+      submittedAt: new Date().toISOString(),
+      internalNotes: null,
+      region: 'DACH',
+      project: 'Test Project',
+    }
+    const repo = createMockRepository()
+    repo.createExpense = vi.fn().mockResolvedValue(createdExpense)
+    renderAppAt('/expenses/new', repo)
+
+    await screen.findByRole('main')
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+    await waitFor(() => {
+      expect(visitedPaths).toContain('/expenses/new-expense-uuid')
+    }, { timeout: 3000 })
+  })
+
+  it('shows an error and retains form data on failed submission', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const repo = createMockRepository()
+    repo.createExpense = vi.fn().mockRejectedValue(new Error('Network error'))
+    renderAppAt('/expenses/new', repo)
+
+    const main = await screen.findByRole('main')
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+    expect(
+      await screen.findByText('Failed to submit the expense. Please try again.'),
+    ).toBeInTheDocument()
+
+    expect(within(main).getByLabelText('Amount')).toHaveValue(100)
+    expect(within(main).getByLabelText('Region')).toHaveValue('DACH')
+    expect(within(main).getByLabelText('Project')).toHaveValue('Test Project')
+    expect(within(main).getByLabelText('Description')).toHaveValue('Test expense description')
+  })
+
+  it('succeeds on retry after a failed submission', async () => {
+    const user = userEvent.setup()
+    seedSession(consultantUser)
+    const createdExpense: Expense = {
+      id: 'retry-expense-uuid',
+      submitterId: 'u1',
+      description: 'Test expense description',
+      type: 'Breakfast',
+      amount: 100,
+      currency: 'USD',
+      receiptDate: todayISO(),
+      status: 'Submitted',
+      submittedAt: new Date().toISOString(),
+      internalNotes: null,
+      region: 'DACH',
+      project: 'Test Project',
+    }
+    const repo = createMockRepository()
+    repo.createExpense = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce(createdExpense)
+    renderAppAt('/expenses/new', repo)
+
+    await screen.findByRole('main')
+    await fillValidForm(user)
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+    expect(
+      await screen.findByText('Failed to submit the expense. Please try again.'),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+    expect(await screen.findByText('Expense submitted successfully.')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(visitedPaths).toContain('/expenses/retry-expense-uuid')
+    }, { timeout: 3000 })
+  })
+})
