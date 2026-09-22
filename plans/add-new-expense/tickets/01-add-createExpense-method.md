@@ -8,8 +8,8 @@
 
 ## Acceptance Criteria
 
-- [ ] `createExpense(expense: Expense) => Promise<Expense>` is added to `ExpenseRepository` interface in `src/lib/repositories/ExpenseRepository.ts`
-- [ ] `MockExpenseRepository` implements `createExpense()`: validates expense against Zod schema, checks for duplicate ID (throws if found), stores in internal map, returns created expense
-- [ ] Unit tests cover: successful creation with all fields, duplicate ID error, schema validation failure
-- [ ] Method rejects `Approved` expenses (immutable status)
-- [ ] Tests pass without breaking existing repository tests
+- [x] `createExpense(expense: Expense) => Promise<Expense>` is added to `ExpenseRepository` interface in `src/lib/repositories/ExpenseRepository.ts`
+- [x] `MockExpenseRepository` implements `createExpense()`: validates expense against Zod schema, checks for duplicate ID (throws if found), stores in internal map, returns created expense
+- [x] Unit tests cover: successful creation with all fields, duplicate ID error, schema validation failure
+- [x] Method rejects `Approved` expenses (immutable status)
+- [x] Tests pass without breaking existing repository tests
