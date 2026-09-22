@@ -6,6 +6,7 @@ import LoginPage from '@/pages/LoginPage'
 import ExpensesPage from '@/pages/ExpensesPage'
 import ReviewPage from '@/pages/ReviewPage'
 import ExpenseDetailPage from '@/pages/ExpenseDetailPage'
+import ExpenseCreatePage from '@/pages/ExpenseCreatePage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 function RootRedirect() {
@@ -25,6 +26,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['consultant']}>
             <ExpensesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/expenses/new"
+        element={
+          <ProtectedRoute allowedRoles={['consultant']}>
+            <ExpenseCreatePage />
           </ProtectedRoute>
         }
       />

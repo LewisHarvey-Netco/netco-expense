@@ -45,6 +45,11 @@ interface ExpenseDetailCardProps {
    * are provided.
    */
   onResubmit?: (updatedExpense: Expense) => Promise<void>
+  /**
+   * The label of the submit button. Defaults to 'Resubmit'. The loading
+   * state label is derived from it (e.g. 'Submit' → 'Submitting…').
+   */
+  buttonLabel?: string
 }
 
 function getSubmitterName(submitterId: string): string {
@@ -74,6 +79,7 @@ export default function ExpenseDetailCard({
   expense,
   isEditable = false,
   onResubmit,
+  buttonLabel = 'Resubmit',
 }: ExpenseDetailCardProps) {
   const navigate = useNavigate()
   const form = useForm<ExpenseFormValues>({
@@ -110,6 +116,8 @@ export default function ExpenseDetailCard({
   }, [message])
 
   const canResubmit = isEditable && onResubmit !== undefined
+  // 'Resubmit' → 'Resubmitting…', 'Submit' → 'Submitting…' (append 'ting…').
+  const loadingLabel = `${buttonLabel}ting…`
 
   async function handleResubmit(values: ExpenseFormValues) {
     if (!onResubmit) return
@@ -361,10 +369,10 @@ export default function ExpenseDetailCard({
                 {isSubmitting ? (
                   <>
                     <Loader2Icon className="animate-spin" />
-                    Resubmitting…
+                    {loadingLabel}
                   </>
                 ) : (
-                  'Resubmit'
+                  buttonLabel
                 )}
               </Button>
               {resubmitted && (

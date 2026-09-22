@@ -159,6 +159,27 @@ export const EditableWithResubmit: Story = {
   },
 }
 
+export const EditableWithResubmitCustomLabel: Story = {
+  args: {
+    expense: { ...baseExpense, status: 'Submitted' },
+    role: 'consultant',
+    isEditable: true,
+    buttonLabel: 'Submit',
+    // Resolves after a short delay so the "Submitting…" loading state is
+    // visible; on fulfilment the success message and "Back to Expenses" link
+    // appear (the success message auto-dismisses after ~3 seconds).
+    onResubmit: () => new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The same wired-up card as "EditableWithResubmit" but with a custom buttonLabel ("Submit"). The button renders the custom label, and the loading state is derived from it ("Submitting…").',
+      },
+    },
+  },
+}
+
 export const ResubmitFails: Story = {
   args: {
     expense: { ...baseExpense, status: 'Submitted' },

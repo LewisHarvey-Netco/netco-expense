@@ -74,7 +74,7 @@ This feature implements user stories **61–85** from [`docs/user-stories.md`](.
   - `type`: first available expense type
   - `receiptDate`: today's date in YYYY-MM-DD format
   - `status`: 'Submitted'
-  - `submittedAt`: today's date in YYYY-MM-DD format
+  - `submittedAt`: current timestamp in full ISO 8601 datetime format (e.g. `2026-09-22T12:34:56.789Z`)
   - `internalNotes`: null
   - `region`: empty string
   - `project`: empty string
@@ -95,9 +95,15 @@ This feature implements user stories **61–85** from [`docs/user-stories.md`](.
 - **Route definition:** `/expenses/new` mapped to `<ProtectedRoute requiredRole="consultant"><ExpenseCreatePage /></ProtectedRoute>`
 - **Route order:** Must be defined **before** `/expenses/:id` in the route tree. React Router matches routes in definition order, and the more specific route must come first.
 
+### Navigation Entry Point
+- **"New Expense" button on the expense list page:** A button on `/expenses` (consultant view) links to `/expenses/new`. Without it, the only way to reach the creation page is by typing the URL, which is not a discoverable workflow.
+- **Placement:** Top of the list, aligned with the page title/action area, using the primary button variant.
+- **Visibility:** Consultant role only (the `/expenses` page is already consultant-only, so no extra guard is needed).
+
 ### Date Handling
-- **Format:** YYYY-MM-DD (ISO 8601), matching existing expense date format
-- **Defaults:** Both `receiptDate` and `submittedAt` default to today's date
+- **`receiptDate` format:** YYYY-MM-DD (ISO 8601 date), matching existing expense date format
+- **`submittedAt` format:** Full ISO 8601 datetime (e.g. `2026-09-22T12:34:56.789Z`) — required by the Zod schema (`z.string().datetime({ offset: true })`)
+- **Defaults:** Both default to "now" (receiptDate truncated to the date portion)
 - **Rationale:** Minimizes user input and aligns with the implicit assumption that an expense is submitted on the day it's recorded
 
 ### ID Generation Strategy
@@ -194,7 +200,6 @@ This feature implements user stories **61–85** from [`docs/user-stories.md`](.
 
 The following are explicitly **not** included in this PRD:
 
-- **"Create Expense" button on expense list:** No quick-link button will be added to the `/expenses` page. Users must navigate directly to `/expenses/new` or via a menu if one exists.
 - **Expense templates:** Users cannot create expenses from pre-defined templates or duplicated expenses. All expenses start from the same blank template.
 - **Multi-currency default selection:** Currency defaults to USD. No user preference or locale-based defaults are implemented.
 - **Bulk expense creation:** Users cannot create multiple expenses in one submission.

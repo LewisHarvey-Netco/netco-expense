@@ -264,6 +264,30 @@ describe('ExpenseDetailCard', () => {
         renderCard(<ExpenseDetailCard expense={makeExpense({ status: 'Submitted' })} isEditable />)
         expect(screen.queryByRole('button', { name: 'Resubmit' })).not.toBeInTheDocument()
       })
+
+      it('renders the custom button label when buttonLabel is provided', () => {
+        renderCard(
+          <ExpenseDetailCard
+            expense={makeExpense({ status: 'Submitted' })}
+            isEditable
+            buttonLabel="Submit"
+            onResubmit={vi.fn().mockResolvedValue(undefined)}
+          />,
+        )
+        expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Resubmit' })).not.toBeInTheDocument()
+      })
+
+      it('renders the default Resubmit label when buttonLabel is not provided', () => {
+        renderCard(
+          <ExpenseDetailCard
+            expense={makeExpense({ status: 'Submitted' })}
+            isEditable
+            onResubmit={vi.fn().mockResolvedValue(undefined)}
+          />,
+        )
+        expect(screen.getByRole('button', { name: 'Resubmit' })).toBeInTheDocument()
+      })
     })
 
     describe('valid submission', () => {
@@ -336,6 +360,24 @@ describe('ExpenseDetailCard', () => {
     })
 
     describe('loading state', () => {
+      it('disables the button with a loading label derived from buttonLabel', async () => {
+        const user = userEvent.setup()
+        const onResubmit = vi.fn(() => new Promise<void>(() => {}))
+        renderCard(
+          <ExpenseDetailCard
+            expense={makeExpense({ status: 'Submitted' })}
+            isEditable
+            buttonLabel="Submit"
+            onResubmit={onResubmit}
+          />,
+        )
+
+        await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+        const button = await screen.findByRole('button', { name: /Submitting/ })
+        expect(button).toBeDisabled()
+      })
+
       it('disables the button with loading text while submitting; fields stay enabled', async () => {
         const user = userEvent.setup()
         const onResubmit = vi.fn(() => new Promise<void>(() => {}))

@@ -25,6 +25,7 @@ flowchart TD
             ExpensesPage["ExpensesPage<br/>(consultant)"]
             ReviewPage["ReviewPage<br/>(finance)"]
             DetailPage["ExpenseDetailPage<br/>(role-aware)"]
+            CreatePage["ExpenseCreatePage<br/>(consultant)"]
         end
         
         subgraph DataLayer ["Data Layer"]
@@ -54,7 +55,7 @@ flowchart TD
 - **`AuthContext`** — manages login state, persists user to `sessionStorage`, available app-wide via `useAuth()`
 - **`RepositoryContext`** — distributes the expense data repository, available app-wide via `useRepository()`
 
-**All route pages** (LoginPage, ExpensesPage, ReviewPage, ExpenseDetailPage) consume both contexts as needed. See "Routing Architecture" and individual page sections below for specifics.
+**All route pages** (LoginPage, ExpensesPage, ReviewPage, ExpenseDetailPage, ExpenseCreatePage) consume both contexts as needed. See "Routing Architecture" and individual page sections below for specifics.
 
 There is no server tier in this diagram because none exists. If/when a backend is introduced,
 this document should be updated and a new ADR should record the API/service boundary decision.
@@ -81,6 +82,7 @@ data-router/loader API). Route table:
 |---|---|---|
 | `/login` | `LoginPage` | Public |
 | `/expenses` | `ExpensesPage` | `consultant` role only |
+| `/expenses/new` | `ExpenseCreatePage` | `consultant` role only |
 | `/expenses/:id` | `ExpenseDetailPage` (role-aware) | `consultant` role only |
 | `/review` | `ReviewPage` | `finance` role only |
 | `/review/:id` | `ExpenseDetailPage` (role-aware) | `finance` role only |
@@ -116,8 +118,8 @@ ad-hoc auth checks inside the page component.
 ## Component Structure
 
 - `src/pages/` — route-level components (`LoginPage`, `ExpensesPage`, `ReviewPage`,
-  `ExpenseDetailPage`, `NotFoundPage`). These own page layout and compose shared components +
-  shadcn primitives.
+  `ExpenseDetailPage`, `ExpenseCreatePage`, `NotFoundPage`). These own page layout and compose
+  shared components + shadcn primitives.
 - `src/components/` — shared, hand-written components used across pages (`Header`,
   `ProtectedRoute`, `ExpenseTable`, `FilterPanel`, `ReviewDecisionForm`).
 - `src/components/expenses/` — expense-domain components shared between the finance and
@@ -245,9 +247,12 @@ together via `@hookform/resolvers/zod`. The app has three forms:
   validated by the shared `expenseSchema` (Zod) in `src/schemas/expense.ts`; the form validates
   on blur and shows inline field errors. The fields are disabled unless the card's `isEditable`
   prop is true (see ADR-0013). When `isEditable` and an `onResubmit` callback are both supplied,
-  a "Resubmit" button submits the form: the card calls `onResubmit` with the form values plus the
+  a submit button submits the form: the card calls `onResubmit` with the form values plus the
   expense's `id` and renders the loading/success/error feedback itself, while the page performs
-  the `repository.updateExpense()` mutation (see ADR-0014).
+  the `repository.updateExpense()` mutation (see ADR-0014). The button label is customizable via
+  the optional `buttonLabel` prop (default `'Resubmit'`; the loading label is derived from it,
+  e.g. `'Submit'` → `'Submitting…'`), so the same card serves both the edit flow
+  (`ExpenseDetailPage`) and the create flow (`ExpenseCreatePage`, `buttonLabel="Submit"`).
 
 All forms follow the same pattern: zod schema → `useForm({ resolver: zodResolver(...) })` →
 shadcn `Input`/`Label` bound via `register()` or `Controller` → submit handler calling into the
