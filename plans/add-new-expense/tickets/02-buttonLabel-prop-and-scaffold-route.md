@@ -4,17 +4,17 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Acceptance Criteria
 
-- [ ] Add optional `buttonLabel?: string` prop to `ExpenseDetailCard` component (defaults to `'Resubmit'`)
-- [ ] Button text renders `buttonLabel` value when provided
-- [ ] Button renders default `'Resubmit'` when `buttonLabel` is not provided (backward compatibility)
-- [ ] Form behavior unchanged; only button label is customizable
-- [ ] Create `src/pages/ExpenseCreatePage.tsx` with: UUID generation on mount, default template initialization (amount: 0, currency: USD, receiptDate: today's date in YYYY-MM-DD, submittedAt: today, status: 'Submitted', submitterId: current user's ID)
-- [ ] Render `ExpenseDetailCard` with `isEditable={true}` and `buttonLabel="Submit"`
-- [ ] Add route to `App.tsx`: `/expenses/new` defined **before** `/expenses/:id` (route order matters)
-- [ ] Wrap route in `ProtectedRoute` with `requiredRole="consultant"`
-- [ ] Tests cover: card renders custom button label, card renders default label when omitted, page renders with correct defaults, form is editable
-- [ ] Storybook story updated to show both button label variants
+- [x] Add optional `buttonLabel?: string` prop to `ExpenseDetailCard` component (defaults to `'Resubmit'`)
+- [x] Button text renders `buttonLabel` value when provided
+- [x] Button renders default `'Resubmit'` when `buttonLabel` is not provided (backward compatibility)
+- [x] Form behavior unchanged; only button label is customizable
+- [x] Create `src/pages/ExpenseCreatePage.tsx` with: UUID generation on mount, default template initialization (amount: 0, currency: USD, receiptDate: today's date in YYYY-MM-DD, submittedAt: full ISO datetime, status: 'Submitted', submitterId: current user's ID)
+- [x] Render `ExpenseDetailCard` with `isEditable={true}` and `buttonLabel="Submit"`
+- [x] Add route to `App.tsx`: `/expenses/new` defined **before** `/expenses/:id` (route order matters)
+- [x] Wrap route in `ProtectedRoute` with `requiredRole="consultant"`
+- [x] Tests cover: card renders custom button label, card renders default label when omitted, page renders with correct defaults, form is editable
+- [x] Storybook story updated to show both button label variants
