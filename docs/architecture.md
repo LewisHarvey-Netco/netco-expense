@@ -398,7 +398,18 @@ address finance feedback on a `Changes Requested` expense, re-edit a `Resubmitte
 before finance re-reviews, `Approved` immutability (disabled fields, no Resubmit button),
 error recovery from an invalid resubmission (inline validation error, corrected retry), and
 the full cycle where finance approves a `Resubmitted` expense and the consultant's subsequent
-visit is read-only (`expenses-consultant-edit.spec.ts`). Shared helpers live in
+visit is read-only (`expenses-consultant-edit.spec.ts`). Consultant creation: login →
+"New Expense" button on the list → `/expenses/new` (template defaults: today's date, USD,
+amount 0, `Breakfast`, `Submitted`) → fill required fields → Submit → success message →
+redirect to the new expense's detail page; plus error recovery from an invalid (empty/zero)
+amount (inline validation error, form data persists, corrected retry), an unauthenticated
+redirect to `/login`, and a finance redirect to `/review` when accessing `/expenses/new`
+(`add-expense.spec.ts`). The repository-failure error path is deliberately not covered in E2E:
+`MockExpenseRepository.createExpense()` has no user-triggerable failure in the create flow, so
+simulating one would require a test-only seam in production code (rejected — see the scope
+decision in `plans/add-new-expense/tickets/04-e2e-tests-full-workflow.md`). Repository
+failure/retry is covered at the RTL layer in `src/pages/ExpenseCreatePage.test.tsx` (injected
+mock repository), per the testing-architecture boundary above. Shared helpers live in
 `e2e/helpers.ts`: `loginAs` (full-load login), `loginAsSpa` (login without a full page load,
 so the in-memory repository state survives a logout → login cycle), `statusBadge` (the
 detail-page status badge, scoped to the badge element so it never matches the "Submitted"
