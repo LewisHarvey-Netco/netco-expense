@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loginAs, statusBadge, expectDetailPageLoaded } from './helpers';
+import { test, expect, loginAs, statusBadge, expectDetailPageLoaded } from './helpers';
 
 // Test data notes:
 // - Alice Nielsen (alice@netcompany.com, u1) is a consultant; Bob Madsen

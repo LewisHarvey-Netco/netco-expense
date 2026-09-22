@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loginAs, statusBadge, expectDetailPageLoaded } from './helpers';
+import { test, expect, loginAs, statusBadge, expectDetailPageLoaded } from './helpers';
 
 // Test data notes (see src/mocks/expenses.json):
 // - The mock repository is in-memory and re-seeded from the mock JSON on every

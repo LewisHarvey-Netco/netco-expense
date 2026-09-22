@@ -1,4 +1,89 @@
-import { expect, type Page } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
+
+// Set when a user is watching a headed run (e.g. PLAYWRIGHT_SLOW_MO=800).
+// Used to hold the result banner for a couple of seconds between tests.
+const slowMo = parseInt(process.env.PLAYWRIGHT_SLOW_MO || '0', 10);
+
+/**
+ * Exports a `test` fixture that wraps the default `page` to inject a fixed
+ * banner at the top of the page showing the title of the currently running
+ * e2e test. This lets a user watching a headed run
+ * (`$env:PLAYWRIGHT_SLOW_MO=800; npm run test:e2e:headed`) always see which
+ * test is running. Specs should import `test` (and `expect`) from this file
+ * instead of directly from `@playwright/test`.
+ *
+ * The banner is applied via `addInitScript`, so it is re-applied after every
+ * full page load; SPA navigations keep it because the DOM persists.
+ *
+ * When `PLAYWRIGHT_SLOW_MO` is set (i.e. a human is watching), after each test
+ * the banner is updated to show the outcome (PASSED/FAILED) and the page is
+ * held for a couple of seconds so the user can see the final state before the
+ * next test starts. Headless/CI runs (no slowMo) skip the hold.
+ */
+export const test = base.extend<{ page: Page }>({
+  page: async ({ page }, use, info) => {
+    await page.addInitScript((title: string) => {
+      const inject = () => {
+        const existing = document.getElementById('e2e-test-banner');
+        if (existing) existing.remove();
+        const banner = document.createElement('div');
+        banner.id = 'e2e-test-banner';
+        banner.textContent = `E2E: ${title}`;
+        Object.assign(banner.style, {
+          position: 'fixed',
+          top: '0',
+          left: '0',
+          right: '0',
+          zIndex: '2147483647',
+          pointerEvents: 'none',
+          backgroundColor: '#141E1E',
+          color: '#FFFFFF',
+          font: 'bold 14px/1.4 "Studio 6", Arial, sans-serif',
+          padding: '8px 16px',
+          textAlign: 'center',
+          letterSpacing: '0.02em',
+          borderBottom: '3px solid #FF6359',
+        } as CSSStyleDeclaration);
+        document.body.prepend(banner);
+      };
+      // The init script runs before the page's scripts, when <body> may not
+      // exist yet. Inject immediately if body is present, otherwise wait for
+      // DOMContentLoaded.
+      if (document.body) {
+        inject();
+      } else {
+        document.addEventListener('DOMContentLoaded', inject);
+      }
+    }, info.title);
+
+    // Capture whether the test body threw so the banner can show the outcome.
+    let failed = false;
+    try {
+      await use(page);
+    } catch (error) {
+      failed = true;
+      throw error;
+    }
+
+    // Update the banner to show the outcome, then hold the page at its final
+    // state for a couple of seconds so the user can see it.
+    try {
+      await page.evaluate(({ title, wasFailed }: { title: string; wasFailed: boolean }) => {
+        const banner = document.getElementById('e2e-test-banner');
+        if (!banner) return;
+        banner.textContent = `E2E: ${title} — ${wasFailed ? 'FAILED' : 'PASSED'}`;
+        banner.style.borderBottom = `3px solid ${wasFailed ? '#FF6359' : '#718886'}`;
+      }, { title: info.title, wasFailed: failed });
+    } catch {
+      // The page may already be closing; nothing else to do.
+    }
+    if (slowMo > 0) {
+      await page.waitForTimeout(2000);
+    }
+  },
+});
+
+export { expect };
 
 /**
  * Fills in and submits the login form on a page that is already at /login,

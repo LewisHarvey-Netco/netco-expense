@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loginAs } from './helpers';
+import { test, expect, loginAs } from './helpers';
 
 test('finance user sees all expenses on /review', async ({ page }) => {
   await loginAs(page, 'bob@netcompany.com');

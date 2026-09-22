@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loginAs } from './helpers';
+import { test, expect, loginAs } from './helpers';
 
 test('filters narrow the table, clear restores it', async ({ page }) => {
   await loginAs(page, 'bob@netcompany.com');

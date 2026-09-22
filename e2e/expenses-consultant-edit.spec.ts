@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loginAs, loginAsSpa, statusBadge, expectDetailPageLoaded } from './helpers';
+import { test, expect, loginAs, loginAsSpa, statusBadge, expectDetailPageLoaded } from './helpers';
 
 // Test data notes (see src/mocks/expenses.json):
 // - All expenses below were submitted by Alice (u1, consultant):

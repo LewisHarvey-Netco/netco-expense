@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { loginAs } from './helpers';
+import { test, expect, loginAs } from './helpers';
 
 // Test data notes (see src/mocks/expenses.json):
 // - Alice Nielsen (u1, consultant) submitted 6 of the 10 mock expenses:
