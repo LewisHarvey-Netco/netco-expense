@@ -122,6 +122,34 @@ describe('Login flow', () => {
   })
 })
 
+describe('About route (/about)', () => {
+  it('allows a finance user to access /about', async () => {
+    seedSession(financeUser)
+    renderAppAt('/about')
+
+    expect(
+      await screen.findByRole('heading', { name: 'About' })
+    ).toBeInTheDocument()
+  })
+
+  it('allows a consultant user to access /about', async () => {
+    seedSession(consultantUser)
+    renderAppAt('/about')
+
+    expect(
+      await screen.findByRole('heading', { name: 'About' })
+    ).toBeInTheDocument()
+  })
+
+  it('redirects an unauthenticated user from /about to /login', async () => {
+    renderAppAt('/about')
+
+    await waitFor(() => {
+      expect(testLocation).toBe('/login')
+    })
+  })
+})
+
 describe('Consultant expense detail route (/expenses/:id)', () => {
   const aliceExpense = mockExpenses.find((e) => e.submitterId === consultantUser.id)!
 

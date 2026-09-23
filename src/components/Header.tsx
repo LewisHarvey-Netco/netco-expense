@@ -36,6 +36,9 @@ export default function Header() {
             My Expenses
           </NavLink>
         )}
+        <NavLink to="/about" className={navLinkClass}>
+          About
+        </NavLink>
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm">{user.name}</span>

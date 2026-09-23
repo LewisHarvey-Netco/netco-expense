@@ -106,6 +106,55 @@ describe('Header navigation (finance)', () => {
   })
 })
 
+describe('Header navigation (about)', () => {
+  it('shows the About link for finance users', () => {
+    renderHeader(financeUser, '/about')
+
+    expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument()
+  })
+
+  it('shows the About link for consultant users', () => {
+    renderHeader(consultantUser, '/about')
+
+    expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument()
+  })
+
+  it('links to /about', () => {
+    renderHeader(financeUser, '/about')
+
+    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(
+      'href',
+      '/about'
+    )
+  })
+
+  it('navigates to /about when clicked', async () => {
+    const user = userEvent.setup()
+    const { getCurrentPath } = renderHeader(consultantUser, '/expenses')
+
+    await user.click(screen.getByRole('link', { name: 'About' }))
+
+    expect(getCurrentPath()).toBe('/about')
+  })
+
+  it('marks the link active on /about', () => {
+    renderHeader(financeUser, '/about')
+
+    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    )
+  })
+
+  it('does not mark the link active outside /about', () => {
+    renderHeader(financeUser, '/review')
+
+    expect(screen.getByRole('link', { name: 'About' })).not.toHaveAttribute(
+      'aria-current'
+    )
+  })
+})
+
 describe('Header navigation (consultant)', () => {
   it('shows the My Expenses link for consultant users', () => {
     renderHeader(consultantUser, '/expenses')

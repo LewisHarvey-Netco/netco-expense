@@ -8,6 +8,7 @@ import ReviewPage from '@/pages/ReviewPage'
 import ExpenseDetailPage from '@/pages/ExpenseDetailPage'
 import ExpenseCreatePage from '@/pages/ExpenseCreatePage'
 import NotFoundPage from '@/pages/NotFoundPage'
+import AboutPage from '@/pages/AboutPage'
 
 function RootRedirect() {
   const { user } = useAuth()
@@ -58,6 +59,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['finance']}>
             <ExpenseDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <ProtectedRoute>
+            <AboutPage />
           </ProtectedRoute>
         }
       />
