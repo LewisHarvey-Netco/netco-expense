@@ -418,6 +418,20 @@ field label or the header's role badge) and `expectDetailPageLoaded` (waits for 
 pushState before it re-renders the route, so the list page's badges may still be in the DOM in
 between and an unscoped text locator would hit a strict-mode violation).
 
+**Presentation demo (`presentation.spec.ts`).** A single, continuous, narrated end-to-end test
+that plays like a live demo: one test drives six tasks in sequence (consultant login → edit +
+resubmit a `Changes Requested` expense → create a new expense → logout → finance login + approve a
+`Submitted` expense → request changes on another), each narrated by a fixed top banner. The banner
+is injected by a dedicated `test` fixture in `e2e/demo.ts` (a sibling of `helpers.ts`'s fixture)
+via `addInitScript` (re-applied on full page load, persists across SPA nav), styled to the
+Netcompany palette. The fixture exposes two actions the spec calls: `setTask(n, title)` (banner
+shows "Task N: <title>", coral accent border) and `markSuccess(n, title)` (banner shows
+"Task N: <title> — SUCCESS", green-60 border, and holds ~2s when `PLAYWRIGHT_SLOW_MO` is set so a
+live audience sees it). On a thrown error the banner flips to "FAILED". Because the in-memory
+repository persists across SPA logout → login (ADR-0010), the consultant's mutations are still in
+effect when finance logs in. This is a presentation aid, not an additional coverage layer — every
+interaction it exercises is already covered by the workflow specs above.
+
 There are currently no isolated unit tests for individual functions (e.g. `roleHome()`) — coverage
 is achieved through the integration-style tests above, which was a deliberate choice given the
 app's current size, not an oversight.

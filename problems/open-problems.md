@@ -16,6 +16,32 @@ root cause (if known), and current status (open / worked around).
 
 Issues the developer can address without changes to Feniks AI.
 
+## 2026-09-23 — Playwright 1.62 silently ignores per-test `timeout` option
+
+**What was attempted:** Giving a long-running E2E test (`e2e/presentation.spec.ts`,
+which takes ~36s with `PLAYWRIGHT_SLOW_MO=800`) a longer timeout via the
+per-test options object: `test('...', { timeout: 180_000 }, async (...) => ...)`.
+The test kept failing with "Test timeout of 30000ms exceeded".
+
+**What went wrong:** The `{ timeout: ... }` option was silently ignored. In
+Playwright 1.62.1 the `details` argument of `test(title, details, body)` is typed
+as `TestDetails = { tag?, annotation? }` — `timeout` is no longer a valid
+per-test option, and passing it produces no error and no effect (the `e2e/`
+directory is not covered by `tsc -b`, so the excess property never surfaced as a
+type error either).
+
+**Root cause:** Playwright removed per-test `timeout`/`retries`/`box` from the
+`details` object; the supported ways to change a test's timeout are now
+`test.setTimeout(ms)` at runtime (inside the test body or a hook) or
+`test.describe.configure({ timeout: ms })` for a group.
+
+**Status:** Worked around.
+
+**Developer action:** Use `test.setTimeout(180_000)` as the first statement in
+the test body (see `e2e/presentation.spec.ts`). Verify any non-default timeout
+actually takes effect by running the test in the slow mode it's meant for —
+a "Test timeout of 30000ms exceeded" error means the option was not applied.
+
 ---
 
 # Feniks AI / Tooling Fixes Needed
