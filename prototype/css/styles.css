@@ -655,33 +655,31 @@ body {
 /* Mobile
    Attribute selectors target inline-styled layout in the HTML pages so they collapse without per-page edits. */
 @media (max-width: 768px) {
-  /* Horizontally scrollable nav keeps a single compact row */
+  /* Nav wraps onto several rows; not sticky since it is tall on phones */
   .nav {
-    padding: 0 16px;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-  }
-
-  .nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .nav > * {
-    flex-shrink: 0;
+    height: auto;
+    position: static;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    row-gap: 8px;
   }
 
   .nav-brand {
-    margin-right: 24px;
+    width: 100%;
+    margin-right: 0;
     font-size: 16px;
   }
 
   .nav-link {
     margin-right: 16px;
+    padding: 4px 0;
   }
 
   .nav-user {
-    margin-left: 24px;
+    width: 100%;
+    margin-left: 0;
+    font-size: 13px;
+    overflow-wrap: anywhere;
   }
 
   .container {
@@ -815,18 +813,23 @@ body {
   }
 
   .proto-footer {
+    position: static;
+    flex-wrap: wrap;
     padding: 8px 16px;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
+    row-gap: 4px;
   }
 
-  .proto-footer > * {
-    flex-shrink: 0;
+  .proto-footer span {
+    width: 100%;
+    margin-right: 0;
   }
 
   .proto-footer a {
     margin-right: 16px;
+  }
+
+  body {
+    padding-bottom: 0;
   }
 }
 
