@@ -55,6 +55,12 @@
   border-color: var(--border);
 }
 
+/* Stops Chrome's pull-down-to-refresh from firing when scrolling back to the top */
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
