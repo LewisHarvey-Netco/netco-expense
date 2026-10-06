@@ -84,7 +84,7 @@ export default function ExpensesPage() {
     <div className="min-h-svh bg-background">
       <Header />
       <main className="mx-auto w-full max-w-6xl px-6 py-8">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between gap-4">
           <PageTitle>My Expenses</PageTitle>
           <Button onClick={() => navigate('/expenses/new')}>New Expense</Button>
         </div>

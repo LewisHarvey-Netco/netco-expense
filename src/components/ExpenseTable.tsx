@@ -30,7 +30,7 @@ export default function ExpenseTable({
     {
       key: 'submittedAt',
       label: 'Submitted',
-      className: 'w-[110px]',
+      className: 'hidden w-[110px] md:table-cell',
       render: (expense) => (
         <span className="text-muted-foreground">
           {formatDate(expense.submittedAt)}
@@ -57,7 +57,7 @@ export default function ExpenseTable({
     {
       key: 'type',
       label: 'Type',
-      className: 'w-[120px]',
+      className: 'hidden w-[120px] md:table-cell',
       render: (expense) => expense.type,
     },
     {
@@ -86,7 +86,7 @@ export default function ExpenseTable({
       columns={columns}
       onRowClick={onRowClick}
       emptyMessage="No expenses to display."
-      tableClassName="min-w-[760px]"
+      tableClassName="min-w-[560px] md:min-w-[760px]"
     />
   )
 }

@@ -23,8 +23,8 @@ export default function Header() {
   if (!user) return null
 
   return (
-    <header className="flex items-center justify-between bg-primary text-primary-foreground px-6 py-3">
-      <div className="flex items-center gap-4">
+    <header className="flex flex-col gap-2 bg-primary text-primary-foreground px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <span className="text-lg font-semibold">Netco Expense</span>
         {user.role === 'finance' && (
           <NavLink to="/review" className={navLinkClass}>
@@ -40,7 +40,7 @@ export default function Header() {
           About
         </NavLink>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="text-sm">{user.name}</span>
         <Badge variant="secondary">{user.role}</Badge>
         <Button variant="ghost" size="sm" onClick={handleLogout}>
