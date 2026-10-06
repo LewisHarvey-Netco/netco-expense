@@ -26,7 +26,7 @@ export default function Header() {
   if (!user) return null
 
   return (
-    <header className="sticky top-0 z-40 flex flex-wrap items-center bg-primary text-primary-foreground px-4 py-3 md:px-6">
+    <header className="flex flex-wrap items-center bg-primary text-primary-foreground px-4 py-3 md:px-6">
       <span className="text-lg font-semibold">Netco Expense</span>
       <Button
         variant="ghost"
